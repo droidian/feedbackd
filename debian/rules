@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@ --builddirectory=_build
+
+override_dh_auto_configure:
+	dh_auto_configure -- -Dgtk_doc=true
+
+override_dh_installudev:
+	# Make sure all the symlink rules in 60 ran:
+	dh_installudev --priority=90
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	dbus-run-session ninja -C _build test
+endif

@@ -1,0 +1,18 @@
+<schemalist>
+  <schema id="org.sigxcpu.feedbackd"
+          path="/org/sigxcpu/feedbackd/">
+    <key name="profile" type="s">
+      <choices>
+        <choice value='full'/>
+        <choice value='quiet'/>
+        <choice value='silent'/>
+      </choices>
+      <default>'full'</default>
+    <summary>Feedack profile to use</summary>
+    <description>
+      The feedback profile determines the audio and haptical feedback
+      level given on events to the user.
+    </description>
+    </key>
+  </schema>
+</schemalist>

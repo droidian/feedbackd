@@ -1,0 +1,119 @@
+project('feedbackd', 'c',
+          version : '0.0.0',
+          license : 'LGPLv3+',
+    meson_version : '>= 0.49.0',
+  default_options : [
+    'warning_level=1',
+    'buildtype=debugoptimized',
+    'c_std=gnu11',
+  ],
+)
+
+gio            = dependency('gio-2.0', version: '>=2.50.0')
+gio_unix       = dependency('gio-unix-2.0', version: '>=2.50.0')
+glib           = dependency('glib-2.0', version: '>=2.50.0')
+gobject        = dependency('gobject-2.0', version: '>=2.50.0')
+gsound         = dependency('gsound')
+gudev          = dependency('gudev-1.0', version: '>=232')
+json_glib      = dependency('json-glib-1.0')
+
+prefix = get_option('prefix')
+
+datadir = join_paths(prefix, get_option('datadir'))
+libdir = join_paths(prefix, get_option('libdir'))
+girdir = join_paths(prefix, join_paths(datadir, 'gir-1.0'))
+ifacedir = join_paths(prefix, join_paths(datadir, 'dbus-1', 'interfaces'))
+servicedir = join_paths(prefix, join_paths(datadir, 'dbus-1', 'services'))
+libexecdir = join_paths(prefix, get_option('libexecdir'))
+typelibdir = join_paths(prefix, join_paths(libdir, 'girepository-1.0'))
+vapidir = join_paths(prefix, join_paths(datadir, 'vala', 'vapi'))
+feedbackd_theme_dir = join_paths(datadir, 'feedbackd', 'themes')
+
+run_data = configuration_data()
+run_data.set('ABS_BUILDDIR', meson.current_build_dir())
+run_data.set('ABS_SRCDIR', meson.current_source_dir())
+configure_file(
+  input: 'run.in',
+  output: 'run',
+  configuration: run_data)
+
+gnome = import('gnome')
+
+cc = meson.get_compiler('c')
+
+test_c_args = [
+  '-Wcast-align',
+  '-Wdate-time',
+  ['-Werror=format-security', '-Werror=format=2'],
+  '-Wendif-labels',
+  '-Werror=incompatible-pointer-types',
+  '-Werror=missing-declarations',
+  '-Werror=overflow',
+  '-Werror=return-type',
+  '-Werror=shift-count-overflow',
+  '-Werror=shift-overflow=2',
+  '-Werror=implicit-fallthrough=3',
+  '-Wformat-nonliteral',
+  '-Wformat-security',
+  '-Winit-self',
+  '-Wmaybe-uninitialized',
+  '-Wmissing-field-initializers',
+  '-Wmissing-include-dirs',
+  '-Wmissing-noreturn',
+  '-Wnested-externs',
+  '-Wno-missing-field-initializers',
+  '-Wno-sign-compare',
+  '-Wno-strict-aliasing',
+  '-Wno-unused-parameter',
+  '-Wold-style-definition',
+  '-Wpointer-arith',
+  '-Wredundant-decls',
+  '-Wstrict-prototypes',
+  '-Wtype-limits',
+  '-Wundef',
+  '-Wunused-function',
+]
+
+if get_option('buildtype') != 'plain'
+  test_c_args += '-fstack-protector-strong'
+endif
+
+global_c_args = [
+  '-DFEEDBACKD_THEME_DIR="@0@"'.format(feedbackd_theme_dir),
+  '-DLIBFEEDBACK_COMPILATION',
+]
+
+add_project_arguments(
+  global_c_args + cc.get_supported_arguments(test_c_args),
+  language: 'c'
+)
+
+introspection_feature = get_option('introspection')
+introspection = introspection_feature.enabled() or introspection_feature.auto()
+
+apiversion = '0.0'
+libname = 'libfeedback-' + apiversion
+
+json_glib_validate = find_program('json-glib-validate', required: false)
+
+subdir('data')
+subdir('libfeedback')
+subdir('src')
+subdir('cli')
+subdir('tests')
+subdir('doc')
+
+summary = [
+        '',
+        '---------------',
+        'feedbackd @0@'.format(meson.project_version()),
+        '',
+	'         Daemon: @0@'.format(get_option('daemon')),
+        '  Documentation: @0@'.format(get_option('gtk_doc')),
+        '  Introspection: @0@'.format(introspection),
+        '           Vapi: @0@'.format(get_option('vapi')),
+        '          Tests: @0@'.format(get_option('tests')),
+        '---------------',
+        ''
+]
+message('\n'.join(summary))

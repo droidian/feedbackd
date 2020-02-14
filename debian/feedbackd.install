@@ -1,0 +1,5 @@
+/usr/bin/
+/usr/libexec/
+/usr/share/dbus-1/
+/usr/share/feedbackd/
+/usr/share/glib-2.0/schemas

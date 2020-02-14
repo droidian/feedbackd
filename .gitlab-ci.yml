@@ -1,0 +1,81 @@
+include:
+ - 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-definitions.yml'
+
+stages:
+ - build
+ - test
+ - package
+ - test-package
+
+variables:
+  DEPS: build-essential git
+
+before_script:
+  - export DEBIAN_FRONTEND=noninteractive
+  - apt-get -y update
+  - apt-get -y build-dep .
+  - apt-get -y install gcovr
+
+.tags: &tags
+  tags:
+    - librem5
+
+# Regular, full build
+build:native-debian-buster:full:
+  <<: *tags
+  stage: build
+  image: debian:buster
+  artifacts:
+    paths:
+      - _build
+  script:
+    - meson --werror . _build
+    - ninja -C _build
+
+# Minimal build for e.g. submodule usage
+build:native-debian-buster:lib:
+  <<: *tags
+  stage: build
+  image: debian:buster
+  script:
+    - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
+    - ninja -C _build
+
+build:native-debian-bullseye:
+  <<: *tags
+  stage: build
+  image: debian:bullseye
+  artifacts:
+    paths:
+      - _build
+  script:
+    - meson -Db_coverage=true --werror . _build
+    - ninja -C _build
+
+test:native-debian-bullseye:
+  <<: *tags
+  stage: test
+  image: debian:bullseye
+  dependencies:
+    - build:native-debian-bullseye
+  coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
+  script:
+    - dbus-run-session ninja -C _build test coverage
+
+package:deb-debian-buster:
+  extends: .l5-build-debian-package
+
+package:deb-debian-buster:arm64:
+  tags:
+    - librem5:arm64
+  extends: .l5-build-debian-package
+
+autopkgtest-debian-buster-package:
+  dependencies:
+    - package:deb-debian-buster
+  extends: .l5-autopkgtest-debian-package
+
+lintian-debian-buster-package:
+  dependencies:
+    - package:deb-debian-buster
+  extends: .l5-lintian-debian-package

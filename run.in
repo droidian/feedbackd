@@ -1,0 +1,12 @@
+#!/bin/sh
+set -e
+
+ABS_BUILDDIR='@ABS_BUILDDIR@'
+ABS_SRCDIR='@ABS_SRCDIR@'
+FEEDBACK_THEME=${FEEDBACK_THEME:-"${ABS_SRCDIR}/data/default.json"}
+
+export FEEDBACK_THEME
+export GSETTINGS_SCHEMA_DIR="${ABS_BUILDDIR}/data"
+
+set -x
+exec "${ABS_BUILDDIR}/src/feedbackd" "$@"

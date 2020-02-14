@@ -1,0 +1,128 @@
+{
+  "name" : "default",
+  "profiles" : [
+    {
+      "name" : "full",
+      "feedbacks" : [
+        {
+          "event-name" : "phone-incoming-call",
+          "type"       : "Sound",
+          "effect"     : "phone-incoming-call"
+        },
+        {
+          "event-name" : "message-new-instant",
+          "type"       : "Sound",
+          "effect"     : "message-new-instant"
+        },
+        {
+          "event-name" : "message-new-sms",
+          "type"       : "Sound",
+          "effect"     : "message-new-instant"
+        },
+        {
+          "event-name" : "message-new-email",
+          "type"       : "Sound",
+          "effect"     : "message-new-email"
+        },
+        {
+          "event-name" : "alarm-clock-elapsed",
+          "type"       : "Sound",
+          "effect"     : "alarm-clock-elapsed"
+        },
+        {
+          "event-name" : "theme-demo",
+          "type"       : "Sound",
+          "effect"     : "theme-demo"
+        }
+      ]
+    },
+    {
+      "name" : "quiet",
+      "feedbacks" : [
+        {
+          "event-name" : "phone-incoming-call",
+          "type"       : "VibraPeriodic",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "phone-missed-call",
+          "type"       : "VibraRumble",
+          "duration"   : 300
+        },
+        {
+          "event-name" : "message-new-instant",
+          "type"       : "VibraRumble",
+          "duration"   : 150
+        },
+        {
+          "event-name" : "message-new-sms",
+          "type"       : "VibraRumble",
+          "duration"   : 500,
+          "count"      : 2,
+          "pause"      : 100
+        },
+        {
+          "event-name" : "message-new-email",
+          "type"       : "VibraRumble",
+          "duration"   : 750,
+          "count"      : 3,
+          "pause"      : 100
+        },
+        {
+          "event-name" : "message-sent-instant",
+          "type"       : "VibraRumble",
+          "duration"   : 150
+        },
+        {
+          "event-name" : "bell-terminal",
+          "type"       : "VibraRumble",
+          "duration"   : 100
+        },
+        {
+          "event-name"   : "alarm-clock-elapsed",
+          "type"         : "VibraPeriodic",
+          "magnitude"    : 32767,
+          "duration"     : 10000,
+          "fade-in-time" : 10000,
+          "fade-in-level": 4096
+        },
+        {
+          "event-name"   : "teme-demo",
+          "type"         : "VibraPeriodic",
+          "magnitude"    : 32767,
+          "duration"     : 5000
+        }
+      ]
+    },
+    {
+      "name" : "silent",
+      "feedbacks" : [
+        {
+          "event-name" : "phone-missed-call",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "message-missed-email",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "message-missed-instant",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "message-missed-sms",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "battery-caution",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        }
+      ]
+    }
+  ]
+}
