@@ -4,8 +4,9 @@ debian/debhelper-build-stamp
 debian/files
 debian/gir1.2-feedback-0.0.substvars
 debian/gir1.2-feedback-0.0/
-debian/feedbackd.debhelper.log
-debian/feedbackd.substvars
+debian/*.debhelper
+debian/*.debhelper.log
+debian/*.substvars
 debian/feedbackd/
 debian/libfeedback-0.0-0.substvars
 debian/libfeedback-0.0-0/
