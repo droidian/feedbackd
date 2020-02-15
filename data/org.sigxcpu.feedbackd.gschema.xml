@@ -17,14 +17,6 @@
   </schema>
 
   <schema id="org.sigxcpu.feedbackd.application">
-    <key name="application-id" type="s">
-      <default>''</default>
-      <summary>Application ID</summary>
-      <description>
-        The application that this policy is for.
-      </description>
-    </key>
-
     <key name="profile" type="s">
       <choices>
         <choice value='full'/>

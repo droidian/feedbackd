@@ -21,6 +21,10 @@
 #define FEEDBACKD_SCHEMA_ID "org.sigxcpu.feedbackd"
 #define FEEDBACKD_KEY_PROFILE "profile"
 
+#define APP_SCHEMA FEEDBACKD_SCHEMA_ID ".application"
+#define APP_PREFIX "/org/sigxcpu/feedbackd/application/"
+
+
 /**
  * SECTION:fbd-feedback-manager
  * @short_description: The manager processing incoming events
@@ -82,6 +86,37 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
       }
     }
   }
+}
+
+static gchar *
+munge_app_id (const gchar *app_id)
+{
+  gchar *id = g_strdup (app_id);
+  gint i;
+
+  g_strcanon (id,
+              "0123456789"
+              "abcdefghijklmnopqrstuvwxyz"
+              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+              "-",
+              '-');
+  for (i = 0; id[i] != '\0'; i++)
+    id[i] = g_ascii_tolower (id[i]);
+
+  return id;
+}
+
+static FbdFeedbackProfileLevel
+app_get_feedback_level (const gchar *app_id)
+{
+  g_autofree gchar *profile = NULL;
+  g_autofree gchar *munged_app_id = munge_app_id (app_id);
+  g_autofree gchar *path = g_strconcat (APP_PREFIX, munged_app_id, "/", NULL);
+  g_autoptr (GSettings) setting =  g_settings_new_with_path (APP_SCHEMA, path);
+
+  profile = g_settings_get_string (setting, FEEDBACKD_KEY_PROFILE);
+  g_debug ("%s uses app profile %s", app_id, profile);
+  return fbd_feedback_profile_level (profile);
 }
 
 static void
@@ -181,6 +216,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   FbdEvent *event;
   GSList *feedbacks, *l;
   gint event_id;
+  FbdFeedbackProfileLevel app_level, level;
 
   g_debug ("Event '%s' for '%s'", arg_event, arg_app_id);
 
@@ -211,7 +247,10 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   event = fbd_event_new (event_id, arg_app_id, arg_event, arg_timeout);
   g_hash_table_insert (self->events, GUINT_TO_POINTER (event_id), event);
 
-  feedbacks = fbd_feedback_theme_lookup_feedback (self->theme, self->level, event);
+  /* If user configured a lower feedback level for this app honor that */
+  app_level = app_get_feedback_level (arg_app_id);
+  level = self->level > app_level ? app_level : self->level;
+  feedbacks = fbd_feedback_theme_lookup_feedback (self->theme, level, event);
 
   if (feedbacks) {
     for (l = feedbacks; l; l = l->next) {

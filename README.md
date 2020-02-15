@@ -126,6 +126,15 @@ Run feedbacks for event `message-new-instant` for 10 seconds:
 _build/cli/fbcli -t 10 -E alarm-clock-elapsed
 ```
 
+## Per app profiles
+One can lower the feedback level of an individual application
+via `GSettings`. E.g. for an app with app id `sm.puri.Phosh`
+to set the profile to `quiet` do:
+
+```
+GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.application:/org/sigxcpu/feedbackd/application/sm-puri-phosh/ profile quiet
+```
+
 # Documentation
 
 - [Libfeedback API](https://honk.sigxcpu.org/projects/feedbackd/doc/)
