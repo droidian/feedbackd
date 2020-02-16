@@ -10,6 +10,11 @@
           "effect"     : "alarm-clock-elapsed"
         },
         {
+          "event-name" : "button-pressed",
+          "type"       : "Sound",
+          "effect"     : "button-pressed"
+        },
+        {
           "event-name" : "message-new-email",
           "type"       : "Sound",
           "effect"     : "message-new-email"
@@ -38,6 +43,11 @@
           "event-name" : "theme-demo",
           "type"       : "Sound",
           "effect"     : "theme-demo"
+        },
+        {
+          "event-name" : "window-close",
+          "type"       : "Sound",
+          "effect"     : "theme-demo"
         }
       ]
     },
@@ -54,6 +64,11 @@
         },
         {
           "event-name" : "bell-terminal",
+          "type"       : "VibraRumble",
+          "duration"   : 100
+        },
+        {
+          "event-name" : "button-pressed",
           "type"       : "VibraRumble",
           "duration"   : 100
         },
@@ -101,6 +116,11 @@
           "type"       : "VibraPeriodic",
           "magnitude"  : 32767,
           "duration"   : 5000
+        },
+        {
+          "event-name" : "window-close",
+          "type"       : "VibraRumble",
+          "duration"   : 100
         }
       ]
     },
