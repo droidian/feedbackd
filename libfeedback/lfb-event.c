@@ -301,6 +301,15 @@ lfb_event_init (LfbEvent *self)
   self->end_reason = LFB_EVENT_END_REASON_NATURAL;
 }
 
+/**
+ * lfb_event_new:
+ * @event: The event's name.
+ *
+ * Creates a new #LfbEvent based on the given event
+ * name. See #LfbEvent:event for details.
+ *
+ * Returns: The #LfbEvent.
+ */
 LfbEvent *
 lfb_event_new (const char *event)
 {
