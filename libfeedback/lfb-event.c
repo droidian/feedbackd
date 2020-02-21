@@ -233,7 +233,7 @@ lfb_event_class_init (LfbEventClass *klass)
   object_class->finalize = lfb_event_finalize;
 
   /**
-   * LpfEvent:event:
+   * LfbEvent:event:
    *
    * The type of event from the Event naming spec, e.g. 'message-new-instant'.
    */
@@ -246,7 +246,7 @@ lfb_event_class_init (LfbEventClass *klass)
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   /**
-   * LpfEvent:timeout:
+   * LfbEvent:timeout:
    *
    * How long feedback should be provided in milliseconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
