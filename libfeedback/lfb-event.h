@@ -52,7 +52,7 @@ typedef enum _LfbEventEndReason {
 
 #define LFB_TYPE_EVENT (lfb_event_get_type())
 
-G_DECLARE_FINAL_TYPE (LfbEvent, lfb_event, LFB, EVENT, GObject);
+G_DECLARE_FINAL_TYPE (LfbEvent, lfb_event, LFB, EVENT, GObject)
 
 LfbEvent*   lfb_event_new (const char *event);
 gboolean    lfb_event_trigger_feedback (LfbEvent *self, GError **error);
