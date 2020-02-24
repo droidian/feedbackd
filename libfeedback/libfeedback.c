@@ -16,9 +16,11 @@
  *
  * To use the library call #lfb_init() with the id of your application
  * (usually the desktop file name without the .desktop extension).
- * When done call #lfb_uninit() to free any resources.
+ * After initializing the library you can trigger feedback using
+ * #LfbEvent objects.  When your application finishes call
+ * #lfb_uninit() to free any resources:
  *
- * |[
+ * |[<!-- language="C" -->
  *    #define LIBFEEDBACK_USE_UNSTABLE_API
  *    #include <libfeedback.h>
  *
@@ -28,9 +30,7 @@
  *       if (lfb_init ("com.example.appid", &err)) {
  *         g_error ("%s", err->message);
  *       }
- *       // run your application, emit events
- *       // ...
- *       // when done:
+ *       ...
  *       lfb_uninit ();
  *       return 0;
  *    }

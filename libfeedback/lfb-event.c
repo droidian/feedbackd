@@ -18,24 +18,56 @@
  * audio, haptic and/or visual feedback to the user by triggering
  * feedback on a feedback daemon.
  *
- * One event can trigger several feedbacks at once (e.g. audio and
+ * One event can trigger multiple feedbacks at once (e.g. audio and
  * haptic feedback). This is determined by the feedback theme in
  * use (which is not under the appliction's control) and the active
  * feedback profile (see #lfb_set_feedback_profile()).
  *
- * After initializing the library feedback can be triggered like
+ * After initializing the library via #lfb_init() feedback can be
+ * triggered like:
  *
  * |[
  *    g_autoptr (GError) err = NULL;
  *    LpfEvent *event = lfb_event_new ("message-new-instant");
- *    ret = lfb_event_trigger_feedback (event, &err);
+ *    lfb_event_set_timeout (event, 0);
+ *    if (!lfb_event_trigger_feedback (event, &err))
+ *      g_warning ("Failed to trigger feedback: %s", err->message);
  * ]|
  *
  * When all feedback for this event has ended the #LfbEvent::feedback-ended
  * signal is emitted. If you want to end the feedback ahead of time use
- * #lfb_event_end_feedback ().
+ * #lfb_event_end_feedback ():
+ *
+ * |[
+ *    if (!lfb_event_end_feedback (event, &err))
+ *      g_warning ("Failed to end feedback: %s", err->message);
+ * ]|
+ *
  * Since these methods involve DBus calls there are asynchronous variants
- * available, see e.g. #lfb_event_trigger_feedback_async().
+ * available, e.g. #lfb_event_trigger_feedback_async():
+ *
+ * |[
+ *    static void
+ *    on_feedback_triggered (LfbEvent      *event,
+ *                           GAsyncResult  *res,
+ *                           gpointer      unused)
+ *    {
+ *       g_autoptr (GError) err = NULL;
+ *       if (!lfb_event_trigger_feedback_finish (event, res, &err)) {
+ *          g_warning ("Failed to trigger feedback for %s: %s",
+ *                     lfb_event_get_event (event), err->message);
+ *       }
+ *    }
+ *
+ *    static void
+ *    my_function ()
+ *    {
+ *      LfbEvent *event = lfb_event_new ("message-new-instant");
+ *      lfb_event_trigger_feedback_async (event, NULL,
+ *                                       (GAsyncReadyCallback)on_feedback_triggered,
+ *                                       NULL);
+ *    }
+ * ]|
  */
 
 enum {
@@ -250,7 +282,7 @@ lfb_event_class_init (LfbEventClass *klass)
    *
    * How long feedback should be provided in milliseconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
-   * in a loop until ended explicitly.
+   * in a loop until ended explicitly via e.g. #lfb_event_end_feedback().
    */
   props[PROP_TIMEOUT] =
     g_param_spec_int (
