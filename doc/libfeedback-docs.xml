@@ -27,16 +27,10 @@
     </copyright>
   </bookinfo>
 
-  <chapter id="intro">
-    <title>Introduction</title>
+  <xi:include href="overview.xml"/>
 
-    <para>
-      The purpose of libfeedback is to trigger audible, haptic and visual feedback based on
-      events. Events are identified by strings.
-    </para>
-
-    <xi:include href="build-howto.xml"/>
-  </chapter>
+  <part>
+  <title>API Reference</title>
 
   <chapter id="core-api">
     <title>Core API</title>
@@ -54,7 +48,8 @@
     <title>DBus Interface</title>
     <xi:include href="../data/libfeedback-org.sigxcpu.Feedback.xml"/>
   </chapter>
-
+  </part>
+  
   <chapter id="object-tree">
     <title>Object Hierarchy</title>
     <xi:include href="xml/tree_index.sgml"/>

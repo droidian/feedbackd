@@ -6,7 +6,7 @@ private_headers = [
 ]
 
 content_files = [
-  'build-howto.xml',
+  'overview.xml',
 ]
 
 glib_prefix = dependency('glib-2.0').get_pkgconfig_variable('prefix')
