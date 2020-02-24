@@ -30,6 +30,11 @@
           "effect"     : "alarm-clock-elapsed"
         },
         {
+          "event-name" : "timeout-completed",
+          "type"       : "Sound",
+          "effect"     : "complete"
+        },
+        {
           "event-name" : "theme-demo",
           "type"       : "Sound",
           "effect"     : "theme-demo"
@@ -85,6 +90,11 @@
           "duration"     : 10000,
           "fade-in-time" : 10000,
           "fade-in-level": 4096
+        },
+        {
+          "event-name"   : "timeout-completed",
+          "type"         : "VibraRumble",
+          "duration"     : 100
         },
         {
           "event-name"   : "theme-demo",
