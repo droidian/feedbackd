@@ -87,7 +87,7 @@
           "fade-in-level": 4096
         },
         {
-          "event-name"   : "teme-demo",
+          "event-name"   : "theme-demo",
           "type"         : "VibraPeriodic",
           "magnitude"    : 32767,
           "duration"     : 5000
