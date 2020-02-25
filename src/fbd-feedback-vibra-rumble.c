@@ -122,7 +122,7 @@ fbd_feedback_vibra_rumble_start_vibra (FbdFeedbackVibra *vibra)
   self->rumble = (duration / self->count) - self->pause;
   if (self->rumble <= 0) {
     self->rumble = FBD_FEEDBACK_VIBRA_DEFAULT_DURATION;
-    self->pause = 0;
+    self->pause = FBD_FEEDBACK_VIBRA_RUMBLE_DEFAULT_PAUSE;
     self->count = 1;
   }
   period = self->rumble + self->pause;
@@ -162,7 +162,7 @@ fbd_feedback_vibra_rumble_class_init (FbdFeedbackVibraRumbleClass *klass)
       "pause",
       "Pause",
       "The pause in msecs between rumbles",
-      0, G_MAXINT, 0,
+      0, G_MAXINT, FBD_FEEDBACK_VIBRA_RUMBLE_DEFAULT_PAUSE,
       G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
@@ -172,4 +172,5 @@ static void
 fbd_feedback_vibra_rumble_init (FbdFeedbackVibraRumble *self)
 {
   self->count = 1;
+  self->pause = FBD_FEEDBACK_VIBRA_RUMBLE_DEFAULT_PAUSE;
 }
