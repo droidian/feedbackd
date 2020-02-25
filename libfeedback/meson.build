@@ -51,7 +51,7 @@ libfeedback = build_target(
 
 libfeedback_inc = include_directories('.')
 libfeedback_dep = declare_dependency(
-  sources : [generated_dbus_sources, lfb_enum_sources],
+  sources : [generated_dbus_sources, lfb_enum_sources[1]],
   link_with : libfeedback,
   dependencies: libfeedback_deps,
   include_directories : libfeedback_inc,
