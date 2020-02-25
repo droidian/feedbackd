@@ -3,10 +3,10 @@ option('vapi', type: 'boolean', value: true)
 
 option('daemon',
        type: 'boolean', value: true,
-       description: 'Whether to build the daeon')
+       description: 'Whether to build the daemon')
 option('gtk_doc',
        type: 'boolean', value: false,
-       description: 'Whether to generate the API reference for Handy')
+       description: 'Whether to generate the API reference for Libfeedback')
 option('tests',
        type: 'boolean', value: true,
        description: 'Whether to compile unit tests')

@@ -33,7 +33,7 @@ libfeedback_deps = [
 
 libfeedback_c_args = [
   '-DG_LOG_DOMAIN="libfeedback"',
-  '-DFEEDBACK_COMPILATION',
+  '-DLIBFEEDBACK_COMPILATION',
   '-DLIBFEEDBACK_USE_UNSTABLE_API',
 ]
 
@@ -72,7 +72,7 @@ pkgconfig.generate(
   )
 
 if introspection
-  libhandy_gir_extra_args = [
+  libfeedback_gir_extra_args = [
     '-I' + dbus_header_dir,
     '--c-include=libfeedback.h',
     '--quiet',
@@ -94,7 +94,7 @@ if introspection
                 install : true,
         install_dir_gir : girdir,
     install_dir_typelib : typelibdir,
-             extra_args : libhandy_gir_extra_args,
+             extra_args : libfeedback_gir_extra_args,
    )
 
   if get_option('vapi')
