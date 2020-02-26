@@ -74,7 +74,7 @@ the quiet and silent profile work out of the box.
 Events are then mapped to a specific type of feedback (sound, led, vibra) via a
 device specific theme (since devices have different capabilities).
 
-There's currently only a single hardcoded theme named `default`. The currently
+There's currently only a single hard coded theme named `default`. The currently
 available feedback types are:
 
 - Sound (an audible sound from the sound naming spec)
@@ -89,7 +89,7 @@ daemon.
 ## Profiles
 The profile determines which parts of the theme are in use:
 
-- `full`: Use conigured events form the `full`, `quiet` and `silent` parts of
+- `full`: Use configured events form the `full`, `quiet` and `silent` parts of
   the feedback them.
 - `quiet`: Use `quiet` and `silent` part from of the feedback theme. This usually
   means no audio feedback.
