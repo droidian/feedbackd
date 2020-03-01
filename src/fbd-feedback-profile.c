@@ -95,7 +95,7 @@ feedback_get_type (JsonNode *feedback_node)
     g_ascii_toupper (type_name[strlen(FBD_FEEDBACK_CLS_PREFIX)]);
   gtype = g_type_from_name (type_name);
 
-  g_debug ("Feedback %s, type %lu", type_name, gtype);
+  g_debug ("Feedback %s, type %" G_GSIZE_FORMAT, type_name, gtype);
   g_return_val_if_fail (gtype, FBD_TYPE_FEEDBACK_DUMMY);
   return gtype;
 }
