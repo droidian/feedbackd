@@ -8,6 +8,7 @@ debian/*.debhelper
 debian/*.debhelper.log
 debian/*.substvars
 debian/feedbackd/
+debian/feedbackd-common/
 debian/libfeedback-0.0-0.substvars
 debian/libfeedback-0.0-0/
 debian/libfeedback-dev.substvars
