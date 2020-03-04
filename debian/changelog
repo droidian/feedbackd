@@ -1,3 +1,27 @@
+feedbackd (0.0.0+git20200304) amber-phone; urgency=medium
+
+  [ Guido Günther ]
+  * libfeedback: Drop trailing semicolon.
+    Trips up some compilers.
+    Thanks to Andrea Schaefer
+  * build: Don't add lfb-enums.c to list of generated sources.
+    Otherwise when used as a subproject the master project will try
+    to rebuild with it's own set of flags. These lack
+    LIBFEEDBACK_COMPILATION which does not end well.
+  * Fix typos
+  * theme: Add timeout-completed event for alarms and stop watches
+  * Update docs (Closes: #4, #8)
+  * debian: Split out shared files.
+    This allows other programs (like gnome-control-center) to consume the
+    settings schema without having to depend on the daemon itself.
+
+  [ Rasmus Thomsen ]
+  * fbd-feedback-profile: use G_GSIZE_FORMAT instead of hardcoding lu.
+    On 32-bit platforms lu doesn't apply since GType is defined as a gsize
+    fixes #15
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 04 Mar 2020 16:46:36 +0100
+
 feedbackd (0.0.0+git20200214) amber-phone; urgency=medium
 
   * Initial git snapshot
