@@ -36,6 +36,10 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
+Breaks:
+ feedbackd (<< 0.0.0+git20200304),
+Replaces:
+ feedbackd (<< 0.0.0+git20200304),
 Description: DBus service for haptic/visual/audio feedback
  Feedbackd is a DBus activated daemon that provides haptic/
  visual/audio feedback based on events.
