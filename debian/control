@@ -63,7 +63,7 @@ Package: libfeedback-dev
 Architecture: any
 Section: libdevel
 Depends:
- gir1.2-feedback-0.0 (= ${binary:Version}),
+ gir1.2-lfb-0.0 (= ${binary:Version}),
  libfeedback-0.0-0 (= ${binary:Version}),
  libglib2.0-dev,
  ${misc:Depends},
@@ -75,7 +75,7 @@ Description: Development files for libfeedback
  This package contains development files and Vala bindings to use when writing
  applications that interface with GThd.
 
-Package: gir1.2-feedback-0.0
+Package: gir1.2-lfb-0.0
 Architecture: any
 Section: introspection
 Depends:
