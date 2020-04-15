@@ -40,7 +40,7 @@ Breaks:
  feedbackd (<< 0.0.0+git20200304),
 Replaces:
  feedbackd (<< 0.0.0+git20200304),
-Description: DBus service for haptic/visual/audio feedback
+Description: Shared files for feedbackd
  Feedbackd is a DBus activated daemon that provides haptic/
  visual/audio feedback based on events.
  .
@@ -52,7 +52,7 @@ Section: libs
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
-Description: DBus service for haptic/visual/audio feedback
+Description: Library for managing haptic/visual/audio feedback
  Feedbackd is a DBus activated daemon that provides haptic/
  visual/audio feedback based on events.
  .
@@ -68,7 +68,7 @@ Depends:
  libglib2.0-dev,
  ${misc:Depends},
  ${shlibs:Depends},
-Description: DBus service for haptic/visual/audio feedback
+Description: Development files for libfeedback
  Feedbackd is a DBus activated daemon that provides haptic/
  visual/audio feedback based on events.
  .
