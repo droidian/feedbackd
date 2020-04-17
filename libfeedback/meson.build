@@ -2,6 +2,14 @@
 
 libfeedback_libdir = get_option('libdir')
 libfeedback_header_dir = get_option('includedir') / libname
+libfeedback_link_args = []
+libfeedback_symbols_file = 'libfeedback.syms'
+
+# Check linker flags
+ld_version_script_arg = '-Wl,--version-script,@0@'.format(meson.current_source_dir() / libfeedback_symbols_file)
+if cc.links('int main() { return 0; }', args : ld_version_script_arg, name : 'ld_supports_version_script')
+  libfeedback_link_args += [ld_version_script_arg]
+endif
 
 lfb_enum_headers = files([
   'lfb-event.h',
@@ -44,6 +52,7 @@ libfeedback = build_target(
             soversion : 0,
                c_args : libfeedback_c_args,
          dependencies : libfeedback_deps,
+            link_args : libfeedback_link_args,
               install : true,
           install_dir : libfeedback_libdir,
           target_type : libtype,
