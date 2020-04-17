@@ -5,9 +5,14 @@
       "name" : "full",
       "feedbacks" : [
         {
-          "event-name" : "phone-incoming-call",
+          "event-name" : "alarm-clock-elapsed",
           "type"       : "Sound",
-          "effect"     : "phone-incoming-call"
+          "effect"     : "alarm-clock-elapsed"
+        },
+        {
+          "event-name" : "message-new-email",
+          "type"       : "Sound",
+          "effect"     : "message-new-email"
         },
         {
           "event-name" : "message-new-instant",
@@ -20,14 +25,9 @@
           "effect"     : "message-new-instant"
         },
         {
-          "event-name" : "message-new-email",
+          "event-name" : "phone-incoming-call",
           "type"       : "Sound",
-          "effect"     : "message-new-email"
-        },
-        {
-          "event-name" : "alarm-clock-elapsed",
-          "type"       : "Sound",
-          "effect"     : "alarm-clock-elapsed"
+          "effect"     : "phone-incoming-call"
         },
         {
           "event-name" : "timeout-completed",
@@ -45,14 +45,24 @@
       "name" : "quiet",
       "feedbacks" : [
         {
-          "event-name" : "phone-incoming-call",
-          "type"       : "VibraPeriodic",
-          "duration"   : 10000
+          "event-name"   : "alarm-clock-elapsed",
+          "type"         : "VibraPeriodic",
+          "magnitude"    : 32767,
+          "duration"     : 10000,
+          "fade-in-time" : 10000,
+          "fade-in-level": 4096
         },
         {
-          "event-name" : "phone-missed-call",
+          "event-name" : "bell-terminal",
           "type"       : "VibraRumble",
-          "duration"   : 300
+          "duration"   : 100
+        },
+        {
+          "event-name" : "message-new-email",
+          "type"       : "VibraRumble",
+          "duration"   : 750,
+          "count"      : 3,
+          "pause"      : 100
         },
         {
           "event-name" : "message-new-instant",
@@ -67,46 +77,41 @@
           "pause"      : 100
         },
         {
-          "event-name" : "message-new-email",
-          "type"       : "VibraRumble",
-          "duration"   : 750,
-          "count"      : 3,
-          "pause"      : 100
-        },
-        {
           "event-name" : "message-sent-instant",
           "type"       : "VibraRumble",
           "duration"   : 150
         },
         {
-          "event-name" : "bell-terminal",
+          "event-name" : "phone-incoming-call",
+          "type"       : "VibraPeriodic",
+          "duration"   : 10000
+        },
+        {
+          "event-name" : "phone-missed-call",
+          "type"       : "VibraRumble",
+          "duration"   : 300
+        },
+        {
+          "event-name" : "timeout-completed",
           "type"       : "VibraRumble",
           "duration"   : 100
         },
         {
-          "event-name"   : "alarm-clock-elapsed",
-          "type"         : "VibraPeriodic",
-          "magnitude"    : 32767,
-          "duration"     : 10000,
-          "fade-in-time" : 10000,
-          "fade-in-level": 4096
-        },
-        {
-          "event-name"   : "timeout-completed",
-          "type"         : "VibraRumble",
-          "duration"     : 100
-        },
-        {
-          "event-name"   : "theme-demo",
-          "type"         : "VibraPeriodic",
-          "magnitude"    : 32767,
-          "duration"     : 5000
+          "event-name" : "theme-demo",
+          "type"       : "VibraPeriodic",
+          "magnitude"  : 32767,
+          "duration"   : 5000
         }
       ]
     },
     {
       "name" : "silent",
       "feedbacks" : [
+        {
+          "event-name" : "battery-caution",
+          "type"       : "Dummy",
+          "duration"   : 10000
+        },
         {
           "event-name" : "phone-missed-call",
           "type"       : "Dummy",
@@ -124,11 +129,6 @@
         },
         {
           "event-name" : "message-missed-sms",
-          "type"       : "Dummy",
-          "duration"   : 10000
-        },
-        {
-          "event-name" : "battery-caution",
           "type"       : "Dummy",
           "duration"   : 10000
         }
