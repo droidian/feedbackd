@@ -58,7 +58,7 @@ fbd_dep = declare_dependency(
 
 executable(
   'feedbackd',
-  sources : 'fbd.c',
+  sources : ['fbd.c', generated_dbus_sources[1]],
   include_directories : fbd_inc,
   dependencies : fbd_dep,
   install : true,

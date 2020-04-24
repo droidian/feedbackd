@@ -71,7 +71,7 @@ fbd_tests = [
 
 foreach test : fbd_tests
   t = executable('test-@0@'.format(test),
-                 ['test-@0@.c'.format(test)],
+                 ['test-@0@.c'.format(test), generated_dbus_sources[1]],
                  c_args : test_fbd_cflags,
                  pie : true,
                  link_args : test_fbd_link_args,
