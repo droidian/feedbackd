@@ -70,7 +70,7 @@
         {
           "event-name" : "button-pressed",
           "type"       : "VibraRumble",
-          "duration"   : 25
+          "duration"   : 15
         },
         {
           "event-name" : "message-new-email",
@@ -120,7 +120,7 @@
         {
           "event-name" : "window-close",
           "type"       : "VibraRumble",
-          "duration"   : 50
+          "duration"   : 25
         }
       ]
     },
