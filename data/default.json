@@ -15,6 +15,11 @@
           "effect"     : "button-pressed"
         },
         {
+          "event-name" : "button-released",
+          "type"       : "Sound",
+          "effect"     : "button-released"
+        },
+        {
           "event-name" : "message-new-email",
           "type"       : "Sound",
           "effect"     : "message-new-email"
@@ -71,6 +76,11 @@
           "event-name" : "button-pressed",
           "type"       : "VibraRumble",
           "duration"   : 15
+        },
+        {
+          "event-name" : "button-released",
+          "type"       : "VibraRumble",
+          "duration"   : 12
         },
         {
           "event-name" : "message-new-email",
