@@ -1,3 +1,18 @@
+feedbackd (0.0.0+git20200527) amber; urgency=medium
+
+  [ Rasmus Thomsen ]
+  * build: add proper dependencies on gdbus-codgen-generated headers.
+    Without this it was possible that ninja built a target that needs
+    the generated header before the header was generated
+
+  [ Guido Günther ]
+  * Release another git snapshot
+  * Honor sound theme on GNOME.
+    We don't set this for other DEs since they might want to pick a good
+    default from elsewhere.
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 27 May 2020 10:00:08 +0200
+
 feedbackd (0.0.0+git20200420) amber; urgency=medium
 
   [ Guido Günther ]
