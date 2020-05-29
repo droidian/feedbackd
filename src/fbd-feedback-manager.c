@@ -69,9 +69,9 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
   if (g_strcmp0 (action, "remove") == 0 && self->vibra) {
     GUdevDevice *dev = fbd_dev_vibra_get_device (self->vibra);
 
-    if (g_strcmp0 (g_udev_device_get_sysfs_path(dev),
+    if (g_strcmp0 (g_udev_device_get_sysfs_path (dev),
 		   g_udev_device_get_sysfs_path (device)) == 0) {
-      g_debug ("Vibra device %s got remove", g_udev_device_get_sysfs_path (dev));
+      g_debug ("Vibra device %s got removed", g_udev_device_get_sysfs_path (dev));
       g_clear_object (&self->vibra);
     }
   } else if (g_strcmp0 (action, "add") == 0 || !self->vibra) {
