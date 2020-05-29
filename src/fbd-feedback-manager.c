@@ -80,10 +80,8 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
 
       g_debug ("Found hotplugged vibra device at %s", g_udev_device_get_sysfs_path (device));
       self->vibra = fbd_dev_vibra_new (device, &err);
-      if (!self->vibra) {
+      if (!self->vibra)
 	g_warning ("Failed to init vibra device: %s", err->message);
-	g_clear_error (&err);
-      }
     }
   }
 }
