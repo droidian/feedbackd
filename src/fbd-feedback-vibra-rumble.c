@@ -12,10 +12,10 @@
 
 /**
  * SECTION:fbd-feedback-vibra
- * @short_description: Describes a feedback via a haptic motor
- * @Title: FbdFeedbackVibra
+ * @short_description: Describes a rumble feedback via a haptic motor
+ * @Title: FbdFeedbackVibraRumble
  *
- * The #FbdVibraVibra describes the properties of a haptic feedback
+ * The #FbdVibraVibraRumble describes the properties of a haptic feedback
  * event. It knows nothing about the hardware itself but calls
  * #FbdDevVibra for that.
  */

@@ -11,11 +11,11 @@
 #include "fbd-feedback-manager.h"
 
 /**
- * SECTION:fbd-feedback-vibra
- * @short_description: Describes a feedback via a haptic motor
- * @Title: FbdFeedbackVibra
+ * SECTION:fbd-feedback-vibra-periodic
+ * @short_description: Describes a periodic feedback via a haptic motor
+ * @Title: FbdFeedbackVibraPeriodic
  *
- * The #FbdVibraVibra describes the properties of a haptic feedback
+ * The #FbdVibraVibraPeriodic describes the properties of a haptic feedback
  * event. It knows nothing about the hardware itself but calls
  * #FbdDevVibra for that.
  */
