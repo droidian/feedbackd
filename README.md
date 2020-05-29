@@ -80,6 +80,7 @@ available feedback types are:
 - Sound (an audible sound from the sound naming spec)
 - VibraRumble: haptic motor rumbling
 - VibraPeriodic: periodic feedback from the haptic motor
+- Led: Feedback via blinking LEDs
 
 You can check the feedback theme and the classes (prefixed with Fbd)
 for available properties. Note that the feedback theme API (including

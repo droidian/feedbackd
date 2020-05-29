@@ -3,6 +3,7 @@ if get_option('daemon')
 
 fbd_enum_headers = files([
   'fbd-event.h',
+  'fbd-feedback-led.h',
   'fbd-feedback-vibra.h',
 ])
 fbd_enum_sources = gnome.mkenums_simple('fbd-enums',
@@ -14,9 +15,11 @@ sources = [
   'fbd.c',
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
+  'fbd-dev-leds.c',
   'fbd-event.c',
   'fbd-feedback-base.c',
   'fbd-feedback-dummy.c',
+  'fbd-feedback-led.c',
   'fbd-feedback-manager.c',
   'fbd-feedback-profile.c',
   'fbd-feedback-sound.c',
@@ -24,6 +27,7 @@ sources = [
   'fbd-feedback-vibra.c',
   'fbd-feedback-vibra-periodic.c',
   'fbd-feedback-vibra-rumble.c',
+  'fbd-udev.c',
 ]
 
 fbd_deps = [

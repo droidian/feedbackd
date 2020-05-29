@@ -9,6 +9,7 @@
 #include "lfb-names.h"
 #include "fbd.h"
 #include "fbd-dev-vibra.h"
+#include "fbd-dev-leds.h"
 #include "fbd-event.h"
 #include "fbd-feedback-vibra.h"
 #include "fbd-feedback-manager.h"
@@ -48,6 +49,7 @@ typedef struct _FbdFeedbackManager {
   GUdevClient *client;
   FbdDevVibra *vibra;
   FbdDevSound *sound;
+  FbdDevLeds  *leds;
 } FbdFeedbackManager;
 
 static void fbd_feedback_manager_feedback_iface_init (LfbGdbusFeedbackIface *iface);
@@ -140,6 +142,12 @@ init_devices (FbdFeedbackManager *self)
   }
   if (!self->vibra)
     g_debug ("No vibra capable device found");
+
+  self->leds = fbd_dev_leds_new (&err);
+  if (!self->leds) {
+    g_debug ("Failed to init leds device: %s", err->message);
+    g_clear_error (&err);
+  }
 
   self->sound = fbd_dev_sound_new (&err);
   if (!self->sound) {
@@ -407,6 +415,14 @@ fbd_feedback_manager_get_dev_sound (FbdFeedbackManager *self)
   g_return_val_if_fail (FBD_IS_FEEDBACK_MANAGER (self), NULL);
 
   return self->sound;
+}
+
+FbdDevLeds *
+fbd_feedback_manager_get_dev_leds (FbdFeedbackManager *self)
+{
+  g_return_val_if_fail (FBD_IS_FEEDBACK_MANAGER (self), NULL);
+
+  return self->leds;
 }
 
 gboolean
