@@ -26,7 +26,7 @@ static GParamSpec *props[PROP_LAST_PROP];
 
 /**
  * SECTION:fbd-feedback-profile
- * @short_description: A single profile in a #FbdFeedback
+ * @short_description: A profile in a #FbdFeedbackTheme
  * @Title: FbdFeedbackProfile
  */
 
