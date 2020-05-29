@@ -246,7 +246,7 @@ lfb_event_finalize (GObject *object)
 {
   LfbEvent *self = LFB_EVENT (object);
 
-  /* Signal handler is disconnected automatically due to due to g_signal_connect_object */
+  /* Signal handler is disconnected automatically due to g_signal_connect_object */
   self->handler_id = 0;
 
   g_clear_pointer (&self->event, g_free);
