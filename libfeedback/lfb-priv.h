@@ -12,5 +12,7 @@
 G_BEGIN_DECLS
 
 LfbGdbusFeedback *_lfb_get_proxy (void);
+void              _lfb_active_add_id (guint id);
+void              _lfb_active_remove_id (guint id);
 
 G_END_DECLS

@@ -160,6 +160,7 @@ on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
   } else {
     g_task_return_boolean (task, TRUE);
     state = LFB_EVENT_STATE_RUNNING;
+    _lfb_active_add_id (self->id);
   }
 
   lfb_event_set_state (self, state);
@@ -363,6 +364,7 @@ on_feedback_ended (LfbEvent         *self,
   lfb_event_set_end_reason (self, reason);
   lfb_event_set_state (self, LFB_EVENT_STATE_ENDED);
   g_signal_emit (self, signals[SIGNAL_FEEDBACK_ENDED], 0);
+  _lfb_active_remove_id (self->id);
   self->id = 0;
   g_signal_handler_disconnect (proxy, self->handler_id);
   self->handler_id = 0;
@@ -412,6 +414,8 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
                                                              &self->id,
                                                              NULL,
                                                              error);
+   if (success)
+     _lfb_active_add_id (self->id);
    lfb_event_set_state (self, success ? LFB_EVENT_STATE_RUNNING : LFB_EVENT_STATE_ERRORED);
    return success;
 }
