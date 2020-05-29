@@ -88,9 +88,10 @@ lfb_init (const gchar *app_id, GError **error)
 void
 lfb_uninit (void)
 {
+  _initted = FALSE;
+
   g_clear_pointer (&_app_id, g_free);
   g_clear_object (&_proxy);
-  _initted = FALSE;
 }
 
 /**
