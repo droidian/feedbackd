@@ -8,12 +8,22 @@
 
 #include <glib.h>
 #include <gio/gio.h>
+#include <glib-unix.h>
 
 #include <locale.h>
 
 #define DEFAULT_EVENT "phone-incoming-call"
 
 static GMainLoop *loop;
+
+static gboolean
+on_shutdown_signal (gpointer unused)
+{
+  /* End right away, lfb_uninit will end running feedback */
+  g_main_loop_quit (loop);
+
+  return FALSE;
+}
 
 static gboolean
 on_watch_expired (gpointer unused)
@@ -54,6 +64,9 @@ trigger_event(const char *name, gint timeout)
   g_autoptr(LfbEvent) event = NULL;
   g_autoptr(GIOChannel) input = NULL;
   int success = FALSE;
+
+  g_unix_signal_add (SIGTERM, on_shutdown_signal, NULL);
+  g_unix_signal_add (SIGINT, on_shutdown_signal, NULL);
 
   g_print("Triggering feedback for event '%s'\n", name);
   event = lfb_event_new (name);
