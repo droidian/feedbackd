@@ -102,11 +102,22 @@ fbd_feedback_sound_get_property (GObject    *object,
 }
 
 static void
+fbd_feedback_sound_finalize (GObject *object)
+{
+  FbdFeedbackSound *self = FBD_FEEDBACK_SOUND (object);
+
+  g_clear_pointer (&self->effect, g_free);
+
+  G_OBJECT_CLASS (fbd_feedback_sound_parent_class)->finalize (object);
+}
+
+static void
 fbd_feedback_sound_class_init (FbdFeedbackSoundClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   FbdFeedbackBaseClass *base_class = FBD_FEEDBACK_BASE_CLASS (klass);
 
+  object_class->finalize = fbd_feedback_sound_finalize;
   object_class->set_property = fbd_feedback_sound_set_property;
   object_class->get_property = fbd_feedback_sound_get_property;
 
