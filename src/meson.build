@@ -65,4 +65,13 @@ executable(
   install_dir: libexecdir,
 )
 
+executable(
+  'fbd-ledctrl',
+  sources : ['fbd-ledctrl.c'],
+  include_directories : fbd_inc,
+  dependencies : [glib],
+  install : true,
+  install_dir: libexecdir,
+)
+
 endif
