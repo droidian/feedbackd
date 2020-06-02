@@ -112,11 +112,6 @@
           "duration"   : 10000
         },
         {
-          "event-name" : "phone-missed-call",
-          "type"       : "VibraRumble",
-          "duration"   : 300
-        },
-        {
           "event-name" : "timeout-completed",
           "type"       : "VibraRumble",
           "duration"   : 100
