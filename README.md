@@ -101,9 +101,9 @@ It can be set via a GSetting
 ```sh
   gsettings set org.sigxcpu.feedbackd profile full
 ```
-## fbdcli
+## fbcli
 
-`fbdcli` can be used to trigger feedback for different events. Here are some examples:
+`fbcli` can be used to trigger feedback for different events. Here are some examples:
 
 ### Phone call
 Run feedbacks for event `phone-incoming-call` until explicitly stopped:
