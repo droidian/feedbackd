@@ -89,7 +89,7 @@ daemon.
 ## Profiles
 The profile determines which parts of the theme are in use:
 
-- `full`: Use configured events form the `full`, `quiet` and `silent` parts of
+- `full`: Use configured events from the `full`, `quiet` and `silent` parts of
   the feedback them.
 - `quiet`: Use `quiet` and `silent` part from of the feedback theme. This usually
   means no audio feedback.
