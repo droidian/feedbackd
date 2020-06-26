@@ -41,6 +41,7 @@ endif
 if get_option('man')
   manpages = [
     'fbcli',
+    'feedbackd',
   ]
 
   xsltproc = find_program('xsltproc', required : true)
