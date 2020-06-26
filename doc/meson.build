@@ -36,5 +36,34 @@ gnome.gtkdoc('libfeedback',
         install_dir: 'libfeedback',
       content_files: content_files,
             install: true)
+endif
 
+if get_option('man')
+  manpages = [
+    'fbcli',
+  ]
+
+  xsltproc = find_program('xsltproc', required : true)
+  xsltproc_command = [
+    xsltproc,
+    '--nonet',
+    '--stringparam', 'man.output.quietly', '1',
+    '--stringparam', 'funcsynopsis.style', 'ansi',
+    '--stringparam', 'man.th.extra1.suppress', '1',
+    '--stringparam', 'man.authors.section.enabled', '0',
+    '--stringparam', 'man.copyright.section.enabled', '0',
+    '-o', '@OUTPUT@',
+    'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl',
+    '@INPUT@',
+  ]
+  man1_dir = get_option('mandir') + '/man1'
+
+  foreach page : manpages
+    custom_target(page + '-man',
+      input  : page + '.xml',
+      output : page + '.1',
+      command: xsltproc_command,
+      install: true,
+      install_dir: man1_dir)
+  endforeach
 endif

@@ -7,6 +7,9 @@ option('daemon',
 option('gtk_doc',
        type: 'boolean', value: false,
        description: 'Whether to generate the API reference for Libfeedback')
+option('man',
+       type: 'boolean', value : false,
+       description : 'generate man pages (requires xsltproc)')
 option('tests',
        type: 'boolean', value: true,
        description: 'Whether to compile unit tests')

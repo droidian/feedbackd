@@ -112,6 +112,7 @@ summary = [
         '',
 	'         Daemon: @0@'.format(get_option('daemon')),
         '  Documentation: @0@'.format(get_option('gtk_doc')),
+        '   Manual pages: @0@'.format(get_option('man')),
         '  Introspection: @0@'.format(introspection),
         '           Vapi: @0@'.format(get_option('vapi')),
         '          Tests: @0@'.format(get_option('tests')),
