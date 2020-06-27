@@ -12,10 +12,12 @@ project('feedbackd', 'c',
 gio            = dependency('gio-2.0', version: '>=2.50.0')
 gio_unix       = dependency('gio-unix-2.0', version: '>=2.50.0')
 glib           = dependency('glib-2.0', version: '>=2.50.0')
-gobject        = dependency('gobject-2.0', version: '>=2.50.0')
-gsound         = dependency('gsound')
-gudev          = dependency('gudev-1.0', version: '>=232')
-json_glib      = dependency('json-glib-1.0')
+if get_option('daemon')
+  gobject        = dependency('gobject-2.0', version: '>=2.50.0')
+  gsound         = dependency('gsound')
+  gudev          = dependency('gudev-1.0', version: '>=232')
+  json_glib      = dependency('json-glib-1.0')
+endif
 
 prefix = get_option('prefix')
 
