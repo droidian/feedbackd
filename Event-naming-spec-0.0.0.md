@@ -84,7 +84,8 @@ applications which will use the Feedback Theme Specification.
 
 ### Input Event
 
-- button-pressed:	The Event used when a button is pressed.
+- button-pressed:	The event used when a button is pressed.
+- button-released:  The event used when a button is released.
 - window-close:     The sound used when an existing window is closed.
 
 [Sound naming spec]: http://0pointer.de/public/sound-naming-spec.html
