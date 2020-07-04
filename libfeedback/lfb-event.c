@@ -78,6 +78,7 @@ enum {
   PROP_TIMEOUT,
   PROP_STATE,
   PROP_END_REASON,
+  PROP_FEEDBACK_PROFILE,
   PROP_LAST_PROP,
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -93,6 +94,7 @@ typedef struct _LfbEvent {
 
   char          *event;
   gint           timeout;
+  gchar         *profile;
 
   guint          id;
   LfbEventState  state;
@@ -128,12 +130,14 @@ lfb_event_set_end_reason (LfbEvent *self, LfbEventEndReason reason)
 }
 
 static GVariant *
-build_hints (void)
+build_hints (LfbEvent *self)
 {
   GVariantBuilder hints_builder;
 
   g_variant_builder_init (&hints_builder, G_VARIANT_TYPE ("a{sv}"));
-  return g_variant_new ("a{sv}", &hints_builder);
+  if (self->profile)
+    g_variant_builder_add (&hints_builder, "{sv}", "profile", g_variant_new_string (self->profile));
+  return g_variant_builder_end (&hints_builder);
 }
 
 static void
@@ -216,6 +220,9 @@ lfb_event_set_property (GObject      *object,
   case PROP_TIMEOUT:
     lfb_event_set_timeout (self, g_value_get_int (value));
     break;
+  case PROP_FEEDBACK_PROFILE:
+    lfb_event_set_feedback_profile (self, g_value_get_string (value));
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -238,6 +245,9 @@ lfb_event_get_property (GObject    *object,
   case PROP_TIMEOUT:
     g_value_set_int (value, self->timeout);
     break;
+  case PROP_FEEDBACK_PROFILE:
+    g_value_set_string (value, self->profile);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -253,6 +263,7 @@ lfb_event_finalize (GObject *object)
   self->handler_id = 0;
 
   g_clear_pointer (&self->event, g_free);
+  g_clear_pointer (&self->profile, g_free);
 
   G_OBJECT_CLASS (lfb_event_parent_class)->finalize (object);
 }
@@ -312,6 +323,20 @@ lfb_event_class_init (LfbEventClass *klass)
       LFB_TYPE_EVENT_END_REASON,
       LFB_EVENT_END_REASON_NATURAL,
       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
+   * LfbEvent:feedback-profile:
+   *
+   * The name of the feedback profile to use for this event. See
+   * #lfb_event_set_feedback_profile() for details.
+   */
+  props[PROP_FEEDBACK_PROFILE] =
+    g_param_spec_string (
+      "feedback-profile",
+      "Feedback profile",
+      "Feedback profile to use for this event",
+      NULL,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
@@ -411,7 +436,7 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
    success =  lfb_gdbus_feedback_call_trigger_feedback_sync (proxy,
                                                              lfb_get_app_id (),
                                                              self->event,
-                                                             build_hints (),
+                                                             build_hints (self),
                                                              self->timeout,
                                                              &self->id,
                                                              NULL,
@@ -457,7 +482,7 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
   lfb_gdbus_feedback_call_trigger_feedback (proxy,
                                             lfb_get_app_id (),
                                             self->event,
-                                            build_hints (),
+                                            build_hints (self),
                                             self->timeout,
                                             cancellable,
                                             (GAsyncReadyCallback)on_trigger_feedback_finished,
@@ -661,4 +686,44 @@ lfb_event_get_end_reason (LfbEvent *self)
 {
   g_return_val_if_fail (LFB_IS_EVENT (self), LFB_EVENT_END_REASON_NATURAL);
   return self->end_reason;
+}
+
+/**
+ * lfb_event_set_feedback_profile:
+ * @self: The event
+ * @profile: The feedback profile to use
+ *
+ * Tells the feedback server to use the given feedback profile for
+ * this event. The server might ignore this request.  Valid profile
+ * names and their 'noisiness' are specified in the [Feedback theme
+ * specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Feedback-theme-spec-0.0.0.md).
+ *
+ * A value of %NULL (the default) lets the server pick the profile.
+ */
+void
+lfb_event_set_feedback_profile (LfbEvent *self, const gchar *profile)
+{
+  g_return_if_fail (LFB_IS_EVENT (self));
+
+  if (!g_strcmp0 (self->profile, profile))
+    return;
+
+  g_free (self->profile);
+  self->profile = g_strdup (profile);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_FEEDBACK_PROFILE]);
+}
+
+/**
+ * lfb_event_get_feedback_profile:
+ * @self: The event
+ *
+ * Returns:(transfer full): The set feedback profile to use for this
+ * event or %NULL.
+ */
+char *
+lfb_event_get_feedback_profile (LfbEvent *self)
+{
+  g_return_val_if_fail (LFB_IS_EVENT (self), NULL);
+
+  return g_strdup (self->profile);
 }

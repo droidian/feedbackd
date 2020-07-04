@@ -13,6 +13,7 @@ test_lfb_event_props (void)
 {
   g_autoptr(LfbEvent) event = NULL;
   g_autofree gchar *evname = NULL;
+  g_autofree gchar *profile = NULL;
   gint timeout;
 
   g_assert_true (lfb_init (TEST_APP_ID, NULL));
@@ -28,6 +29,15 @@ test_lfb_event_props (void)
 
   g_assert_cmpint (lfb_event_get_end_reason (event), ==, LFB_EVENT_END_REASON_NATURAL);
   g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_NONE);
+
+  g_object_get (event, "feedback-profile", &profile, NULL);
+  g_assert_null (profile);
+  g_object_set (event, "feedback-profile", "full", NULL);
+  g_object_get (event, "feedback-profile", &profile, NULL);
+  g_assert_cmpstr (profile, ==, "full");
+  g_free (profile);
+  profile = lfb_event_get_feedback_profile (event);
+  g_assert_cmpstr (profile, ==, "full");
 
   lfb_uninit ();
 }

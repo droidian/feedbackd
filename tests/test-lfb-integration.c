@@ -161,6 +161,7 @@ test_lfb_integration_event_async (void)
   cmp = NULL;
 
   event10 = lfb_event_new ("test-dummy-10");
+  lfb_event_set_feedback_profile (event10, "quiet");
   success = lfb_event_trigger_feedback (event10, &err);
   g_assert_no_error (err);
   g_assert_true (success);
