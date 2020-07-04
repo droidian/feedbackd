@@ -211,6 +211,19 @@ on_feedbackd_setting_changed (FbdFeedbackManager *self,
   fbd_feedback_manager_set_profile (self, profile);
 }
 
+static FbdFeedbackProfileLevel
+get_max_level (FbdFeedbackProfileLevel global_level,
+               FbdFeedbackProfileLevel app_level,
+               FbdFeedbackProfileLevel event_level)
+{
+  FbdFeedbackProfileLevel level;
+
+  /* Individual events and apps can select lower levels than the global level but not higher ones */
+  level = global_level > app_level ? app_level : global_level;
+  level = level > event_level ? event_level : level;
+  return level;
+}
+
 static gboolean
 fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
                                               GDBusMethodInvocation *invocation,
@@ -223,7 +236,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   FbdEvent *event;
   GSList *feedbacks, *l;
   gint event_id;
-  FbdFeedbackProfileLevel app_level, level;
+  FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
 
   g_debug ("Event '%s' for '%s'", arg_event, arg_app_id);
 
@@ -254,11 +267,10 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   event = fbd_event_new (event_id, arg_app_id, arg_event, arg_timeout);
   g_hash_table_insert (self->events, GUINT_TO_POINTER (event_id), event);
 
-  /* If user configured a lower feedback level for this app honor that */
   app_level = app_get_feedback_level (arg_app_id);
-  level = self->level > app_level ? app_level : self->level;
-  feedbacks = fbd_feedback_theme_lookup_feedback (self->theme, level, event);
+  level = get_max_level (self->level, app_level, hint_level);
 
+  feedbacks = fbd_feedback_theme_lookup_feedback (self->theme, level, event);
   if (feedbacks) {
     for (l = feedbacks; l; l = l->next) {
       FbdFeedbackBase *fb = l->data;
