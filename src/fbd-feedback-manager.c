@@ -225,6 +225,21 @@ get_max_level (FbdFeedbackProfileLevel global_level,
 }
 
 static gboolean
+parse_hints (GVariant *hints, FbdFeedbackProfileLevel *level)
+{
+  const gchar *profile;
+  gboolean found;
+  g_auto (GVariantDict) dict = G_VARIANT_DICT_INIT (NULL);
+
+  g_variant_dict_init (&dict, hints);
+  found = g_variant_dict_lookup (&dict, "profile", "&s", &profile);
+
+  if (level && found)
+    *level = fbd_feedback_profile_level (profile);
+  return TRUE;
+}
+
+static gboolean
 fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
                                               GDBusMethodInvocation *invocation,
                                               const gchar *arg_app_id,
@@ -256,6 +271,13 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
     g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                            G_DBUS_ERROR_INVALID_ARGS,
                                            "Invalid event %s", arg_event);
+    return TRUE;
+  }
+
+  if (!parse_hints (arg_hints, &hint_level)) {
+    g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
+                                           G_DBUS_ERROR_INVALID_ARGS,
+                                           "Invalid hints");
     return TRUE;
   }
 
