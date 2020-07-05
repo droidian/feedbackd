@@ -157,6 +157,12 @@
           "frequency"  : 1000
         },
         {
+          "event-name" : "message-missed-notification",
+          "type"       : "Led",
+          "color"      : "blue",
+          "frequency"  : 500
+        },
+        {
           "event-name" : "message-missed-sms",
           "type"       : "Led",
           "color"      : "blue",
