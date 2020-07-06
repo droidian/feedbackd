@@ -128,7 +128,7 @@ _build/cli/fbcli -t 10 -E alarm-clock-elapsed
 ```
 
 ## Per app profiles
-One can lower the feedback level of an individual application
+One can set the feedback profile of an individual application
 via `GSettings`. E.g. for an app with app id `sm.puri.Phosh`
 to set the profile to `quiet` do:
 
