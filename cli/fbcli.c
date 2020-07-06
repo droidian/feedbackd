@@ -49,16 +49,16 @@ on_user_input (GIOChannel *channel, GIOCondition cond, LfbEvent *event)
 {
   g_autoptr(GError) err = NULL;
 
-   if (cond == G_IO_IN) {
+  if (cond == G_IO_IN) {
     g_print ("Ending feedback\n");
     if (!lfb_event_end_feedback (event, &err))
-      g_warning("Failed to end feedback: %s", err->message);
+      g_warning ("Failed to end feedback: %s", err->message);
   }
   return FALSE;
 }
 
 static gboolean
-trigger_event(const char *name, gint timeout)
+trigger_event (const char *name, const gchar *profile, gint timeout)
 {
   g_autoptr(GError) err = NULL;
   g_autoptr(LfbEvent) event = NULL;
@@ -68,13 +68,13 @@ trigger_event(const char *name, gint timeout)
   g_unix_signal_add (SIGTERM, on_shutdown_signal, NULL);
   g_unix_signal_add (SIGINT, on_shutdown_signal, NULL);
 
-  g_print("Triggering feedback for event '%s'\n", name);
+  g_print ("Triggering feedback for event '%s'\n", name);
   event = lfb_event_new (name);
   lfb_event_set_timeout (event, timeout);
 
   g_signal_connect (event, "feedback-ended", (GCallback)on_feedback_ended, &success);
   if (!lfb_event_trigger_feedback (event, &err)) {
-    g_print("Failed to report event: %s\n", err->message);
+    g_print ("Failed to report event: %s\n", err->message);
     return FALSE;
   }
 
@@ -92,8 +92,8 @@ trigger_event(const char *name, gint timeout)
 static void
 on_profile_changed (LfbGdbusFeedback *proxy, GParamSpec *psepc, gpointer unused)
 {
-  g_print("Set feedback profile to: '%s'\n",
-          lfb_get_feedback_profile());
+  g_print ("Set feedback profile to: '%s'\n",
+           lfb_get_feedback_profile ());
   g_main_loop_quit (loop);
 }
 
@@ -103,27 +103,28 @@ set_profile (const gchar *profile)
   LfbGdbusFeedback *proxy;
   const gchar *current;
 
-  current = lfb_get_feedback_profile();
-  g_debug("Current profile is %s", current);
+  current = lfb_get_feedback_profile ();
+  g_debug ("Current profile is %s", current);
   if (!g_strcmp0 (current, profile)) {
     g_print ("Profile is already set to %s\n", profile);
     return TRUE;
   }
 
-  g_debug("Setting profile to %s", profile);
+  g_debug ("Setting profile to %s", profile);
   proxy = lfb_get_proxy ();
 
   /* Set profile and wait until we got notified about the profile change */
   loop = g_main_loop_new (NULL, FALSE);
-  lfb_set_feedback_profile(profile);
+  lfb_set_feedback_profile (profile);
   g_signal_connect (proxy, "notify::profile", (GCallback)on_profile_changed, NULL);
   g_main_loop_run (loop);
-  g_print("Current feedback profile is: '%s'\n",
-          lfb_get_feedback_profile());
+  g_print ("Current feedback profile is: '%s'\n",
+           lfb_get_feedback_profile ());
   return TRUE;
 }
 
-int main(int argc, char *argv[0])
+int
+main (int argc, char *argv[0])
 {
   g_autoptr(GOptionContext) opt_context = NULL;
   g_autoptr(GError) err = NULL;
@@ -133,15 +134,15 @@ int main(int argc, char *argv[0])
   int watch = 30;
   int timeout = -1;
   const GOptionEntry options [] = {
-   {"event", 'E', 0, G_OPTION_ARG_STRING, &name,
-    "Event name. (default: " DEFAULT_EVENT ").", NULL},
-   {"timeout", 't', 0, G_OPTION_ARG_INT, &timeout,
-    "Run feedback for timeout seconds", NULL},
-   {"profile", 'P', 0, G_OPTION_ARG_STRING, &profile,
-    "Profile name to set" , NULL},
-   {"watch", 'w', 0, G_OPTION_ARG_INT, &watch,
-    "How long to watch for feedback longest", NULL},
-   { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
+    {"event", 'E', 0, G_OPTION_ARG_STRING, &name,
+     "Event name. (default: " DEFAULT_EVENT ").", NULL},
+    {"timeout", 't', 0, G_OPTION_ARG_INT, &timeout,
+     "Run feedback for timeout seconds", NULL},
+    {"profile", 'P', 0, G_OPTION_ARG_STRING, &profile,
+     "Profile name to set", NULL},
+    {"watch", 'w', 0, G_OPTION_ARG_INT, &watch,
+     "How long to watch for feedback longest", NULL},
+    { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
   };
 
   setlocale (LC_ALL, "");
@@ -149,12 +150,12 @@ int main(int argc, char *argv[0])
   g_option_context_add_main_entries (opt_context, options, NULL);
   if (!g_option_context_parse (opt_context, &argc, &argv, &err)) {
     g_warning ("%s", err->message);
-      return 1;
+    return 1;
   }
 
-  if (!lfb_init("org.sigxcpu.fbcli", &err)) {
-    g_print("Failed to init libfeedback: %s\n", err->message);
-      return 1;
+  if (!lfb_init ("org.sigxcpu.fbcli", &err)) {
+    g_print ("Failed to init libfeedback: %s\n", err->message);
+    return 1;
   }
 
   if (!name)
