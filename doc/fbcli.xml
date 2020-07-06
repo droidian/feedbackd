@@ -70,7 +70,8 @@ print help and exit
 <term><option>--profile=<replaceable>PROFILE</replaceable></option></term>
 <para>
   The feedback profile (<literal>full</literal>, <literal>quiet</literal>, <literal>silent</literal>)
-  to use for the given event.
+  to use for the given event. If no event is specified then the global
+  feedback profile is changed.
 </para>
 </varlistentry>
 

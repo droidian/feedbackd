@@ -71,6 +71,8 @@ trigger_event (const char *name, const gchar *profile, gint timeout)
   g_print ("Triggering feedback for event '%s'\n", name);
   event = lfb_event_new (name);
   lfb_event_set_timeout (event, timeout);
+  if (profile)
+    lfb_event_set_feedback_profile (event, profile);
 
   g_signal_connect (event, "feedback-ended", (GCallback)on_feedback_ended, &success);
   if (!lfb_event_trigger_feedback (event, &err)) {
@@ -162,10 +164,10 @@ main (int argc, char *argv[0])
     name = g_strdup (DEFAULT_EVENT);
 
   g_timeout_add_seconds (watch, (GSourceFunc)on_watch_expired, NULL);
-  if (profile)
+  if (profile && !name)
     success = set_profile (profile);
   else
-    success = trigger_event (name, timeout);
+    success = trigger_event (name, profile, timeout);
 
   lfb_uninit ();
   return !success;
