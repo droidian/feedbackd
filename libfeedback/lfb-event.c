@@ -16,7 +16,9 @@
  *
  * #LfbEvent represents an event that should trigger
  * audio, haptic and/or visual feedback to the user by triggering
- * feedback on a feedback daemon.
+ * feedback on a feedback daemon. Valid event names are specified
+ * in the
+ * [Event naming specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Event-naming-spec-0.0.0.md).
  *
  * One event can trigger multiple feedbacks at once (e.g. audio and
  * haptic feedback). This is determined by the feedback theme in
