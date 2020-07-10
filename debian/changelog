@@ -1,3 +1,59 @@
+feedbackd (0.0.0+git20200707) amber-phone; urgency=medium
+
+  [ Sebastian Krzyszkowiak ]
+  * data: Lower rumble time for window-close and button-pressed even more.
+    Haptic feedback for touchscreen input should be as subtle as possible
+    to not make it distracting.
+  * data: Add button-released event
+
+  [ Guido Günther ]
+  * feedback-sound: Plug a leak.
+    We did not free the effect name
+  * Doc cleanups
+  * feedback-manager: Only act on add.
+    We would otherwise ignore the action when no vibra device was yet found.
+    Make sure we release the old device when updating.
+  * libfeedback: Unset _initted early.
+    This make sure a client does not end up in our shutdown phase and sees a
+    half initted library.
+  * libfeedback: Cancel all running feedbacks on uninit.
+    We keep track of the active ids and end them on uninit. This
+    make sure feedbacks don't continue to run if the application quits
+    and forgets to end a feedback.
+  * fbcli: Quit main loop on CTRL-C / SIGTERM.
+    This makes sure we invoke the cleanup function correctly and allows
+    to test running event handling.
+  * docs: Add manpages (Closes: #12)
+  * data: Drop phone-missed-call in 'quiet' profile.  Only want LEDs there.
+  * feedbackd: Add helper to set up permissions for LEDs.
+    This helper knows about the tiggers and necessary permission.
+    It's intended to be run via udev.
+  * debian: Setup leds via udev.
+    This allows feedbackd to set periodic feedback and makes usable
+    LED devices identifiable by feedbackd.
+  * feedbackd: Support visual feedback via LEDs.
+    later on by using the 'repeat' attribute of the LED pattern
+    trigger.
+  * data: Use LED feedback for missed calls, IMs and SMS
+  * Add generic missed notification.
+    This can be used e.g. by the shell for general purpose notifictions
+    but also for in app notifications of the foreground app.
+  * feedback-manager: Add hint to select feedback profile per event.
+    This e.g. allows events that are meant for haptic only to avoid
+    emitting a sound by omitting the 'full' level and using "quiet"
+    instead. (Closes: #7)
+  * LfbEvent: Add feedback-profile property.
+    This allows to specify the feedback profile to use for
+    this particular event.
+  * cli: Allow to set profile per event.
+    We allowed set the global profile via `-P` use it as per event
+    profile when used with `-E`.
+
+  [ Dorota Czaplejewicz ]
+  * build: Remove feedback dependencies from libfeedback builds
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 10 Jul 2020 11:52:07 +0200
+
 feedbackd (0.0.0+git20200527) amber; urgency=medium
 
   [ Rasmus Thomsen ]
