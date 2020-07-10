@@ -9,8 +9,6 @@
 
 G_BEGIN_DECLS
 
-#define FBD_FEEDBACK_VIBRA_RUMBLE_DEFAULT_PAUSE 100
-
 #define FBD_TYPE_FEEDBACK_VIBRA_RUMBLE (fbd_feedback_vibra_rumble_get_type())
 
 G_DECLARE_FINAL_TYPE (FbdFeedbackVibraRumble, fbd_feedback_vibra_rumble, FBD,
