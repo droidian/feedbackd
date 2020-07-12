@@ -476,6 +476,14 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
 
+  if (self->handler_id == 0) {
+    self->handler_id = g_signal_connect_object (proxy,
+						"feedback-ended",
+						G_CALLBACK (on_feedback_ended),
+						self,
+						G_CONNECT_SWAPPED);
+  }
+
   data = g_new0 (LpfAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
