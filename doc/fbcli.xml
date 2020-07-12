@@ -79,7 +79,7 @@ print help and exit
 <term><option>-w=<replaceable>TIMEOUT</replaceable></option></term>
 <term><option>--watch=<replaceable>TIMEOUT</replaceable></option></term>
 <para>
-  Maximum timout to wait for the feedback for the given event to end and
+  Maximum timeout to wait for the feedback for the given event to end and
   <command>fbcli</command> to exit.
 </para>
 </varlistentry>

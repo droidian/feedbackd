@@ -37,7 +37,7 @@
   a haptic motor or blink a LED.
 </para>
 <para>
-  The feedback triggerd by a given event is determined by the feedback
+  The feedback triggered by a given event is determined by the feedback
   them in use. Events are submitted via a DBus API. For details
   refer to the event and feedback theme specs at
   <ulink url="https://source.puri.sm/Librem5/feedbackd/"/>
