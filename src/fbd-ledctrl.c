@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     return FBD_LEDCTRL_ERR_TRIGGER;
 
   if (group) {
-    g_debug ("Setting permision of %s to %s", sysfs_path, group);
+    g_debug ("Setting permission of %s to %s", sysfs_path, group);
     if (!set_perms (sysfs_path, trigger, group))
       return FBD_LEDCTRL_ERR_PERMS;
   }
