@@ -20,7 +20,7 @@
 
 <refnamediv>
 <refname>feedbackd</refname>
-<refpurpose></refpurpose>
+<refpurpose>A daemon to provide feedback on events</refpurpose>
 </refnamediv>
 
 <refsynopsisdiv>
