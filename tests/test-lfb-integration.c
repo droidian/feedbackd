@@ -109,7 +109,7 @@ on_event_triggered (LfbEvent      *event,
   g_assert_true (LFB_IS_EVENT (event));
   g_assert_null (*cmp);
 
-  g_debug ("%s", __func__);
+  g_debug ("%s: %p, %s", __func__, event, lfb_event_get_event (event));
   success = lfb_event_trigger_feedback_finish (event, res, &err);
   g_assert_no_error (err);
   g_assert_true (success);
@@ -120,14 +120,14 @@ on_event_triggered (LfbEvent      *event,
 }
 
 static void
-on_event_ended (LfbEvent      *event,
-		GAsyncResult  *res,
-		LfbEvent     **cmp)
+on_event_end_finished (LfbEvent      *event,
+                       GAsyncResult  *res,
+                       LfbEvent     **cmp)
 {
   g_autoptr (GError) err = NULL;
   gboolean success;
 
-  g_debug ("%s", __func__);
+  g_debug ("%s: %p, %s", __func__, event, lfb_event_get_event (event));
   g_assert_true (LFB_IS_EVENT (event));
   g_assert_null (*cmp);
 
@@ -147,34 +147,42 @@ test_lfb_integration_event_async (void)
   g_autoptr(LfbEvent) event10 = NULL;
   g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
-  LfbEvent *cmp = NULL;
-  gboolean success;
+  LfbEvent *cmp1 = NULL, *cmp2 = NULL, *cmp3 = NULL;
 
   event0 = lfb_event_new ("test-dummy-0");
   lfb_event_trigger_feedback_async (event0,
 				    NULL,
 				    (GAsyncReadyCallback)on_event_triggered,
-				    &cmp);
+				    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
-  g_assert_true (event0 == cmp);
-  cmp = NULL;
+  g_assert_true (event0 == cmp1);
+  cmp1 = NULL;
 
   event10 = lfb_event_new ("test-dummy-10");
   lfb_event_set_feedback_profile (event10, "quiet");
-  success = lfb_event_trigger_feedback (event10, &err);
-  g_assert_no_error (err);
-  g_assert_true (success);
+  g_signal_connect (event10, "feedback-ended", (GCallback)on_feedback_ended, &cmp1);
 
+  /* The async callback ends the main loop */
+  lfb_event_trigger_feedback_async (event10,
+				    NULL,
+				    (GAsyncReadyCallback)on_event_triggered,
+				    &cmp2);
+  g_main_loop_run (mainloop);
+
+  /* The async callback ends the main loop */
   lfb_event_end_feedback_async (event10,
 				NULL,
-				(GAsyncReadyCallback)on_event_ended,
-				&cmp);
-
+				(GAsyncReadyCallback)on_event_end_finished,
+				&cmp3);
   g_main_loop_run (mainloop);
-  /* The async finish callback saw the right event */
-  g_assert_true (event10 == cmp);
+
+  /* Check if callbacks saw the right event */
+  g_assert_true (event10 == cmp1);
+  g_assert_true (event10 == cmp2);
+  g_assert_true (event10 == cmp3);
   g_assert_cmpint (lfb_event_get_state (event10), ==, LFB_EVENT_STATE_ENDED);
+  g_assert_cmpint (lfb_event_get_end_reason (event10), ==, LFB_EVENT_END_REASON_EXPLICIT);
 }
 
 static void
