@@ -61,7 +61,6 @@ on_feedback_ended (LfbEvent *event, LfbEvent **cmp)
 
   /* "Return" event */
   *cmp = event;
-  g_main_loop_quit (mainloop);
 }
 
 static void
@@ -82,6 +81,7 @@ test_lfb_integration_event_sync (void)
 
   event10 = lfb_event_new ("test-dummy-10");
   g_signal_connect (event10, "feedback-ended", (GCallback)on_feedback_ended, &cmp);
+  g_signal_connect_swapped (event10, "feedback-ended", (GCallback)g_main_loop_quit, mainloop);
   success = lfb_event_trigger_feedback (event10, &err);
   g_assert_no_error (err);
   g_assert_true (success);
