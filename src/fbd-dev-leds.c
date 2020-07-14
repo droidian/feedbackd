@@ -130,6 +130,7 @@ initable_init (GInitable    *initable,
 
         led = g_malloc0 (sizeof(FbdDevLed));
         led->dev = dev;
+        led->color = i;
         led->max_brightness = brightness;
         path = g_udev_device_get_sysfs_path (dev);
         g_debug ("LED at '%s' usable", path);
