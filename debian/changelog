@@ -1,3 +1,23 @@
+feedbackd (0.0.0+git20200714) amber-phone; urgency=medium
+
+  [ Arnaud Ferraris ]
+  * doc: fix typos
+  * doc: feedbackd: add short description.
+    Lintian issues a warning if short description is empty.
+  * fbd-ledctrl: fix typo
+
+  [ Guido Günther ]
+  * lfb-event: Clarify return values of `finished` functions.
+    They just inidicate that we talked to feedbackd succesfully.
+  * lfb-event: Connect done handler in async case too.
+    Otherwise the event state is not updated properly
+  * tests: Don't quit mainloop on event end.
+    This is needed to properly test aync where we have the
+    finished async event handler and the signal.
+  * tests: Use async feedback as the test name implies
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 14 Jul 2020 10:30:45 +0200
+
 feedbackd (0.0.0+git20200707) amber-phone; urgency=medium
 
   [ Sebastian Krzyszkowiak ]
