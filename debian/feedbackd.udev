@@ -8,5 +8,7 @@ SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT}=="1", ENV{ID_PATH}=="platfor
 
 # Front leds of the Librem5
 SUBSYSTEM=="leds", DEVPATH=="*/phone:*:front", ENV{FEEDBACKD_TYPE}="led", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G video"
+# Front leds of the PinePhone
+SUBSYSTEM=="leds", DEVPATH=="*/*:indicator", ENV{FEEDBACKD_TYPE}="led", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G video"
 
 LABEL="feedbackd_end"
