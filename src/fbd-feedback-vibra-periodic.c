@@ -104,6 +104,7 @@ fbd_feedback_vibra_periodic_start_vibra (FbdFeedbackVibra *vibra)
   FbdDevVibra *dev = fbd_feedback_manager_get_dev_vibra (manager);
   guint duration = fbd_feedback_vibra_get_duration (vibra);
 
+  g_return_if_fail (FBD_IS_DEV_VIBRA (dev));
   g_debug ("Periodic Vibra: %d %d %d %d",
 	   duration, self->magnitude, self->fade_in_level, self->fade_in_time);
 
@@ -111,14 +112,26 @@ fbd_feedback_vibra_periodic_start_vibra (FbdFeedbackVibra *vibra)
 			  self->fade_in_time);
 }
 
+static gboolean
+fbd_feedback_vibra_periodic_is_available (FbdFeedbackBase *base)
+{
+  FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
+  FbdDevVibra *dev = fbd_feedback_manager_get_dev_vibra (manager);
+
+  return FBD_IS_DEV_VIBRA (dev);
+}
+
 static void
 fbd_feedback_vibra_periodic_class_init (FbdFeedbackVibraPeriodicClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  FbdFeedbackBaseClass *base_class = FBD_FEEDBACK_BASE_CLASS (klass);
   FbdFeedbackVibraClass *vibra_class = FBD_FEEDBACK_VIBRA_CLASS (klass);
 
   object_class->set_property = fbd_feedback_vibra_periodic_set_property;
   object_class->get_property = fbd_feedback_vibra_periodic_get_property;
+
+  base_class->is_available = fbd_feedback_vibra_periodic_is_available;
 
   vibra_class->start_vibra = fbd_feedback_vibra_periodic_start_vibra;
   vibra_class->end_vibra = fbd_feedback_vibra_periodic_end_vibra;
