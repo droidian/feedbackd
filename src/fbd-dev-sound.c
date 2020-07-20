@@ -142,7 +142,13 @@ on_sound_play_finished_callback (GSoundContext *ctx,
   GError *err = NULL;
 
   if (!gsound_context_play_full_finish (ctx, res, &err)) {
-    g_warning ("Failed to play sound: %s", err->message);
+    if (err->domain == GSOUND_ERROR && err->code == GSOUND_ERROR_NOTFOUND) {
+      g_debug ("Failed to find sound '%s'", fbd_feedback_sound_get_effect (data->feedback));
+    } else {
+      g_warning ("Failed to play sound '%s': %s",
+		 fbd_feedback_sound_get_effect (data->feedback),
+		 err->message);
+    }
   }
 
   (*data->callback)(data->feedback);
