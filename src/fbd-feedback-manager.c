@@ -72,7 +72,7 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
     GUdevDevice *dev = fbd_dev_vibra_get_device (self->vibra);
 
     if (g_strcmp0 (g_udev_device_get_sysfs_path (dev),
-		   g_udev_device_get_sysfs_path (device)) == 0) {
+                   g_udev_device_get_sysfs_path (device)) == 0) {
       g_debug ("Vibra device %s got removed", g_udev_device_get_sysfs_path (dev));
       g_clear_object (&self->vibra);
     }
@@ -84,7 +84,7 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
       g_clear_object (&self->vibra);
       self->vibra = fbd_dev_vibra_new (device, &err);
       if (!self->vibra)
-	g_warning ("Failed to init vibra device: %s", err->message);
+        g_warning ("Failed to init vibra device: %s", err->message);
     }
   }
 }
@@ -173,9 +173,8 @@ on_event_feedbacks_ended (FbdFeedbackManager *self, FbdEvent *event)
 
   g_return_if_fail (fbd_event_get_feedbacks_ended (event));
 
-  lfb_gdbus_feedback_emit_feedback_ended
-    (LFB_GDBUS_FEEDBACK(self), event_id,
-     fbd_event_get_end_reason (event));
+  lfb_gdbus_feedback_emit_feedback_ended (LFB_GDBUS_FEEDBACK(self), event_id,
+                                          fbd_event_get_end_reason (event));
 
   g_debug ("All feedbacks for event %d finished", event_id);
   g_hash_table_remove (self->events, GUINT_TO_POINTER (event_id));
@@ -261,9 +260,9 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
 
   self = FBD_FEEDBACK_MANAGER (object);
   if (!strlen (arg_app_id)) {
-      g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                             G_DBUS_ERROR_INVALID_ARGS,
-                                             "Invalid app id %s", arg_app_id);
+    g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
+                                           G_DBUS_ERROR_INVALID_ARGS,
+                                           "Invalid app id %s", arg_app_id);
     return TRUE;
   }
 
@@ -302,16 +301,15 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
     g_slist_free (feedbacks);
 
     g_signal_connect_object (event, "feedbacks-ended",
-			     (GCallback) on_event_feedbacks_ended,
-			     self,
-			     G_CONNECT_SWAPPED);
+                             (GCallback) on_event_feedbacks_ended,
+                             self,
+                             G_CONNECT_SWAPPED);
 
     fbd_event_run_feedbacks (event);
   } else {
     /* No feedbacks found, so we're done */
-    lfb_gdbus_feedback_emit_feedback_ended
-      (LFB_GDBUS_FEEDBACK(self), event_id,
-       FBD_EVENT_END_REASON_NOT_FOUND);
+    lfb_gdbus_feedback_emit_feedback_ended (LFB_GDBUS_FEEDBACK(self), event_id,
+                                            FBD_EVENT_END_REASON_NOT_FOUND);
   }
 
   lfb_gdbus_feedback_complete_trigger_feedback (object, invocation, event_id);
@@ -367,7 +365,7 @@ fbd_feedback_manager_constructed (GObject *object)
 
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
   lfb_gdbus_feedback_set_profile (LFB_GDBUS_FEEDBACK (self),
-                                  fbd_feedback_profile_level_to_string(self->level));
+                                  fbd_feedback_profile_level_to_string (self->level));
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
@@ -414,7 +412,7 @@ fbd_feedback_manager_init (FbdFeedbackManager *self)
 
   self->client = g_udev_client_new (subsystems);
   g_signal_connect_swapped (G_OBJECT (self->client), "uevent",
-			    G_CALLBACK (device_changes), self);
+                            G_CALLBACK (device_changes), self);
   init_devices (self);
 
   self->events = g_hash_table_new_full (g_direct_hash,
