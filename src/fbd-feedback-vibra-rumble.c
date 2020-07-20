@@ -137,14 +137,26 @@ fbd_feedback_vibra_rumble_start_vibra (FbdFeedbackVibra *vibra)
   }
 }
 
+static gboolean
+fbd_feedback_vibra_rumble_is_available (FbdFeedbackBase *base)
+{
+  FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
+  FbdDevVibra *dev = fbd_feedback_manager_get_dev_vibra (manager);
+
+  return FBD_IS_DEV_VIBRA (dev);
+}
+
 static void
 fbd_feedback_vibra_rumble_class_init (FbdFeedbackVibraRumbleClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  FbdFeedbackBaseClass *base_class = FBD_FEEDBACK_BASE_CLASS (klass);
   FbdFeedbackVibraClass *vibra_class = FBD_FEEDBACK_VIBRA_CLASS (klass);
 
   object_class->set_property = fbd_feedback_vibra_rumble_set_property;
   object_class->get_property = fbd_feedback_vibra_rumble_get_property;
+
+  base_class->is_available = fbd_feedback_vibra_rumble_is_available;
 
   vibra_class->start_vibra = fbd_feedback_vibra_rumble_start_vibra;
   vibra_class->end_vibra = fbd_feedback_vibra_rumble_end_vibra;
