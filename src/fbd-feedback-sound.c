@@ -49,6 +49,7 @@ fbd_feedback_sound_run (FbdFeedbackBase *base)
   FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
   FbdDevSound *sound = fbd_feedback_manager_get_dev_sound (manager);
 
+  g_return_if_fail (FBD_IS_DEV_SOUND (sound));
   g_debug ("Sound event %s", self->effect);
   fbd_dev_sound_play (sound, self, on_effect_finished);
 }
@@ -64,6 +65,14 @@ fbd_feedback_sound_end (FbdFeedbackBase *base)
   fbd_dev_sound_stop (sound, self);
 }
 
+static gboolean
+fbd_feedback_sound_is_available (FbdFeedbackBase *base)
+{
+  FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
+  FbdDevSound *sound = fbd_feedback_manager_get_dev_sound (manager);
+
+  return FBD_IS_DEV_SOUND (sound);
+}
 
 static void
 fbd_feedback_sound_set_property (GObject      *object,
@@ -123,6 +132,7 @@ fbd_feedback_sound_class_init (FbdFeedbackSoundClass *klass)
 
   base_class->run = fbd_feedback_sound_run;
   base_class->end = fbd_feedback_sound_end;
+  base_class->is_available = fbd_feedback_sound_is_available;
 
   props[PROP_EFFECT] =
     g_param_spec_string (
