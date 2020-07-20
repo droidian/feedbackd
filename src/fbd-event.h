@@ -13,7 +13,7 @@
 G_BEGIN_DECLS
 
 typedef enum _FbdEventEndReason {
-  /* No feedback in current theme for this event */
+  /* No usable feedback in current theme for this event */
   FBD_EVENT_END_REASON_NOT_FOUND = -1,
   /* all feedbacks finished playing their natural length */
   FBD_EVENT_END_REASON_NATURAL   = 0,

@@ -251,6 +251,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   GSList *feedbacks, *l;
   gint event_id;
   FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
+  gboolean found_fb = FALSE;
 
   g_debug ("Event '%s' for '%s'", arg_event, arg_app_id);
 
@@ -295,19 +296,26 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
   if (feedbacks) {
     for (l = feedbacks; l; l = l->next) {
       FbdFeedbackBase *fb = l->data;
-      fbd_event_add_feedback (event, fb);
+
+      if (fbd_feedback_is_available (FBD_FEEDBACK_BASE (fb))) {
+          fbd_event_add_feedback (event, fb);
+          found_fb = TRUE;
+      }
       g_object_unref (fb);
     }
     g_slist_free (feedbacks);
+  } else {
+    /* No feedbacks found at all */
+    found_fb = FALSE;
+  }
 
+  if (found_fb) {
     g_signal_connect_object (event, "feedbacks-ended",
                              (GCallback) on_event_feedbacks_ended,
                              self,
                              G_CONNECT_SWAPPED);
-
     fbd_event_run_feedbacks (event);
   } else {
-    /* No feedbacks found, so we're done */
     lfb_gdbus_feedback_emit_feedback_ended (LFB_GDBUS_FEEDBACK(self), event_id,
                                             FBD_EVENT_END_REASON_NOT_FOUND);
   }
