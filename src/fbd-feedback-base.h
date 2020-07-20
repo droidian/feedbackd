@@ -17,8 +17,9 @@ struct _FbdFeedbackBaseClass
 {
   GObjectClass parent_class;
 
-  void (*run) (FbdFeedbackBase *self);
-  void (*end) (FbdFeedbackBase *self);
+  void     (*run) (FbdFeedbackBase *self);
+  void     (*end) (FbdFeedbackBase *self);
+  gboolean (*is_available) (FbdFeedbackBase *self);
 };
 
 
@@ -27,5 +28,6 @@ void         fbd_feedback_run (FbdFeedbackBase *self);
 void         fbd_feedback_end (FbdFeedbackBase *self);
 gboolean     fbd_feedback_get_ended (FbdFeedbackBase *self);
 void         fbd_feedback_base_done (FbdFeedbackBase *self);
+gboolean     fbd_feedback_is_available (FbdFeedbackBase *self);
 
 G_END_DECLS

@@ -227,3 +227,28 @@ fbd_feedback_base_done (FbdFeedbackBase *self)
   priv->ended = TRUE;
   g_signal_emit (self, signals[SIGNAL_ENDED], 0);
 }
+
+/**
+ * fbd_feedback_available:
+ * @self: The feedback
+ *
+ * Whether this feedback type is available at all. This can be %FALSE e.g.
+ * due to missing hardware.
+ *
+ * Returns: %FALSE if the feedback type is not available at all %TRUE if unsure
+ * or available.
+ */
+gboolean
+fbd_feedback_is_available (FbdFeedbackBase *self)
+{
+  FbdFeedbackBaseClass *klass;
+
+  g_return_val_if_fail (FBD_IS_FEEDBACK_BASE (self), FALSE);
+
+  klass = FBD_FEEDBACK_BASE_GET_CLASS (self);
+  if (klass->is_available)
+    return klass->is_available (self);
+  else
+    return TRUE;
+}
+
