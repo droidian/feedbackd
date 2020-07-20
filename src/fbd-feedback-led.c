@@ -102,6 +102,7 @@ fbd_feedback_led_run (FbdFeedbackBase *base)
   FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
   FbdDevLeds *dev = fbd_feedback_manager_get_dev_leds (manager);
 
+  g_return_if_fail (FBD_IS_DEV_LEDS (dev));
   g_debug ("Periodic led feeedback: self->max_brightness, self->frequency");
 
   /* FIXME: handle priority */
@@ -122,6 +123,15 @@ fbd_feedback_led_end (FbdFeedbackBase *base)
   fbd_feedback_base_done (FBD_FEEDBACK_BASE (self));
 }
 
+static gboolean
+fbd_feedback_led_is_available (FbdFeedbackBase *base)
+{
+  FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
+  FbdDevLeds *dev = fbd_feedback_manager_get_dev_leds (manager);
+
+  return FBD_IS_DEV_LEDS (dev);
+}
+
 static void
 fbd_feedback_led_class_init (FbdFeedbackLedClass *klass)
 {
@@ -133,6 +143,7 @@ fbd_feedback_led_class_init (FbdFeedbackLedClass *klass)
 
   base_class->run = fbd_feedback_led_run;
   base_class->end = fbd_feedback_led_end;
+  base_class->is_available = fbd_feedback_led_is_available;
 
   props[PROP_FREQUENCY] =
     g_param_spec_uint (
