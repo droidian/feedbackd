@@ -56,8 +56,9 @@ on_feedback_ended (LfbEvent *event, LfbEvent **cmp)
   g_assert_true (LFB_IS_EVENT (event));
   g_assert_null (*cmp);
 
-  g_debug ("Feedback ended for %s", lfb_event_get_event (event));
-  g_assert_cmpint (lfb_event_get_end_reason (event), ==, LFB_EVENT_END_REASON_EXPLICIT);
+  g_debug ("Feedback ended for %s: %d",
+	   lfb_event_get_event (event),
+	   lfb_event_get_end_reason (event));
 
   /* "Return" event */
   *cmp = event;
