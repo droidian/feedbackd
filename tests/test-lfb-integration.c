@@ -100,6 +100,30 @@ test_lfb_integration_event_sync (void)
 }
 
 static void
+test_lfb_integration_event_not_found (void)
+{
+  g_autoptr(LfbEvent) event0 = NULL;
+  g_autofree gchar *evname = NULL;
+  g_autoptr (GError) err = NULL;
+  LfbEvent *cmp = NULL;
+  gboolean success;
+
+  event0 = lfb_event_new ("test-does-not-exist");
+  g_signal_connect (event0, "feedback-ended", (GCallback)on_feedback_ended, &cmp);
+  g_signal_connect_swapped (event0, "feedback-ended", (GCallback)g_main_loop_quit, mainloop);
+  success = lfb_event_trigger_feedback (event0, &err);
+  g_assert_no_error (err);
+  g_assert_true (success);
+
+  g_main_loop_run (mainloop);
+
+  /* If the signal fired cmp will match event */
+  g_assert_true (event0 == cmp);
+  g_assert_cmpint (lfb_event_get_state (event0), ==, LFB_EVENT_STATE_ENDED);
+  g_assert_cmpint (lfb_event_get_end_reason (event0), ==, LFB_EVENT_END_REASON_NOT_FOUND);
+}
+
+static void
 on_event_triggered (LfbEvent      *event,
 		    GAsyncResult  *res,
 		    LfbEvent     **cmp)
@@ -227,6 +251,11 @@ main (gint argc, gchar *argv[])
   g_test_add("/feedbackd/lfb-integration/event_async", TestFixture, NULL,
 	     (gpointer)fixture_setup,
 	     (gpointer)test_lfb_integration_event_async,
+	     (gpointer)fixture_teardown);
+
+  g_test_add("/feedbackd/lfb-integration/event_not_found", TestFixture, NULL,
+	     (gpointer)fixture_setup,
+	     (gpointer)test_lfb_integration_event_not_found,
 	     (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/profile", TestFixture, NULL,
