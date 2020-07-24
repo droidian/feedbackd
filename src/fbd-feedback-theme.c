@@ -314,6 +314,6 @@ fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
   }
 
   if (!g_slist_length (feedbacks))
-    g_warning ("No feedback for event %s", fbd_event_get_event (event));
+    g_debug ("No feedback for event %s", fbd_event_get_event (event));
   return feedbacks;
 }
