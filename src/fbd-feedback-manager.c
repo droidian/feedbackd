@@ -315,6 +315,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
                              G_CONNECT_SWAPPED);
     fbd_event_run_feedbacks (event);
   } else {
+    g_hash_table_remove (self->events, GUINT_TO_POINTER (event_id));
     lfb_gdbus_feedback_emit_feedback_ended (LFB_GDBUS_FEEDBACK(self), event_id,
                                             FBD_EVENT_END_REASON_NOT_FOUND);
   }
