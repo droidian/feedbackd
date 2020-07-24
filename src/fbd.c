@@ -116,4 +116,6 @@ int main(int argc, char *argv[])
 
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
+
+  g_object_unref (fbd_feedback_manager_get_default ());
 }
