@@ -119,7 +119,7 @@ fbd_feedback_led_end (FbdFeedbackBase *base)
   FbdFeedbackManager *manager = fbd_feedback_manager_get_default ();
   FbdDevLeds *dev = fbd_feedback_manager_get_dev_leds (manager);
 
-  fbd_dev_leds_stop (dev, FBD_FEEDBACK_LED_COLOR_BLUE);
+  fbd_dev_leds_stop (dev, self->color);
   fbd_feedback_base_done (FBD_FEEDBACK_BASE (self));
 }
 
