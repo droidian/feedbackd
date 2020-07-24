@@ -301,9 +301,8 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback *object,
           fbd_event_add_feedback (event, fb);
           found_fb = TRUE;
       }
-      g_object_unref (fb);
     }
-    g_slist_free (feedbacks);
+    g_slist_free_full (feedbacks, g_object_unref);
   } else {
     /* No feedbacks found at all */
     found_fb = FALSE;
