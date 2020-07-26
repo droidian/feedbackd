@@ -1,3 +1,54 @@
+feedbackd (0.0.0+git20200726) amber-phone; urgency=medium
+
+  [ Arnaud Ferraris ]
+  * debian: udev: add support for PinePhone front LEDs
+  * fbd-dev-leds: store LED color when parsing devices.
+    Failing to do so will always select the first recognized LED (the blue 
+    one for the PinePhone).
+
+  [ Guido Günther ]
+  * Release new git snapshot
+  * fbd-dev-sound: Be less verbose on missing sound files.
+    This is quite common so don't fill the logs at normal debug levels
+    but be more specific about what is missing.
+  * fbd-feedback-base: Add fbd_feedback_is_available ()
+    This allows to check if a feedback type is available
+    at all.
+  * feedback-manager: Fix indentation
+  * fbd-feedback-manager: Check if feedback is usable.
+    If we don't find any usable feedbacks for an event return
+    FBD_EVENT_END_REASON_NOT_FOUND.
+  * fbd-feedback-led: Implement is_available ()
+    This avoids criticals when there's no Leds available.
+  * feedback-vibra-rumble: Implement is_available.
+    This avoids criticals when there's no rumble vibra available.
+  * feedback-vibra-periodic: Implement is_available.
+    This avoids criticals when there's no periodic vibra available.
+  * feedback-sound: Implement is_available.
+    This avoids criticals when there's sound device available. We
+    can also be more precise about the reason why feedback ended.
+  * feedback-theme: Avoid warning when feedback is not found.
+    We tell the caller so debug level is enough
+  * tests: Don't check end reason in feedback handler.
+    This allows to reuse the feedback handler and we check the
+    reason in the actual test function anyway.
+  * tests: Test event not found case too
+  * feedback-manager: Deeply free the feedback list.
+    Instead of freeing each elemnt after each iteration and then the list
+    itself at the very end just fully free the list. g_autoslist does
+    not work well on oder glib so do that manually.
+    This is just cosmetics.
+  * feedback-manager: Don't forget to remove not found events from the hash table.
+    This plugs a leak.
+  * feedback-manager: Dispose leds too
+  * feedback-led: Stop the correct led color
+  * feedback-led: Don't try to stop led when there's no led device.
+    This is not a critical since we prevented submitting initially
+    but daemon cleanup processes all entries in the theme.
+  * fbd: Dispose manager at the very end
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 26 Jul 2020 13:05:59 +0200
+
 feedbackd (0.0.0+git20200714) amber-phone; urgency=medium
 
   [ Arnaud Ferraris ]
