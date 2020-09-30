@@ -31,6 +31,9 @@ build:native-debian-buster:full:
   script:
     - meson --werror . _build
     - ninja -C _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
 
 # Minimal build for e.g. submodule usage
 build:native-debian-buster:lib:
@@ -40,6 +43,9 @@ build:native-debian-buster:lib:
   script:
     - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
     - ninja -C _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
 
 build:native-debian-bullseye:
   <<: *tags
@@ -51,6 +57,9 @@ build:native-debian-bullseye:
   script:
     - meson -Db_coverage=true --werror . _build
     - ninja -C _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
 
 test:native-debian-bullseye:
   <<: *tags
@@ -61,6 +70,9 @@ test:native-debian-bullseye:
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
   script:
     - dbus-run-session ninja -C _build test coverage
+  except:
+    variables:
+      - $PKG_ONLY == "1"
 
 package:deb-debian-buster:
   extends: .l5-build-debian-package
