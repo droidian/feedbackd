@@ -174,6 +174,7 @@ fbd_dev_sound_play (FbdDevSound *self, FbdFeedbackSound *feedback, FbdDevSoundPl
                             data,
                             GSOUND_ATTR_EVENT_ID, fbd_feedback_sound_get_effect (feedback),
                             GSOUND_ATTR_EVENT_DESCRIPTION, "Feedbackd sound feedback",
+                            GSOUND_ATTR_MEDIA_ROLE, "event",
                             NULL);
   return TRUE;
 }
