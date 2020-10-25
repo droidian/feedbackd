@@ -16,7 +16,7 @@ G_BEGIN_DECLS
 
 /**
  * LfbEventState:
- * @LFB_EVENT_STATE_ERRORED: An error occured triggering feedbacks
+ * @LFB_EVENT_STATE_ERRORED: An error occurred triggering feedbacks
  * @LFB_EVENT_STATE_NONE: No state information yet
  * @LFB_EVENT_STATE_RUNNING: The feedbacks for this event are currently running
  * @LFB_EVENT_STATE_ENDED: All feedbacks for this event ended

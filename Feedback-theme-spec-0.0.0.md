@@ -65,7 +65,7 @@ uses a format [similar to the above in JSON](./data/default.json).
 
 # Recommendations
 
-- The silent theme shoud not produce any audible feedback. This includes
+- The silent theme should not produce any audible feedback. This includes
   the buzzing of haptic motors.
 - The quiet theme should not play any sounds. Haptic motors and LEDs can
   be used.

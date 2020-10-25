@@ -72,7 +72,7 @@ applications which will use the Feedback Theme Specification.
 - power-plug: The power cable has been plugged in.
 - power-unplug: The power cable has been unplugged.
 - alarm-clock-elapsed: A user configured alarm elapsed.
-- timeout-completed: A user configured timout completed (e.g. a stop watch).
+- timeout-completed: A user configured timeout completed (e.g. a stop watch).
 
 ### Actions
 

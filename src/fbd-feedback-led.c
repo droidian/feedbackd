@@ -103,7 +103,7 @@ fbd_feedback_led_run (FbdFeedbackBase *base)
   FbdDevLeds *dev = fbd_feedback_manager_get_dev_leds (manager);
 
   g_return_if_fail (FBD_IS_DEV_LEDS (dev));
-  g_debug ("Periodic led feeedback: self->max_brightness, self->frequency");
+  g_debug ("Periodic led feedback: self->max_brightness, self->frequency");
 
   /* FIXME: handle priority */
   fbd_dev_leds_start_periodic (dev,

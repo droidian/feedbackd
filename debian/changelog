@@ -34,7 +34,7 @@ feedbackd (0.0.0+git20200726) amber-phone; urgency=medium
     reason in the actual test function anyway.
   * tests: Test event not found case too
   * feedback-manager: Deeply free the feedback list.
-    Instead of freeing each elemnt after each iteration and then the list
+    Instead of freeing each element after each iteration and then the list
     itself at the very end just fully free the list. g_autoslist does
     not work well on oder glib so do that manually.
     This is just cosmetics.
@@ -59,7 +59,7 @@ feedbackd (0.0.0+git20200714) amber-phone; urgency=medium
 
   [ Guido Günther ]
   * lfb-event: Clarify return values of `finished` functions.
-    They just inidicate that we talked to feedbackd succesfully.
+    They just inidicate that we talked to feedbackd successfully.
   * lfb-event: Connect done handler in async case too.
     Otherwise the event state is not updated properly
   * tests: Don't quit mainloop on event end.
@@ -97,7 +97,7 @@ feedbackd (0.0.0+git20200707) amber-phone; urgency=medium
   * docs: Add manpages (Closes: #12)
   * data: Drop phone-missed-call in 'quiet' profile.  Only want LEDs there.
   * feedbackd: Add helper to set up permissions for LEDs.
-    This helper knows about the tiggers and necessary permission.
+    This helper knows about the triggers and necessary permission.
     It's intended to be run via udev.
   * debian: Setup leds via udev.
     This allows feedbackd to set periodic feedback and makes usable
