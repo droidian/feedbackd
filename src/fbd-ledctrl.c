@@ -17,6 +17,7 @@
 #include <unistd.h>
 
 #define LED_BRIGHTNESS_ATTR "brightness"
+#define LED_MULTI_INTENSITY_ATTR "multi_intensity"
 #define LED_PATTERN_ATTR    "pattern"
 #define LED_REPEAT_ATTR     "repeat"
 #define LED_TRIGGER_ATTR    "trigger"
@@ -125,6 +126,9 @@ set_perms (const char *sysfs_path, const char *trigger, const char *gname)
 
   if (!set_sysfs_attr_perm (sysfs_path, LED_BRIGHTNESS_ATTR, group->gr_gid))
       return FALSE;
+
+  // Attribute is optional
+  set_sysfs_attr_perm (sysfs_path, LED_MULTI_INTENSITY_ATTR, group->gr_gid);
 
   if (!g_strcmp0 (trigger, LED_TRIGGER_PATTERN)) {
     if (!set_sysfs_attr_perm (sysfs_path, LED_PATTERN_ATTR, group->gr_gid))
