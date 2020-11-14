@@ -1,3 +1,21 @@
+feedbackd (0.0.0+git20201114) amber-phone; urgency=high
+
+  [ Guido Günther ]
+  * sound: Set 'event' media role.  This allows pa to cork, duck, etc.
+  * gitlab-ci: Honor PKG_ONLY.  This allow us to get debs quicker
+  * udev: Update led maching for the librem5.  The names changed in device
+    tree which tickles up into userspace.
+  * debian: Don't abuse the video group.  Use a separate group for users that
+    should be able to access the LED devices.
+
+  [ Luca Weiss ]
+  * fbd-dev-leds: fix brightness parameter.
+    The fbd_dev_led_set_brightness function is only getting called with
+    parameter 0 at the moment so this was never noticed.
+  * Fix typos
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 14 Nov 2020 15:54:23 +0100
+
 feedbackd (0.0.0+git20200726) amber-phone; urgency=medium
 
   [ Arnaud Ferraris ]
