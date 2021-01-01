@@ -98,6 +98,11 @@ libname = 'libfeedback-' + apiversion
 
 json_glib_validate = find_program('json-glib-validate', required: false)
 
+meson.add_install_script(
+  join_paths('build-aux', 'post_install.py'),
+  datadir
+)
+
 subdir('data')
 subdir('libfeedback')
 subdir('src')
