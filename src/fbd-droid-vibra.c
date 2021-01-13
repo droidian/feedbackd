@@ -104,6 +104,11 @@ initable_init (GInitable     *initable,
     hw_get_module(VIBRATOR_HARDWARE_MODULE_ID, (const hw_module_t **)(&hwmod));
 
     if (!hwmod || vibrator_open(hwmod, &self->droid_device) < 0) {
+        g_set_error (error,
+                     G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                     "Unable to open droid vibrator: %s",
+                     g_strerror (errno));
+
         return FALSE;
     }
 
