@@ -33,11 +33,11 @@ lfb_tests = [
   'lfb-event',
 ]
 
-if get_option ('daemon')
-  # The integration test needs the daemon
-  lfb_tests += 'lfb-integration'
-  subdir('services')
-endif
+#if get_option ('daemon')
+#  # The integration test needs the daemon
+#  lfb_tests += 'lfb-integration'
+#  subdir('services')
+#endif
 
 foreach test : lfb_tests
   t = executable('test-@0@'.format(test),
