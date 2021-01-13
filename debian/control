@@ -15,6 +15,7 @@ Build-Depends:
  meson,
  pkg-config,
  valac,
+ libhardware-dev,
 Standards-Version: 4.4.0
 Homepage: https://source.puri.sm/Librem5/feedbackd
 
