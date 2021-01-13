@@ -5,8 +5,13 @@
  */
 #pragma once
 
+#ifdef WITH_DROID_SUPPORT
+#include "fbd-droid-vibra.h"
+#include "fbd-droid-leds.h"
+#else
 #include "fbd-dev-vibra.h"
 #include "fbd-dev-leds.h"
+#endif
 #include "fbd-dev-sound.h"
 
 #include "lfb-gdbus.h"
