@@ -4,11 +4,16 @@
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
+#define WITH_DROID_SUPPORT 1
 #define G_LOG_DOMAIN "fbd-feedback-manager"
 
 #include "lfb-names.h"
 #include "fbd.h"
+#ifdef WITH_DROID_SUPPORT
+#include "fbd-droid-vibra.h"
+#else
 #include "fbd-dev-vibra.h"
+#endif
 #include "fbd-dev-leds.h"
 #include "fbd-event.h"
 #include "fbd-feedback-vibra.h"
@@ -132,6 +137,15 @@ init_devices (FbdFeedbackManager *self)
 
   devices = g_udev_client_query_by_subsystem (self->client, "input");
 
+  #ifdef WITH_DROID_SUPPORT
+  GUdevDevice *dev = g_list_last(devices)->data; /* FIXME */
+  self->vibra = fbd_dev_vibra_new (dev, &err);
+
+  if (!self->vibra){
+    g_debug ("Failed to init droid vibra device: %s", err->message);
+    g_clear_error (&err);
+  }
+  #else
   for (l = devices; l != NULL; l = l->next) {
     GUdevDevice *dev = l->data;
 
@@ -144,8 +158,10 @@ init_devices (FbdFeedbackManager *self)
       }
     }
   }
+
   if (!self->vibra)
     g_debug ("No vibra capable device found");
+  #endif
 
   self->leds = fbd_dev_leds_new (&err);
   if (!self->leds) {
