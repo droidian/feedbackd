@@ -16,10 +16,14 @@
 #include <sys/types.h>
 
 #include <android-version.h>
+#if ANDROID_VERSION_MAJOR >= 7
 #include <hardware/vibrator.h>
+#else
+#include <hardware_legacy/vibrator.h>
+#endif
 
 /**
- * SECTION:fbd-dev-vibra
+ * SECTION:fbd-droid-vibra
  * @short_description: Android HAL haptic motor device interface
  * @Title: FbdDevVibra
  *
@@ -41,14 +45,16 @@ typedef enum {
 } FbdDevVibraFeatureFlags;
 
 typedef struct _FbdDevVibra {
-  GObject parent;
+    GObject parent;
 
-  GUdevDevice *device;
-  gint id; /* currently used id */
+    GUdevDevice *device;
+    gint id; /* currently used id */
 
-  vibrator_device_t *droid_device; /* droid vibrator */
+#if ANDROID_VERSION_MAJOR >= 7
+    vibrator_device_t *droid_device; /* droid vibrator */
+#endif
 
-  FbdDevVibraFeatureFlags features;
+    FbdDevVibraFeatureFlags features;
 } FbdDevVibra;
 
 static void initable_iface_init (GInitableIface *iface);
@@ -97,8 +103,9 @@ initable_init (GInitable     *initable,
 {
     FbdDevVibra *self = FBD_DEV_VIBRA (initable);
 
-    /* vibrator init */
-    self->droid_device= 0;
+#if ANDROID_VERSION_MAJOR >= 7
+    /* android >= 7 vibrator init */
+    self->droid_device = 0;
     struct hw_module_t *hwmod = 0;
 
     hw_get_module(VIBRATOR_HARDWARE_MODULE_ID, (const hw_module_t **)(&hwmod));
@@ -111,6 +118,7 @@ initable_init (GInitable     *initable,
 
         return FALSE;
     }
+#endif
 
     g_debug ("Droid vibra device usable");
     return TRUE;
@@ -139,9 +147,9 @@ static void
 fbd_dev_vibra_finalize (GObject *object)
 {
     FbdDevVibra *self = FBD_DEV_VIBRA (object);
-
+#if ANDROID_VERSION_MAJOR >= 7
     self->droid_device->common.close((hw_device_t *)(self->droid_device));
-
+#endif
     G_OBJECT_CLASS (fbd_dev_vibra_parent_class)->finalize (object);
 }
 
@@ -192,10 +200,13 @@ fbd_dev_vibra_rumble (FbdDevVibra *self, guint duration, gboolean upload)
     g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
     /* vibrate */
+#if ANDROID_VERSION_MAJOR >= 7
     if (self->droid_device) {
         self->droid_device -> vibrator_on(self->droid_device, duration);
     }
-
+#else
+    vibrator_on(duration)
+#endif
     g_debug("Playing rumbling vibra effect");
 
     return TRUE;
@@ -205,13 +216,14 @@ fbd_dev_vibra_rumble (FbdDevVibra *self, guint duration, gboolean upload)
 gboolean
 fbd_dev_vibra_periodic (FbdDevVibra *self, guint duration, guint magnitude, guint fade_in_level, guint fade_in_time)
 {
-    g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
-
     /* vibrate */
+#if ANDROID_VERSION_MAJOR >= 7
     if (self->droid_device) {
         self->droid_device -> vibrator_on(self->droid_device, duration);
     }
-
+#else
+    vibrator_on(duration)
+#endif
     g_debug("Playing periodic vibra effect");
 
     return TRUE;
@@ -225,11 +237,14 @@ fbd_dev_vibra_remove_effect (FbdDevVibra *self)
 
     g_debug("Erasing vibra effect");
 
+#if ANDROID_VERSION_MAJOR >= 7
     /* stop vibration */
     if (self->droid_device) {
         self->droid_device -> vibrator_off(self->droid_device);
     }
-
+#else
+    vibrator_off();
+#endif
     return TRUE;
 }
 
@@ -238,6 +253,7 @@ gboolean
 fbd_dev_vibra_stop(FbdDevVibra *self)
 {
     g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
+
     return fbd_dev_vibra_remove_effect (self);
 }
 
