@@ -167,7 +167,7 @@ on_sound_play_finished_callback (GSoundContext *ctx,
                                  GAsyncResult  *res,
                                  FbdAsyncData  *data)
 {
-  GError *err = NULL;
+  g_autoptr (GError) err = NULL;
 
   if (!gsound_context_play_full_finish (ctx, res, &err)) {
     if (err->domain == GSOUND_ERROR && err->code == GSOUND_ERROR_NOTFOUND) {
