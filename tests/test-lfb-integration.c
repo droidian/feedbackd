@@ -185,6 +185,8 @@ test_lfb_integration_event_async (void)
   cmp1 = NULL;
 
   event10 = lfb_event_new ("test-dummy-10");
+  lfb_event_set_timeout (event10, 1);
+  g_assert_cmpint (lfb_event_get_timeout (event10), ==, 1);
   lfb_event_set_feedback_profile (event10, "quiet");
   g_signal_connect (event10, "feedback-ended", (GCallback)on_feedback_ended, &cmp1);
 
