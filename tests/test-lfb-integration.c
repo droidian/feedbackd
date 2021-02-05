@@ -212,6 +212,47 @@ test_lfb_integration_event_async (void)
   g_assert_cmpint (lfb_event_get_end_reason (event10), ==, LFB_EVENT_END_REASON_EXPLICIT);
 }
 
+
+static void
+on_event_with_error_triggered (LfbEvent      *event,
+			       GAsyncResult  *res,
+			       LfbEvent     **cmp)
+{
+  g_autoptr (GError) err = NULL;
+  gboolean success;
+
+  g_debug ("%s: %p, %s", __func__, event, lfb_event_get_event (event));
+  g_assert_true (LFB_IS_EVENT (event));
+  g_assert_null (*cmp);
+
+  success = lfb_event_end_feedback_finish (event, res, &err);
+  g_assert_false (success);
+  g_assert_error (err, G_DBUS_ERROR, G_DBUS_ERROR_INVALID_ARGS);
+
+  /* "Return" event */
+  *cmp = event;
+  g_main_loop_quit (mainloop);
+}
+
+
+static void
+test_lfb_integration_event_async_error (void)
+{
+  g_autoptr(LfbEvent) event0 = NULL;
+  LfbEvent *cmp1 = NULL;
+
+  /* Empty event names are invalid */
+  event0 = lfb_event_new ("");
+  lfb_event_trigger_feedback_async (event0,
+				    NULL,
+				    (GAsyncReadyCallback)on_event_with_error_triggered,
+				    &cmp1);
+  g_main_loop_run (mainloop);
+  /* The async finish callback saw the right event */
+  g_assert_true (event0 == cmp1);
+}
+
+
 static void
 on_profile_changed (LfbGdbusFeedback *proxy, GParamSpec *psepc, const gchar **profile)
 {
@@ -250,9 +291,14 @@ main (gint argc, gchar *argv[])
 	     (gpointer)test_lfb_integration_event_sync,
 	     (gpointer)fixture_teardown);
 
-  g_test_add("/feedbackd/lfb-integration/event_async", TestFixture, NULL,
+  g_test_add("/feedbackd/lfb-integration/event_async/success", TestFixture, NULL,
 	     (gpointer)fixture_setup,
 	     (gpointer)test_lfb_integration_event_async,
+	     (gpointer)fixture_teardown);
+
+  g_test_add("/feedbackd/lfb-integration/event_async/error", TestFixture, NULL,
+	     (gpointer)fixture_setup,
+	     (gpointer)test_lfb_integration_event_async_error,
 	     (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_not_found", TestFixture, NULL,
