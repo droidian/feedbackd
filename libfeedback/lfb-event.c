@@ -148,7 +148,7 @@ on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
 {
   GTask *task = data->task;
   LfbEvent *self = data->event;
-  GError *err = NULL;
+  g_autoptr (GError) err = NULL;
   gboolean success;
   LfbEventState state;
 
@@ -161,7 +161,7 @@ on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
                                                              res,
                                                              &err);
   if (!success) {
-    g_task_return_error (task, err);
+    g_task_return_error (task, g_steal_pointer (&err));
     state = LFB_EVENT_STATE_ERRORED;
   } else {
     g_task_return_boolean (task, TRUE);
@@ -183,7 +183,7 @@ on_end_feedback_finished (LfbGdbusFeedback *proxy,
 {
   GTask *task = data->task;
   LfbEvent *self = data->event;
-  GError *err = NULL;
+  g_autoptr (GError) err = NULL;
   gboolean success;
 
   g_return_if_fail (G_IS_TASK (task));
@@ -194,7 +194,7 @@ on_end_feedback_finished (LfbGdbusFeedback *proxy,
 							 res,
 							 &err);
   if (!success) {
-    g_task_return_error (task, err);
+    g_task_return_error (task, g_steal_pointer (&err));
   } else
     g_task_return_boolean (task, TRUE);
 

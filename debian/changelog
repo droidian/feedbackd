@@ -1,3 +1,15 @@
+feedbackd (0.0.0+git20210125) amber-phone; urgency=medium
+
+  [ Dylan Van Assche ]
+  * meson.build: compile GLib schemas on install.
+    Run a script as a post install to make sure that all GLib schemas are compiled
+  * fbd-feedback-manager: Allow device-specific feedbackd themes.
+
+  [ Guido Günther ]
+  * feedback-manager: Fix formatting.
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 25 Jan 2021 10:50:15 +0100
+
 feedbackd (0.0.0+git20201114) amber-phone; urgency=high
 
   [ Guido Günther ]
