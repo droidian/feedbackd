@@ -57,7 +57,12 @@ gdbus introspect --session --dest org.sigxcpu.Feedback --object-path /org/sigxcp
 and to request feedback for an event
 
 ```sh
-gdbus call --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback --method org.sigxcpu.Feedback.Feedback 'my.app.id' 'phone-incoming-call' '[]' 0
+gdbus call --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback --method org.sigxcpu.Feedback.TriggerFeedback 'my.app.id' 'phone-incoming-call' '[]' 0
+```
+This will return an Event id which you should memorize if you ever want to end the ringtone with:
+
+```sh
+gdbus call --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback --method org.sigxcpu.Feedback.EndFeedback EVENTID
 ```
 
 See `examples/` for a simple python example using GObject introspection.

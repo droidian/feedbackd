@@ -154,10 +154,3 @@ const char *fbd_feedback_sound_get_effect (FbdFeedbackSound *self)
 {
   return self->effect;
 }
-
-gboolean
-fbd_dev_sound_stop(FbdDevSound *self, FbdFeedbackSound *feedback)
-{
-  /* TODO: can we use cancellable to actually end playback? */
-  return TRUE;
-}

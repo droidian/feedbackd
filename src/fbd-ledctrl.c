@@ -102,6 +102,7 @@ set_trigger (const char *sysfs_path, const char *trigger)
    * same trigger over and over again in a udev rule.
    */
   val = read_sysfs_attr (sysfs_path, LED_TRIGGER_ATTR);
+  g_strstrip(val);
   triggers = g_strsplit (val, " ", 0);
 
   /* 
