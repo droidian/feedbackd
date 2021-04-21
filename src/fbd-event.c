@@ -25,6 +25,7 @@ enum {
   PROP_END_REASON,
   PROP_FEEDBACKS_ENDED,
   PROP_TIMEOUT,
+  PROP_SENDER,
   PROP_LAST_PROP,
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -35,6 +36,7 @@ typedef struct _FbdEvent {
   guint id;
   char *app_id;
   char *event;
+  char *sender;
 
   int  timeout;
   gboolean expired;
@@ -118,6 +120,10 @@ fbd_event_set_property (GObject      *object,
   case PROP_END_REASON:
     fbd_event_set_end_reason (self, g_value_get_enum (value));
     break;
+  case PROP_SENDER:
+    g_free (self->sender);
+    self->sender = g_value_dup_string (value);
+    break;
   case PROP_FEEDBACKS_ENDED:
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -152,6 +158,9 @@ fbd_event_get_property (GObject    *object,
   case PROP_FEEDBACKS_ENDED:
     g_value_set_boolean (value, self->ended);
     break;
+  case PROP_SENDER:
+    g_value_set_string (value, self->sender);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -181,6 +190,7 @@ fbd_event_finalize (GObject *object)
 
   g_clear_pointer (&self->app_id, g_free);
   g_clear_pointer (&self->event, g_free);
+  g_clear_pointer (&self->sender, g_free);
 
   G_OBJECT_CLASS (fbd_event_parent_class)->finalize (object);
 }
@@ -245,6 +255,19 @@ fbd_event_class_init (FbdEventClass *klass)
       FBD_EVENT_END_REASON_NATURAL,
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * FbdEvent:Sender:
+   *
+   * The DBus name of the sender
+   */
+  props[PROP_SENDER] =
+    g_param_spec_string (
+      "sender",
+      "",
+      "",
+      NULL,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
   /**
@@ -267,13 +290,14 @@ fbd_event_init (FbdEvent *self)
 }
 
 FbdEvent *
-fbd_event_new (int id, const char *app_id, const char *event, int timeout)
+fbd_event_new (int id, const char *app_id, const char *event, int timeout, const char *sender)
 {
   return FBD_EVENT (g_object_new (FBD_TYPE_EVENT,
                                   "id", id,
                                   "app_id", app_id,
                                   "event", event,
                                   "timeout", timeout,
+                                  "sender", sender,
                                   NULL));
 }
 
@@ -446,4 +470,18 @@ fbd_event_get_end_reason (FbdEvent *self)
   g_return_val_if_fail (FBD_IS_EVENT (self), FBD_EVENT_END_REASON_NATURAL);
 
   return self->end_reason;
+}
+
+/**
+ * fbd_event_get_sender:
+ * @self: The Event
+ *
+ * Returns: The DBus sender that triggered the event.
+ */
+const char *
+fbd_event_get_sender (FbdEvent *self)
+{
+  g_return_val_if_fail (FBD_IS_EVENT (self), FBD_EVENT_END_REASON_NATURAL);
+
+  return self->sender;
 }

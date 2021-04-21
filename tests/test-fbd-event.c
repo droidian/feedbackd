@@ -15,10 +15,11 @@ test_fbd_event (void)
   g_autoptr(FbdEvent) event = NULL;
   g_autofree gchar *appid = NULL;
   g_autofree gchar *name = NULL;
+  g_autofree gchar *sender = NULL;
   FbdEventEndReason reason;
   gint timeout;
 
-  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, 2);
+  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, 2, "sender-id");
 
   g_assert_true (FBD_IS_EVENT (event));
   g_object_get (event,
@@ -26,6 +27,7 @@ test_fbd_event (void)
                 "event", &name,
                 "app-id", &appid,
                 "timeout", &timeout,
+                "sender", &sender,
                 NULL);
 
   g_assert_cmpstr (fbd_event_get_event (event), ==, TEST_EVENT);
@@ -36,6 +38,9 @@ test_fbd_event (void)
 
   g_assert_cmpint (fbd_event_get_timeout (event), ==, timeout);
   g_assert_cmpint (timeout, ==, 2);
+
+  g_assert_cmpstr (fbd_event_get_sender (event), ==, sender);
+  g_assert_cmpstr (sender, ==, "sender-id");
 
   g_assert_cmpint (fbd_event_get_end_reason (event), ==, FBD_EVENT_END_REASON_NATURAL);
   g_assert_cmpint (reason, ==, FBD_EVENT_END_REASON_NATURAL);
@@ -49,7 +54,7 @@ test_fbd_event_feedback (void)
   g_autoptr(FbdFeedbackDummy) feedback1 = NULL;
   g_autoptr(FbdFeedbackDummy) feedback2 = NULL;
 
-  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, -1);
+  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, -1, NULL);
   feedback1 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
   feedback2 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
 
@@ -96,7 +101,7 @@ test_fbd_event_feedback_ended (void)
   g_autoptr(FbdFeedbackDummy) feedback2 = NULL;
   gboolean ended = FALSE;
 
-  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, FBD_EVENT_TIMEOUT_ONESHOT);
+  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, FBD_EVENT_TIMEOUT_ONESHOT, NULL);
   feedback1 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
   fbd_event_add_feedback (event, FBD_FEEDBACK_BASE(feedback1));
   feedback2 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
@@ -117,7 +122,7 @@ test_fbd_event_feedback_loop (void)
   g_autoptr(FbdFeedbackDummy) feedback2 = NULL;
   gboolean ended = FALSE;
 
-  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, FBD_EVENT_TIMEOUT_LOOP);
+  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, FBD_EVENT_TIMEOUT_LOOP, NULL);
   feedback1 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
   fbd_event_add_feedback (event, FBD_FEEDBACK_BASE(feedback1));
   feedback2 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
@@ -139,7 +144,7 @@ test_fbd_event_feedback_timeout (void)
   g_autoptr(FbdFeedbackDummy) feedback2 = NULL;
   gboolean ended = FALSE;
 
-  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, 1);
+  event = fbd_event_new (1, TEST_APP_ID, TEST_EVENT, 1, NULL);
   feedback1 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);
   fbd_event_add_feedback (event, FBD_FEEDBACK_BASE(feedback1));
   feedback2 = g_object_new (FBD_TYPE_FEEDBACK_DUMMY, NULL);

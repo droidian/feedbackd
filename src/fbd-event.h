@@ -33,7 +33,7 @@ typedef enum _FbdEventTimeout {
 
 G_DECLARE_FINAL_TYPE (FbdEvent, fbd_event, FBD, EVENT, GObject);
 
-FbdEvent    *fbd_event_new (gint id, const char *app_id, const char *event, int timeout);
+FbdEvent    *fbd_event_new (gint id, const char *app_id, const char *event, int timeout, const char *sender);
 const char  *fbd_event_get_event (FbdEvent *event);
 const char  *fbd_event_get_app_id (FbdEvent *event);
 guint        fbd_event_get_id (FbdEvent *event);
@@ -48,5 +48,6 @@ int          fbd_event_remove_feedback (FbdEvent *self,
 void         fbd_event_run_feedbacks (FbdEvent *self);
 void         fbd_event_end_feedbacks (FbdEvent *self);
 gboolean     fbd_event_get_feedbacks_ended (FbdEvent *self);
+const char  *fbd_event_get_sender (FbdEvent *self);
 
 G_END_DECLS
