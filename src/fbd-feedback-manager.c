@@ -254,10 +254,12 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
   FbdEvent *event;
   GSList *feedbacks, *l;
   gint event_id;
+  const gchar *sender;
   FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
   gboolean found_fb = FALSE;
 
-  g_debug ("Event '%s' for '%s'", arg_event, arg_app_id);
+  sender = g_dbus_method_invocation_get_sender (invocation);
+  g_debug ("Event '%s' for '%s' from %s", arg_event, arg_app_id, sender);
 
   g_return_val_if_fail (FBD_IS_FEEDBACK_MANAGER (object), FALSE);
   g_return_val_if_fail (arg_app_id, FALSE);
@@ -290,7 +292,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
 
   event_id = self->next_id++;
 
-  event = fbd_event_new (event_id, arg_app_id, arg_event, arg_timeout);
+  event = fbd_event_new (event_id, arg_app_id, arg_event, arg_timeout, sender);
   g_hash_table_insert (self->events, GUINT_TO_POINTER (event_id), event);
 
   app_level = app_get_feedback_level (arg_app_id);
