@@ -4,7 +4,7 @@
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
-#define G_LOG_DOMAIN "fbd-feedback-event"
+#define G_LOG_DOMAIN "fbd-event"
 
 #include "lfb-names.h"
 #include "fbd.h"
