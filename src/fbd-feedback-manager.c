@@ -47,7 +47,10 @@ typedef struct _FbdFeedbackManager {
   FbdFeedbackTheme        *theme;
   guint                    next_id;
 
+  /* Key: event id, value: event */
   GHashTable              *events;
+  /* Key: DBus name, value: watch_id */
+  GHashTable              *clients;
 
   /* Hardware interaction */
   GUdevClient             *client;
@@ -214,6 +217,72 @@ on_feedbackd_setting_changed (FbdFeedbackManager *self,
   fbd_feedback_manager_set_profile (self, profile);
 }
 
+static void
+on_client_vanished (GDBusConnection *connection,
+		    const gchar     *name,
+		    gpointer         user_data)
+{
+  FbdFeedbackManager *self = FBD_FEEDBACK_MANAGER (user_data);
+  GHashTableIter iter;
+  gpointer key, value;
+  FbdEvent *event;
+  GSList *l;
+  g_autoptr (GSList) events = NULL;
+
+  g_return_if_fail (name);
+
+  g_debug ("Client %s vanished", name);
+
+  /*
+   * Prepare a list of events to end feedback for so we don't modify
+   * the hash table in place when 'feedbacks-ended' fires.
+   */
+  g_hash_table_iter_init (&iter, self->events);
+  while (g_hash_table_iter_next (&iter, &key, &value)) {
+    event = FBD_EVENT (value);
+    if (!g_strcmp0 (fbd_event_get_sender (event), name))
+      events = g_slist_append (events, event);
+  }
+
+  for (l = events; l; l = l->next) {
+    event = l->data;
+    g_debug ("Ending event %s (%d) since %s vanished",
+             fbd_event_get_event (event),
+             fbd_event_get_id (event),
+             name);
+    fbd_event_end_feedbacks (event);
+  }
+
+  g_hash_table_remove (self->clients, name);
+}
+
+static void
+watch_client (FbdFeedbackManager *self, GDBusMethodInvocation *invocation)
+{
+  guint watch_id;
+  GDBusConnection *conn = g_dbus_method_invocation_get_connection (invocation);
+  const char *sender = g_dbus_method_invocation_get_sender (invocation);
+
+  watch_id = g_bus_watch_name_on_connection (conn,
+					     sender,
+					     G_BUS_NAME_WATCHER_FLAGS_NONE,
+					     NULL,
+					     on_client_vanished,
+					     self,
+					     NULL);
+  g_hash_table_insert (self->clients, g_strdup (sender), GUINT_TO_POINTER (watch_id));
+}
+
+static void
+free_client_watch (gpointer data)
+{
+  guint watch_id = GPOINTER_TO_UINT (data);
+
+  if (watch_id == 0)
+    return;
+  g_bus_unwatch_name (watch_id);
+}
+
 static FbdFeedbackProfileLevel
 get_max_level (FbdFeedbackProfileLevel global_level,
                FbdFeedbackProfileLevel app_level,
@@ -320,6 +389,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
                              self,
                              G_CONNECT_SWAPPED);
     fbd_event_run_feedbacks (event);
+    watch_client (self, invocation);
   } else {
     g_hash_table_remove (self->events, GUINT_TO_POINTER (event_id));
     lfb_gdbus_feedback_emit_feedback_ended (LFB_GDBUS_FEEDBACK (self), event_id,
@@ -451,6 +521,7 @@ fbd_feedback_manager_dispose (GObject *object)
   g_clear_object (&self->leds);
   g_clear_object (&self->client);
   g_clear_pointer (&self->events, g_hash_table_destroy);
+  g_clear_pointer (&self->clients, g_hash_table_destroy);
 
   G_OBJECT_CLASS (fbd_feedback_manager_parent_class)->dispose (object);
 }
@@ -488,6 +559,10 @@ fbd_feedback_manager_init (FbdFeedbackManager *self)
                                         g_direct_equal,
                                         NULL,
                                         (GDestroyNotify)g_object_unref);
+  self->clients = g_hash_table_new_full (g_str_hash,
+                                         g_str_equal,
+                                         g_free,
+                                         free_client_watch);
 }
 
 FbdFeedbackManager *
