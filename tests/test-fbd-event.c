@@ -37,8 +37,8 @@ test_fbd_event (void)
   g_assert_cmpint (fbd_event_get_timeout (event), ==, timeout);
   g_assert_cmpint (timeout, ==, 2);
 
-  g_assert_cmpint (fbd_event_get_end_reason (event), ==, FBD_EVENT_END_REASON_NORMAL);
-  g_assert_cmpint (reason, ==, FBD_EVENT_END_REASON_NORMAL);
+  g_assert_cmpint (fbd_event_get_end_reason (event), ==, FBD_EVENT_END_REASON_NATURAL);
+  g_assert_cmpint (reason, ==, FBD_EVENT_END_REASON_NATURAL);
 }
 
 static void

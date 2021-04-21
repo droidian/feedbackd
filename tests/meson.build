@@ -67,6 +67,7 @@ test_fbd_deps = [
 fbd_tests = [
   'fbd-feedback-profile',
   'fbd-feedback-theme',
+  'fbd-event',
 ]
 
 foreach test : fbd_tests
