@@ -36,7 +36,7 @@ typedef struct _FbdEvent {
   char *app_id;
   char *event;
 
-  gint timeout;
+  int  timeout;
   gboolean expired;
   guint timeout_id;
 
@@ -267,7 +267,7 @@ fbd_event_init (FbdEvent *self)
 }
 
 FbdEvent *
-fbd_event_new (gint id, const gchar *app_id, const gchar *event, gint timeout)
+fbd_event_new (int id, const char *app_id, const char *event, int timeout)
 {
   return FBD_EVENT (g_object_new (FBD_TYPE_EVENT,
                                   "id", id,
@@ -277,7 +277,7 @@ fbd_event_new (gint id, const gchar *app_id, const gchar *event, gint timeout)
                                   NULL));
 }
 
-const gchar *
+const char *
 fbd_event_get_event (FbdEvent *self)
 {
   g_return_val_if_fail (FBD_IS_EVENT (self), NULL);
@@ -285,7 +285,7 @@ fbd_event_get_event (FbdEvent *self)
   return self->event;
 }
 
-const gchar *
+const char *
 fbd_event_get_app_id (FbdEvent *self)
 {
   g_return_val_if_fail (FBD_IS_EVENT (self), NULL);
@@ -301,7 +301,7 @@ fbd_event_get_id (FbdEvent *self)
   return self->id;
 }
 
-gint
+int
 fbd_event_get_timeout (FbdEvent *self)
 {
   g_return_val_if_fail (FBD_IS_EVENT (self), -1);
@@ -334,7 +334,7 @@ fbd_event_get_feedbacks (FbdEvent *self)
   return self->feedbacks;
 }
 
-gint
+int
 fbd_event_remove_feedback (FbdEvent *self, FbdFeedbackBase *feedback)
 {
   g_return_val_if_fail (FBD_IS_EVENT (self), 0);
