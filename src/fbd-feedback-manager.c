@@ -437,7 +437,6 @@ find_themefile (void)
 
   g_autoptr (GError) err = NULL;
   gchar **xdg_data_dirs = (gchar **) g_get_system_data_dirs ();
-  g_autofree gchar *config_path = NULL;
   g_autofree gchar *compatibles = NULL;
 
   // Try to read the device name
@@ -453,6 +452,8 @@ find_themefile (void)
 
       // Iterate over $XDG_DATA_DIRS
       for (i = 0; i < g_strv_length (xdg_data_dirs); i++) {
+        g_autofree gchar *config_path = NULL;
+
         config_path = g_strconcat (xdg_data_dirs[i], "feedbackd/themes/", comp, ".json", NULL);
         g_debug ("Searching for device specific themefile in %s", config_path);
 
