@@ -94,8 +94,7 @@ initable_init (GInitable    *initable,
 {
   const gchar * const subsystems[] = { LED_SUBSYSTEM, NULL };
   FbdDevLeds *self = FBD_DEV_LEDS (initable);
-
-  g_autoptr (GList) leds;
+  g_autolist (GUdevDevice) leds = NULL;
   gboolean found = FALSE;
 
   self->client = g_udev_client_new (subsystems);
@@ -132,7 +131,7 @@ initable_init (GInitable    *initable,
           continue;
 
         led = g_malloc0 (sizeof(FbdDevLed));
-        led->dev = dev;
+        led->dev = g_object_ref (dev);
         led->color = i;
         led->max_brightness = brightness;
         path = g_udev_device_get_sysfs_path (dev);
@@ -142,9 +141,6 @@ initable_init (GInitable    *initable,
         break;
       }
     }
-
-    if (!led)
-      g_object_unref (dev);
   }
 
   /* TODO: listen for new leds via udev events */
