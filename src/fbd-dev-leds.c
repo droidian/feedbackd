@@ -123,7 +123,7 @@ initable_init (GInitable    *initable,
 
       enum_name = g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i);
       c = strrchr (enum_name, '_');
-      color = g_strdup (g_ascii_strdown (c+1, -1));
+      color = g_ascii_strdown (c+1, -1);
       if (g_strstr_len (name, -1, color)) {
         g_autoptr (GError) err = NULL;
         guint brightness = g_udev_device_get_sysfs_attr_as_int (dev, "max_brightness");
