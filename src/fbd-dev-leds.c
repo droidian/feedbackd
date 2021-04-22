@@ -117,10 +117,12 @@ initable_init (GInitable    *initable,
        color LEDSs so go with fixed colors until the kernel gives us
        enough information */
     for (int i = 0; i <= FBD_FEEDBACK_LED_COLOR_LAST; i++) {
-      g_autofree gchar *color;
+      g_autofree char *color = NULL;
+      g_autofree char *enum_name = NULL;
       gchar *c;
 
-      c = strrchr (g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i), '_');
+      enum_name = g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i);
+      c = strrchr (enum_name, '_');
       color = g_strdup (g_ascii_strdown (c+1, -1));
       if (g_strstr_len (name, -1, color)) {
         g_autoptr (GError) err = NULL;
