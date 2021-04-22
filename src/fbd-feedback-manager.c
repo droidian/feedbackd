@@ -517,6 +517,7 @@ fbd_feedback_manager_dispose (GObject *object)
 
   g_clear_object (&self->settings);
   g_clear_object (&self->theme);
+  g_clear_object (&self->sound);
   g_clear_object (&self->vibra);
   g_clear_object (&self->leds);
   g_clear_object (&self->client);
