@@ -56,6 +56,7 @@ static void
 fbd_dev_led_free (FbdDevLed *led)
 {
   g_object_unref (led->dev);
+  g_free (led);
 }
 
 static gboolean
