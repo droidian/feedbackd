@@ -130,7 +130,8 @@ app_get_feedback_level (const gchar *app_id)
 static void
 init_devices (FbdFeedbackManager *self)
 {
-  GList *devices, *l;
+  GList *l;
+  g_autolist (GUdevClient) devices = NULL;
   g_autoptr(GError) err = NULL;
 
   devices = g_udev_client_query_by_subsystem (self->client, "input");
