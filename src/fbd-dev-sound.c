@@ -102,7 +102,7 @@ fbd_dev_sound_dispose (GObject *object)
 
   g_clear_object (&self->ctx);
   g_clear_object (&self->sound_settings);
-  g_clear_object (&self->playbacks);
+  g_clear_pointer (&self->playbacks, g_hash_table_unref);
 
   G_OBJECT_CLASS (fbd_dev_sound_parent_class)->dispose (object);
 }
