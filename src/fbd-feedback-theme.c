@@ -249,7 +249,7 @@ fbd_feedback_theme_new (const gchar *name)
 FbdFeedbackTheme *
 fbd_feedback_theme_new_from_data (const gchar *data, GError **error)
 {
-  JsonNode *node = json_from_string(data, error);
+  g_autoptr (JsonNode) node = json_from_string(data, error);
   if (!node)
     return NULL;
 
