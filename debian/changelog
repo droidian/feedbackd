@@ -1,3 +1,68 @@
+feedbackd (0.0.0+git20210426) byzantium; urgency=medium
+
+  [ Martin Bürgmann ]
+  * implement fbd_dev_sound_stop
+    tracks the FdbFeedbackSounds in a GHashTable in the FdbDevSound
+    (Closes: #10)
+
+  [ Guido Günther ]
+  * fbd-dev-sound: Don't leak GError
+  * fbd-dev-sound: Don't warn when sound was cancelled.
+    This is not an error per se.
+  * lfb-event: Don't leak error.
+    Don't leak the error values in the success case
+  * tests: Run lfb_event_{get,set}_timeout
+  * test-lfb-integration: Test invocation error
+  * event: Make log-domain match source file name
+  * tests: Run event tests too
+  * event: Remove 'g' prefix from common C types.
+    This matchs phosh's style.
+  * fbd-event: Add sender property.
+    This allows us to store the DBus sender
+  * fbd-manager: Keep DBus sender around
+  * feedback-manager: Track DBus clients and end feedbacks if they go away.
+    When the client goes away we build up a list of events to end feedback
+    for to make sure the hash table isn't modified in place. tThe alternative
+    approach would be to disconnect the on_event_feedbacks_ended handler,
+    duplicate the DBus signal emission and use g_hash_table_foreach_remove
+    but that looks less robust than using the same code path. (Closes: #25)
+  * Help emacs to indent properly
+  * fbd-feedback-theme: Don't leak JSON node
+  * fbd-dev-leds: Free actual FbdDevLed as well.
+    So far we only unref'ed the device.
+  * fbd-dev-leds: Don't leak enum_name
+    g_enum_to_string() is transfer full.
+  * fbd-dev-leds: Don't leak color
+    g_ascii_strdown() creates a copy already.
+  * fbd-dev-leds: Use automatic deep cleanup for device list.
+    The current logic was fragile and failed e.g. when the
+    FEEDBACKD_UDEV_VAL_LED would not match leaking the dev since the
+    g_object_unref() at the end of the loop was never hit.
+    Prevent that with automatic cleanup and explicitly ref'ing the
+    devs we want to use.
+  * fbd-dev-sound: Use correct cleanup for hash table.
+    This went unnoticed since the manager forgot to cleanup
+    this at all (see follow up commit).
+  * fbd-feedback-manager: Make sure to dispose sound device as well.
+    Fixes another leak.
+  * fbd-feedback-manager: Don't leak config_path.
+    It's assigned multiple times.
+  * fbd-feedback-manager: Don't leak device list
+
+  [ Clayton Craft ]
+  * fbd-ledctrl: fix matching of trigger in list of triggers.
+    If the trigger is the last thing in sysfs_path/LED_TRIGGER_ATTR, then
+    the new-line at the end of the output causes g_strv_contains to fail to
+    find the trigger in the list. This strips the new-line before splitting
+    the output into a list for searching.
+
+  [ Sebastian Spaeth ]
+  * README: Fix gdbus test command.
+    It is TriggerFeedback and not Feedback (anymore). Also add a note how to
+    end the feedback in order to prevent loss of hearing :-).
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 26 Apr 2021 12:34:38 +0200
+
 feedbackd (0.0.0+git20210125) amber-phone; urgency=medium
 
   [ Dylan Van Assche ]
