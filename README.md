@@ -79,8 +79,71 @@ the quiet and silent profile work out of the box.
 Events are then mapped to a specific type of feedback (sound, led, vibra) via a
 device specific theme (since devices have different capabilities).
 
-There's currently only a single hard coded theme named `default`. The currently
-available feedback types are:
+Feedbackd is shipped with a default theme `default.json`.
+You can add your own themes in one of two ways:
+
+1. By exporting an environment variable `FEEDBACK_THEME` with a path to a
+   valid theme file (not recommended, use for testing only), or
+2. By adding your theme file to one of the folders in the `XDG_DATA_DIRS`
+   environment variable, appended with `feedbackd/themes/`. This folder isn't
+   created automatically, so you have to create it yourself. Here's an example:
+   ```bash
+   # Check which folders are "valid"
+   $ echo $XDG_DATA_DIRS
+   [ ... ]:/usr/local/share:/usr/share
+   
+   # Pick a folder that suits you. Note that you shouldn't place themes in
+   # /usr/share, because they would be overwritten by updates!
+   # Create missing directories
+   $ sudo mkdir -p /usr/local/share/feedbackd/themes
+   
+   # Add your theme file!
+   $ sudo cp my_awesome_theme.json /usr/local/share/feedbackd/themes/
+   ```
+
+Check out the companion [feedbackd-device-themes][1] repository for a
+selection of device-specific themes. In order for your theme to be recognized
+it must be named properly. Currently, theme names are based on the `compatible`
+device-tree attribute. You can run the following command to get a list of valid
+filenames for your custom theme (**Note**: You must run this command on the
+device you want to create the theme for!):
+
+```bash
+$ cat /sys/firmware/devicetree/base/compatible | tr '\0' "\n"
+```
+
+Example output (for a Pine64 PinePhone):
+
+```bash
+$ cat /sys/firmware/devicetree/base/compatible | tr '\0' "\n"
+pine64,pinephone-1.2
+pine64,pinephone
+allwinner,sun50i-a64
+```
+
+Thus you could create a custom feedbackd theme for the Pinephone by placing a
+modified theme file in
+`/usr/local/share/feedbackd/themes/pine64,pinephone.json`
+
+If multiple theme files exist, the selection logic follows these steps:
+
+1. It picks an identifier from the devicetree, until none are left
+2. It searches through the folders in `XDG_DATA_DIRS` in order of appearence,
+   until none are left
+3. If a theme file is found in the current location with the current name,
+   **it will be chosen** and other themes are ignored.
+
+If no theme file can be found this way (i.e. there are no identifiers and
+folders left to check), `default.json` is chosen instead. Given the above
+examples:
+
+- `/usr/local/share/feedbackd/themes/pine64,pinephone-1.2.json` takes
+  precedence over `/usr/local/share/feedbackd/themes/pine64-pinephone.json`
+- `/usr/local/share/feedbackd/themes/pine64-pinephone.json` takes precedence
+  over `/usr/share/feedbackd/themes/pine64-pinephone-1.2.json`
+- etc...
+
+The currently available feedback types are:
 
 - Sound (an audible sound from the sound naming spec)
 - VibraRumble: haptic motor rumbling
@@ -148,3 +211,5 @@ GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.applicatio
 - [Feedback-theme-spec draft](./Feedback-theme-spec-0.0.0.md)
 
 [debian/control]: ./debian/control#L5
+[1]: https://source.puri.sm/Librem5/feedbackd-device-themes)
+
