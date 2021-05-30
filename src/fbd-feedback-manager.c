@@ -454,8 +454,12 @@ find_themefile (void)
       // Iterate over $XDG_DATA_DIRS
       for (i = 0; i < g_strv_length (xdg_data_dirs); i++) {
         g_autofree gchar *config_path = NULL;
+        g_autofree gchar *theme_file_name = NULL;
 
-        config_path = g_strconcat (xdg_data_dirs[i], "feedbackd/themes/", comp, ".json", NULL);
+        // We leave it to g_build_filename to add/remove erroneous path separators
+        theme_file_name = g_strconcat (comp, ".json", NULL);
+        config_path = g_build_filename (xdg_data_dirs[i], "feedbackd", "themes",
+                                        theme_file_name, NULL);
         g_debug ("Searching for device specific themefile in %s", config_path);
 
         // Check if file exist
