@@ -84,7 +84,10 @@ You can add your own themes in one of two ways:
 
 1. By exporting an environment variable `FEEDBACK_THEME` with a path to a
    valid theme file (not recommended, use for testing only), or
-2. By adding your theme file to one of the folders in the `XDG_DATA_DIRS`
+2. By creating a theme file under `$XDG_CONFIG_HOME/feedbackd/themes/default.json`.
+   If `XDG_CONFIG_HOME` environment variable is not set or empty, it will
+   default to `$HOME/.config`, or
+3. By adding your theme file to one of the folders in the `XDG_DATA_DIRS`
    environment variable, appended with `feedbackd/themes/`. This folder isn't
    created automatically, so you have to create it yourself. Here's an example:
    ```bash

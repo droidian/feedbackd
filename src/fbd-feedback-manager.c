@@ -437,8 +437,17 @@ find_themefile (void)
   const gchar *comp;
 
   g_autoptr (GError) err = NULL;
+  g_autofree gchar *user_config_path = NULL;
   gchar **xdg_data_dirs = (gchar **) g_get_system_data_dirs ();
   g_autofree gchar *compatibles = NULL;
+
+  // First look for a default file under $XDG_DATA_HOME
+  user_config_path = g_build_filename (g_get_user_config_dir (), "feedbackd",
+                                       "themes", "default.json", NULL);
+  if (g_file_test (user_config_path, (G_FILE_TEST_EXISTS))) {
+    g_debug ("Found user themefile at: %s", user_config_path);
+    return g_steal_pointer (&user_config_path);
+  }
 
   // Try to read the device name
   if (g_file_test (DEVICE_TREE_PATH, (G_FILE_TEST_EXISTS))) {
@@ -465,7 +474,7 @@ find_themefile (void)
         // Check if file exist
         if (g_file_test (config_path, (G_FILE_TEST_EXISTS))) {
           g_debug ("Found themefile for this device at: %s", config_path);
-          return g_strdup (config_path);
+          return g_steal_pointer (&config_path);
         }
       }
 
