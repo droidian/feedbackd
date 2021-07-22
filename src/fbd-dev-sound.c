@@ -114,14 +114,20 @@ initable_init (GInitable    *initable,
 {
   FbdDevSound *self = FBD_DEV_SOUND (initable);
   const char *desktop;
+  gboolean gnome_session = FALSE;
 
   self->playbacks = g_hash_table_new (g_direct_hash, g_direct_equal);
-  self->ctx = gsound_context_new(NULL, error);
+  self->ctx = gsound_context_new (NULL, error);
   if (!self->ctx)
     return FALSE;
 
   desktop = g_getenv ("XDG_CURRENT_DESKTOP");
-  if (!g_strcmp0 (desktop, "GNOME")) {
+  if (desktop) {
+    g_auto (GStrv) components = g_strsplit (desktop, ":", -1);
+    gnome_session = g_strv_contains ((const char * const *)components, "GNOME");
+  }
+
+  if (gnome_session) {
     self->sound_settings = g_settings_new (GNOME_SOUND_SCHEMA_ID);
 
     g_signal_connect_object (self->sound_settings, "changed::" GNOME_SOUND_KEY_THEME_NAME,
