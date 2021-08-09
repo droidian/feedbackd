@@ -160,14 +160,15 @@ main (int argc, char *argv[0])
     return 1;
   }
 
-  if (!name)
-    name = g_strdup (DEFAULT_EVENT);
-
-  g_timeout_add_seconds (watch, (GSourceFunc)on_watch_expired, NULL);
   if (profile && !name)
     success = set_profile (profile);
-  else
+  else {
+    if (!name)
+      name = g_strdup (DEFAULT_EVENT);
+
+    g_timeout_add_seconds (watch, (GSourceFunc)on_watch_expired, NULL);
     success = trigger_event (name, profile, timeout);
+  }
 
   lfb_uninit ();
   return !success;
