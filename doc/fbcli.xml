@@ -66,7 +66,7 @@ print help and exit
 </varlistentry>
 
 <varlistentry>
-<term><option>-p=<replaceable>PROFILE</replaceable></option></term>
+<term><option>-P=<replaceable>PROFILE</replaceable></option></term>
 <term><option>--profile=<replaceable>PROFILE</replaceable></option></term>
 <para>
   The feedback profile (<literal>full</literal>, <literal>quiet</literal>, <literal>silent</literal>)

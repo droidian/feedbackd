@@ -8,4 +8,4 @@ from gi.repository import Lfb
 
 Lfb.init('org.sigxcpu.lfbexample')
 event = Lfb.Event.new('phone-incoming-call')
-event.trigger()
+event.trigger_feedback()
