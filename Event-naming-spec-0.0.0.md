@@ -57,6 +57,8 @@ applications which will use the Feedback Theme Specification.
 
 ### Notifications
 
+- camera-focus: The event used when the camera got focus
+- camera-shutter: The event used when a photo was taken
 - message-new-instant: The event used when a new IM is received.
 - message-new-sms:  The event used when a new sms is received.
 - message-new-email:  The event used when a new email is received.

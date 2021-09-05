@@ -20,6 +20,16 @@
           "effect"     : "button-released"
         },
         {
+          "event-name" : "camera-focus",
+          "type"       : "Sound",
+          "effect"     : "camera-focus"
+        },
+        {
+          "event-name" : "camera-shutter",
+          "type"       : "Sound",
+          "effect"     : "camera-shutter"
+        },
+        {
           "event-name" : "message-new-email",
           "type"       : "Sound",
           "effect"     : "message-new-email"
