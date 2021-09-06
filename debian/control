@@ -7,6 +7,7 @@ Build-Depends:
  debhelper-compat (= 12),
  dh-sequence-gir,
  gtk-doc-tools,
+ json-glib-tools,
  libgirepository1.0-dev,
  libglib2.0-dev,
  libgudev-1.0-dev (>= 232),
