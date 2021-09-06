@@ -60,6 +60,11 @@
           "effect"     : "phone-failure"
         },
         {
+          "event-name" : "phone-outgoing-busy",
+          "type"       : "Sound",
+          "effect"     : "phone-outgoing-busy"
+        },
+        {
           "event-name" : "timeout-completed",
           "type"       : "Sound",
           "effect"     : "complete"
