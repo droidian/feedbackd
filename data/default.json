@@ -55,6 +55,11 @@
           "effect"     : "phone-hangup"
         },
         {
+          "event-name" : "phone-failure",
+          "type"       : "Sound",
+          "effect"     : "phone-failure"
+        },
+        {
           "event-name" : "timeout-completed",
           "type"       : "Sound",
           "effect"     : "complete"
