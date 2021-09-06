@@ -50,6 +50,11 @@
           "effect"     : "phone-incoming-call"
         },
         {
+          "event-name" : "phone-hangup",
+          "type"       : "Sound",
+          "effect"     : "phone-hangup"
+        },
+        {
           "event-name" : "timeout-completed",
           "type"       : "Sound",
           "effect"     : "complete"
