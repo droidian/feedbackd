@@ -15,7 +15,8 @@ Build-Depends:
  meson,
  pkg-config,
  valac,
- libhardware-dev,
+ libgbinder-dev,
+ libglibutil-dev,
 Standards-Version: 4.4.0
 Homepage: https://source.puri.sm/Librem5/feedbackd
 

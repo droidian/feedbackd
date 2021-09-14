@@ -15,21 +15,26 @@
 #include <gio/gio.h>
 
 #include <memory.h>
-#include <hardware/lights.h>
-#include <hardware/hardware.h>
+#include <gbinder.h>
 
 /**
  * SECTION:fbd-droid-leds
- * @short_description: Android LED device interface (libhardware)
+ * @short_description: Android LED device interface (gbinder)
  * @Title: FbdDroidLeds
  *
- * #FbdDevLeds is used to interface with LEDS via libhardware.
+ * #FbdDevLeds is used to interface with LEDS via gbinder.
  */
+
+#define BINDER_LIGHT_SERVICE_DEVICE "/dev/hwbinder"
+#define BINDER_LIGHT_SERVICE_IFACE "android.hardware.light@2.0::ILight"
+#define BINDER_LIGHT_SERVICE_SLOT "default"
 
 typedef struct _FbdDevLeds {
     GObject      parent;
 
-    struct light_device_t *notifications;
+    GBinderServiceManager* sm;  
+    GBinderRemoteObject* remote;
+    GBinderClient* client;
 
 } FbdDevLeds;
 
@@ -45,29 +50,74 @@ initable_init (GInitable    *initable,
                GError      **error)
 {
     FbdDevLeds *self = FBD_DEV_LEDS (initable);
-    int err;
-    hw_device_t* droid_device;
+    char *fqname =
+        (BINDER_LIGHT_SERVICE_IFACE "/" BINDER_LIGHT_SERVICE_SLOT);
 
-    struct hw_module_t    *hwmod;
+    g_debug("initializing droid leds");
 
-    err = hw_get_module(LIGHTS_HARDWARE_MODULE_ID, (const hw_module_t**) &hwmod);
-    if (err == 0) {
-
-        err = hwmod->methods->open(hwmod, LIGHT_ID_NOTIFICATIONS,(hw_device_t **) &self->notifications);
-        if (!err == 0 && !droid_device) {
-
-            g_debug ("Failed to access droid notification lights");
-            return FALSE;
-        }
-
-    } else {
-          g_debug ("Failed to access droid led hardware");
-          return FALSE;
+    self->sm = gbinder_servicemanager_new(BINDER_LIGHT_SERVICE_DEVICE);
+    if (!self->sm) {
+        g_set_error (error,
+                     G_IO_ERROR, G_IO_ERROR_FAILED,
+                     "Failed to init servicemanager");
+        return FALSE;
+    }
+    self->remote = gbinder_servicemanager_get_service_sync(self->sm,
+        fqname, NULL);
+    if (!self->remote) {
+        g_set_error (error,
+                     G_IO_ERROR, G_IO_ERROR_FAILED,
+                     "Failed to get light hal service remote");
+        gbinder_servicemanager_unref(self->sm);
+        return FALSE;
+    }
+    self->client = gbinder_client_new(self->remote, BINDER_LIGHT_SERVICE_IFACE);
+    if (!self->client) {
+        g_set_error (error,
+                     G_IO_ERROR, G_IO_ERROR_FAILED,
+                     "Failed to get light hal service client");
+        gbinder_remote_object_unref(self->remote);
+        gbinder_servicemanager_unref(self->sm);
+        return FALSE;
     }
 
-    g_debug ("droid LED usable");
+    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
+    GBinderRemoteReply* reply;
+    int status;
 
-    return TRUE;
+    reply = gbinder_client_transact_sync_reply(self->client,
+        2 /* getSupportedTypes */, req, &status);
+    gbinder_local_request_unref(req);
+
+    if (status == GBINDER_STATUS_OK) {
+        GBinderReader reader;
+        guint value;
+
+        gbinder_remote_reply_init_reader(reply, &reader);
+        status = gbinder_reader_read_uint32(&reader, &value);
+        if (value != GBINDER_STATUS_OK) {
+            g_set_error (error,
+                         G_IO_ERROR, G_IO_ERROR_FAILED,
+                         "Failed to get leds supported types");
+            return FALSE;
+        }
+        
+        gsize count = 0;
+        gsize vecSize = 0;
+        const int32_t *types;
+        types = gbinder_reader_read_hidl_vec(&reader, &count, &vecSize);
+        for (int i = 0; i < count; i++) {
+            if (types[i] == LIGHT_TYPE_NOTIFICATIONS) {
+                g_debug ("droid LED usable");
+                return TRUE;
+            }
+        }
+    }
+
+    g_set_error (error,
+                 G_IO_ERROR, G_IO_ERROR_FAILED,
+                 "Failed to find notification led on light hal");
+    return FALSE;
 }
 
 static void
@@ -81,10 +131,11 @@ fbd_dev_leds_dispose (GObject *object)
 {
     FbdDevLeds *self = FBD_DEV_LEDS (object);
 
-    /* close droid device */
-    hw_device_t* droid_device = (hw_device_t *) self->notifications;
-    droid_device->close(droid_device);
-
+    g_debug("Disposing droid leds");
+    if (self->client)
+        gbinder_client_unref(self->client);
+    if (self->sm)
+        gbinder_servicemanager_unref(self->sm);
     G_OBJECT_CLASS (fbd_dev_leds_parent_class)->dispose (object);
 }
 
@@ -123,28 +174,63 @@ gboolean
 fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
                              guint max_brightness, guint freq)
 {
-    gdouble max;
-    gdouble t;
-    g_autofree gchar *str = NULL;
-    g_autoptr (GError) err = NULL;
-    struct light_state_t   notification_state;
+    g_debug ("droid LED start flashing");
+    uint32_t max, argb_color;
+    int32_t t;
 
-    max = MAXIMUM_HYBRIS_LED_BRIGHTNESS * (max_brightness / 100.0);;
+    max = (max_brightness / 100.0) * 0xff;
+    t = 1000 * 1000 / freq / 2;
 
-    t = 1000.0 * 1000.0 / freq / 2.0;
-    str = g_strdup_printf ("0 %d %d %d\n", (gint)t, (gint)max, (gint)t);
-    g_debug ("Freq %d mHz, Brightness: %d%%, Blink pattern: %s", freq, max_brightness, str);
+    int alpha = 0xff; // Full Alpha
+    argb_color = (alpha & 0xff) << 24;
+    switch (color) {
+        case FBD_FEEDBACK_LED_COLOR_WHITE:
+            argb_color += ((max & 0xff) << 16) + ((max & 0xff) << 8) + (max & 0xff);
+            break;
+        case FBD_FEEDBACK_LED_COLOR_RED:
+            argb_color += (max & 0xff) << 16;
+            break;
+        case FBD_FEEDBACK_LED_COLOR_GREEN:
+            argb_color += (max & 0xff) << 8;
+            break;
+        case FBD_FEEDBACK_LED_COLOR_BLUE:
+            argb_color += max & 0xff;
+            break;
+    }
 
-    /* turn on droid leds */
+    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
+    GBinderRemoteReply* reply;
+    GBinderWriter writer;
+    LightState* notification_state;
+    int status;
 
-	  memset(&notification_state, 0, sizeof(struct light_state_t));
-	  notification_state.color = color;
-	  notification_state.flashMode = LIGHT_FLASH_TIMED;
-	  notification_state.flashOnMS = t;
-	  notification_state.flashOffMS = t;
-  	notification_state.brightnessMode = BRIGHTNESS_MODE_USER;
+    gbinder_local_request_init_writer(req, &writer);
+    notification_state = gbinder_writer_new0(&writer, LightState);
+    notification_state->color = argb_color;
+    notification_state->flashMode = FLASH_TYPE_TIMED;
+    notification_state->flashOnMs = t;
+    notification_state->flashOffMs = t;
+    notification_state->brightnessMode = BRIGHTNESS_MODE_USER;
 
-  	self->notifications->set_light(self->notifications, &notification_state);
+    gbinder_writer_append_int32(&writer, LIGHT_TYPE_NOTIFICATIONS);
+    gbinder_writer_append_buffer_object(&writer, notification_state,
+            sizeof(*notification_state));
+
+    reply = gbinder_client_transact_sync_reply(self->client,
+        1 /* setLight */, req, &status);
+    gbinder_local_request_unref(req);
+
+    if (status == GBINDER_STATUS_OK) {
+        GBinderReader reader;
+        guint value;
+
+        gbinder_remote_reply_init_reader(reply, &reader);
+        status = gbinder_reader_read_uint32(&reader, &value);
+        if (value != GBINDER_STATUS_OK)
+            return FALSE;
+    } else {
+        return FALSE;
+    }
 
     return TRUE;
 }
@@ -152,16 +238,41 @@ fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
 gboolean
 fbd_dev_leds_stop (FbdDevLeds *self, FbdFeedbackLedColor color)
 {
-    struct light_state_t   notification_state;
+    g_debug ("droid LED stop flashing");
 
-    /* turn off droid leds */
-    memset(&notification_state, 0, sizeof(struct light_state_t));
-  	notification_state.color = 0x00000000;
-  	notification_state.flashMode = LIGHT_FLASH_NONE;
-  	notification_state.flashOnMS = 0;
-  	notification_state.flashOffMS = 0;
-  	notification_state.brightnessMode = 0;
+    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
+    GBinderRemoteReply* reply;
+    GBinderWriter writer;
+    LightState* notification_state;
+    int status;
 
-  	self->notifications->set_light(self->notifications, &notification_state);
+    gbinder_local_request_init_writer(req, &writer);
+    notification_state = gbinder_writer_new0(&writer, LightState);
+    notification_state->color = 0;
+    notification_state->flashMode = FLASH_TYPE_NONE;
+    notification_state->flashOnMs = 0;
+    notification_state->flashOffMs = 0;
+    notification_state->brightnessMode = BRIGHTNESS_MODE_USER;
+
+    gbinder_writer_append_int32(&writer, LIGHT_TYPE_NOTIFICATIONS);
+    gbinder_writer_append_buffer_object(&writer, notification_state,
+            sizeof(*notification_state));
+
+    reply = gbinder_client_transact_sync_reply(self->client,
+        1 /* setLight */, req, &status);
+    gbinder_local_request_unref(req);
+
+    if (status == GBINDER_STATUS_OK) {
+        GBinderReader reader;
+        guint value;
+
+        gbinder_remote_reply_init_reader(reply, &reader);
+        status = gbinder_reader_read_uint32(&reader, &value);
+        if (value != GBINDER_STATUS_OK)
+            return FALSE;
+    } else {
+        return FALSE;
+    }
+
     return TRUE;
 }

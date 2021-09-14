@@ -40,7 +40,7 @@ fbd_deps = [
   gsound,
   gudev,
   json_glib,
-  dependency('libhardware'),
+  dependency('libgbinder'),
 ]
 
 fbd_inc = [
