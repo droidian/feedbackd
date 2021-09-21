@@ -13,6 +13,8 @@ sources = [
   generated_dbus_sources,
   fbd_enum_sources,
   'fbd.c',
+  'fbd-droid-vibra.c',
+  'fbd-droid-leds.c',
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
   'fbd-dev-leds.c',
@@ -38,6 +40,7 @@ fbd_deps = [
   gsound,
   gudev,
   json_glib,
+  dependency('libgbinder'),
 ]
 
 fbd_inc = [
