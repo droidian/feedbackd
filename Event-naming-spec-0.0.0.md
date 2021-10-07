@@ -57,18 +57,18 @@ applications which will use the Feedback Theme Specification.
 
 ### Notifications
 
-- camera-focus: The event used when the camera got focus
-- camera-shutter: The event used when a photo was taken
+- camera-focus: The event used when the camera got focus.
+- camera-shutter: The event used when a photo was taken.
 - message-new-instant: The event used when a new IM is received.
 - message-new-sms:  The event used when a new sms is received.
 - message-new-email:  The event used when a new email is received.
-- message-missed-email: The event used when an email  was received but not seen by the user.
+- message-missed-email: The event used when an email was received but not seen by the user.
 - message-missed-instant: The event used when a instant message was received but not seen by the user.
 - message-missed-notification: The event used when a notification was shown but not seen by the user.
 - message-missed-sms: The event used when a sms message was received but not seen by the user.
-- phone-incoming-call: This Event is used when a phone/voip call is coming in.
-- phone-missed-call: This Event is used when a phone/voip call is was incoming but not answered.
-- battery-caution: The event used when the battery is nearing exhaustion (below 40%, for example)
+- phone-incoming-call: The event used when a phone/voip call is coming in.
+- phone-missed-call: The event used when a phone/voip call is was incoming but not answered.
+- battery-caution: The event used when the battery is nearing exhaustion (below 40%, for example).
 - battery-full:	The event used when the battery is fully loaded up.
 - device-added: The event used when a device has become available to the desktop, i.e. due to USB plugging.
 - power-plug: The power cable has been plugged in.
