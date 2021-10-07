@@ -1,5 +1,6 @@
 include:
  - 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-definitions.yml'
+ - 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-bullseye-jobs.yml'
 
 stages:
  - build
@@ -7,48 +8,21 @@ stages:
  - package
  - test-package
 
-variables:
-  DEPS: build-essential git
-
-before_script:
-  - export DEBIAN_FRONTEND=noninteractive
-  - apt-get -y update
-  - apt-get -y build-dep .
-  - apt-get -y install gcovr
+.before_script: &before_script
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get -y update
+    - apt-get -y build-dep .
+    - apt-get -y install gcovr
 
 .tags: &tags
   tags:
     - librem5
 
 # Regular, full build
-build:native-debian-buster:full:
+build:native-debian-bullseye:full:
   <<: *tags
-  stage: build
-  image: debian:buster
-  artifacts:
-    paths:
-      - _build
-  script:
-    - meson --werror . _build
-    - ninja -C _build
-  except:
-    variables:
-      - $PKG_ONLY == "1"
-
-# Minimal build for e.g. submodule usage
-build:native-debian-buster:lib:
-  <<: *tags
-  stage: build
-  image: debian:buster
-  script:
-    - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
-    - ninja -C _build
-  except:
-    variables:
-      - $PKG_ONLY == "1"
-
-build:native-debian-bullseye:
-  <<: *tags
+  <<: *before_script
   stage: build
   image: debian:bullseye
   artifacts:
@@ -61,12 +35,26 @@ build:native-debian-bullseye:
     variables:
       - $PKG_ONLY == "1"
 
+# Minimal build for e.g. submodule usage
+build:native-debian-bullseye:lib:
+  <<: *tags
+  <<: *before_script
+  stage: build
+  image: debian:bullseye
+  script:
+    - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
+    - ninja -C _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
+
 test:native-debian-bullseye:
   <<: *tags
+  <<: *before_script
   stage: test
   image: debian:bullseye
-  dependencies:
-    - build:native-debian-bullseye
+  needs:
+    - build:native-debian-bullseye:full
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
   script:
     - dbus-run-session ninja -C _build test coverage
@@ -74,20 +62,3 @@ test:native-debian-bullseye:
     variables:
       - $PKG_ONLY == "1"
 
-package:deb-debian-buster:
-  extends: .l5-build-debian-package
-
-package:deb-debian-buster:arm64:
-  tags:
-    - librem5:arm64
-  extends: .l5-build-debian-package
-
-autopkgtest-debian-buster-package:
-  dependencies:
-    - package:deb-debian-buster
-  extends: .l5-autopkgtest-debian-package
-
-lintian-debian-buster-package:
-  dependencies:
-    - package:deb-debian-buster
-  extends: .l5-lintian-debian-package
