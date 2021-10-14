@@ -215,4 +215,3 @@ GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.applicatio
 
 [debian/control]: ./debian/control#L5
 [1]: https://source.puri.sm/Librem5/feedbackd-device-themes)
-
