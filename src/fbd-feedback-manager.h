@@ -22,6 +22,7 @@ FbdFeedbackManager *fbd_feedback_manager_get_default (void);
 FbdDevVibra *fbd_feedback_manager_get_dev_vibra (FbdFeedbackManager *self);
 FbdDevSound *fbd_feedback_manager_get_dev_sound (FbdFeedbackManager *self);
 FbdDevLeds  *fbd_feedback_manager_get_dev_leds  (FbdFeedbackManager *self);
+void         fbd_feedback_manager_load_theme    (FbdFeedbackManager *self);
 gboolean     fbd_feedback_manager_set_profile (FbdFeedbackManager *self, const gchar *profile);
 
 G_END_DECLS

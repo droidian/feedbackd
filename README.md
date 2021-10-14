@@ -95,6 +95,10 @@ You can add your own themes in one of two ways:
    $ sudo cp my_awesome_theme.json /usr/local/share/feedbackd/themes/
    ```
 
+Upon reception of `SIGHUP` signal, the daemon process will proceed to retrigger
+the above logic to find the themes, and reload the corresponding one. This can
+be used to avoid having to restart the daemon in case of configuration changes.
+
 Check out the companion [feedbackd-device-themes][1] repository for a
 selection of device-specific themes. In order for your theme to be recognized
 it must be named properly. Currently, theme names are based on the `compatible`

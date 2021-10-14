@@ -42,6 +42,18 @@ quit_cb (gpointer user_data)
     return FALSE;
 }
 
+static gboolean
+reload_cb (gpointer user_data)
+{
+  FbdFeedbackManager *manager = fbd_feedback_manager_get_default();
+
+  g_return_val_if_fail (FBD_IS_FEEDBACK_MANAGER (manager), FALSE);
+
+  g_debug ("Caught signal, reloading feedback theme...");
+  fbd_feedback_manager_load_theme (manager);
+
+  return TRUE;
+}
 
 static void
 bus_acquired_cb (GDBusConnection *connection,
@@ -102,6 +114,7 @@ int main(int argc, char *argv[])
 
   g_unix_signal_add (SIGTERM, quit_cb, NULL);
   g_unix_signal_add (SIGINT, quit_cb, NULL);
+  g_unix_signal_add (SIGHUP, reload_cb, NULL);
 
   loop = g_main_loop_new (NULL, FALSE);
 
