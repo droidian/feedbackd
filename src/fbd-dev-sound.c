@@ -187,9 +187,11 @@ on_sound_play_finished_callback (GSoundContext *ctx,
     }
   }
 
+  /* Order matters here. We need to remove the feedback from the hash table before
+     invoking the callback. */
+  g_hash_table_remove (data->dev->playbacks, data->feedback);
   (*data->callback)(data->feedback);
 
-  g_hash_table_remove (data->dev->playbacks, data->feedback);
   fbd_async_data_dispose (data);
 }
 
@@ -204,7 +206,8 @@ fbd_dev_sound_play (FbdDevSound *self, FbdFeedbackSound *feedback, FbdDevSoundPl
 
   data = fbd_async_data_new (self, feedback, callback);
 
-  g_hash_table_insert (self->playbacks, feedback, data);
+  if (!g_hash_table_insert (self->playbacks, feedback, data))
+    g_warning ("Feedback %p already present", feedback);
 
   gsound_context_play_full (self->ctx, data->cancel,
                             (GAsyncReadyCallback) on_sound_play_finished_callback,
