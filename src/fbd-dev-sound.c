@@ -30,7 +30,7 @@ typedef struct _FbdAsyncData {
   FbdDevSoundPlayedCallback  callback;
   FbdFeedbackSound          *feedback;
   FbdDevSound               *dev;
-  GCancellable              *playback;
+  GCancellable              *cancel;
 } FbdAsyncData;
 
 typedef struct _FbdDevSound {
@@ -81,7 +81,7 @@ fbd_async_data_new (FbdDevSound *dev, FbdFeedbackSound *feedback, FbdDevSoundPla
   data->callback = callback;
   data->feedback = g_object_ref (feedback);
   data->dev = g_object_ref (dev);
-  data->playback = g_cancellable_new ();
+  data->cancel = g_cancellable_new ();
 
   return data;
 }
@@ -91,7 +91,7 @@ fbd_async_data_dispose (FbdAsyncData *object)
 {
   g_object_unref (object->feedback);
   g_object_unref (object->dev);
-  g_object_unref (object->playback);
+  g_object_unref (object->cancel);
   g_free (object);
 }
 
@@ -206,7 +206,7 @@ fbd_dev_sound_play (FbdDevSound *self, FbdFeedbackSound *feedback, FbdDevSoundPl
 
   g_hash_table_insert (self->playbacks, feedback, data);
 
-  gsound_context_play_full (self->ctx, data->playback,
+  gsound_context_play_full (self->ctx, data->cancel,
                             (GAsyncReadyCallback) on_sound_play_finished_callback,
                             data,
                             GSOUND_ATTR_EVENT_ID, fbd_feedback_sound_get_effect (feedback),
@@ -228,7 +228,7 @@ fbd_dev_sound_stop (FbdDevSound *self, FbdFeedbackSound *feedback)
   if (data == NULL)
     return FALSE;
 
-  g_cancellable_cancel (data->playback);
+  g_cancellable_cancel (data->cancel);
 
   return TRUE;
 }
