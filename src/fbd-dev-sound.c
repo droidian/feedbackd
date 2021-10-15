@@ -87,12 +87,12 @@ fbd_async_data_new (FbdDevSound *dev, FbdFeedbackSound *feedback, FbdDevSoundPla
 }
 
 static void
-fbd_async_data_dispose (FbdAsyncData *object)
+fbd_async_data_dispose (FbdAsyncData *data)
 {
-  g_object_unref (object->feedback);
-  g_object_unref (object->dev);
-  g_object_unref (object->cancel);
-  g_free (object);
+  g_object_unref (data->feedback);
+  g_object_unref (data->dev);
+  g_object_unref (data->cancel);
+  g_free (data);
 }
 
 static void
