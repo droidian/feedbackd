@@ -1,4 +1,4 @@
-feedbackd (0.0.0+git20211015) byzantium; urgency=medium
+feedbackd (0.0.0+git20211018) byzantium; urgency=medium
 
   [ Evangelos Ribeiro Tzaras ]
   * fbd-dev-sound: Honour sound theme name for all GNOME based desktops.
@@ -27,7 +27,7 @@ feedbackd (0.0.0+git20211015) byzantium; urgency=medium
   * fbd-dev-sound: Delay sending `ended` signal. This makes sure
     we properly end the feedback even when looping.
 
- -- Guido Günther <agx@sigxcpu.org>  Thu, 07 Oct 2021 14:45:42 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 19 Oct 2021 13:13:43 +0200
 
 feedbackd (0.0.0+git20210426) byzantium; urgency=medium
 
