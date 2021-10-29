@@ -294,7 +294,7 @@ lfb_event_class_init (LfbEventClass *klass)
   /**
    * LfbEvent:timeout:
    *
-   * How long feedback should be provided in milliseconds. The special value
+   * How long feedback should be provided in seconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
    * in a loop until ended explicitly via e.g. #lfb_event_end_feedback().
    */

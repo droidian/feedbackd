@@ -21,7 +21,7 @@
         @app_id: The application id usually in "reverse DNS" format
         @event: The event name from the Event naming spec
         @hints: Additional hints (e.g. to prefer haptic feedback over audio feedback on button press events, currently unused)
-        @timeout: When the feedbacks for this event should end latest. The special values '-1' (just run each feedback once) and '0' (endless loop) are also supported.
+        @timeout: When the feedbacks for this event should end latest in seconds. The special values '-1' (just run each feedback once) and '0' (endless loop) are also supported.
 	@id: Event id for future reference
 
         Give user feedback for an event by triggering feedbacks
