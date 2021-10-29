@@ -481,7 +481,7 @@ fbd_event_get_end_reason (FbdEvent *self)
 const char *
 fbd_event_get_sender (FbdEvent *self)
 {
-  g_return_val_if_fail (FBD_IS_EVENT (self), FBD_EVENT_END_REASON_NATURAL);
+  g_return_val_if_fail (FBD_IS_EVENT (self), NULL);
 
   return self->sender;
 }
