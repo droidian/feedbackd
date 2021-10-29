@@ -705,9 +705,9 @@ lfb_event_get_end_reason (LfbEvent *self)
  * @profile: The feedback profile to use
  *
  * Tells the feedback server to use the given feedback profile for
- * this event. The server might ignore this request.  Valid profile
- * names and their 'noisiness' are specified in the [Feedback theme
- * specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Feedback-theme-spec-0.0.0.md).
+ * this event when it is submitted. The server might ignore this
+ * request.  Valid profile names and their 'noisiness' are specified
+ * in the [Feedback theme specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Feedback-theme-spec-0.0.0.md).
  *
  * A value of %NULL (the default) lets the server pick the profile.
  */
