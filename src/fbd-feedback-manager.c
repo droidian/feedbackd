@@ -505,6 +505,7 @@ fbd_feedback_manager_constructed (GObject *object)
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
                             G_CALLBACK (on_feedbackd_setting_changed), self);
+  on_feedbackd_setting_changed (self, FEEDBACKD_KEY_PROFILE, self->settings);
 }
 
 static void
