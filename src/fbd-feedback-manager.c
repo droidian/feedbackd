@@ -499,8 +499,6 @@ fbd_feedback_manager_constructed (GObject *object)
   fbd_feedback_manager_load_theme(self);
 
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
-  lfb_gdbus_feedback_set_profile (LFB_GDBUS_FEEDBACK (self),
-                                  fbd_feedback_profile_level_to_string (self->level));
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
