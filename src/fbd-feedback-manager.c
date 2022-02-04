@@ -546,7 +546,7 @@ fbd_feedback_manager_init (FbdFeedbackManager *self)
   const gchar * const subsystems[] = { "input", NULL };
 
   self->next_id = 1;
-  self->level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
+  self->level = FBD_FEEDBACK_PROFILE_LEVEL_UNKNOWN;
 
   self->client = g_udev_client_new (subsystems);
   g_signal_connect_swapped (G_OBJECT (self->client), "uevent",
