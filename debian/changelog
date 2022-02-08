@@ -1,3 +1,30 @@
+feedbackd (0.0.0+git20220208) byzantium; urgency=medium
+
+  [ Pablo Correa Gómez ]
+  * Reload theme on SIGHUP signal.
+    Allows for users/applications to request a theme reload
+    by sending SIGHUP signal to the daemon.
+
+  [ Evangelos Ribeiro Tzaras ]
+  * lfb-event: Clarify docstring on lfb_event_set_feedback_profile
+  * fbd-event: Fix return value for fbd_event_get_sender
+  * doc: Clarify that the timeout is in seconds
+
+  [ Guido Günther ]
+  * libfeedback: Remove unused variables
+  * tests: Remove unused variables
+  * manager: Set initial profile to unknown.
+    This makes sure we sync the profile with the DBus property after
+    fetching it from GSettings.
+  * manager: Sync profile with setting on startup.
+    On startup the GSetting is the relevant input for selecting the profle.
+    (Closes: #52)
+  * manager: Don't sync DBus profile property.
+    This will happen in on_feedbackd_setting_changed() once the
+    profile was adjusted.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 08 Feb 2022 11:29:41 +0100
+
 feedbackd (0.0.0+git20211018) byzantium; urgency=medium
 
   [ Evangelos Ribeiro Tzaras ]
