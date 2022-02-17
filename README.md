@@ -54,16 +54,7 @@ You can introspect and get the current theme with
 gdbus introspect --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback
 ```
 
-and to request feedback for an event
-
-```sh
-gdbus call --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback --method org.sigxcpu.Feedback.TriggerFeedback 'my.app.id' 'phone-incoming-call' '[]' 0
-```
-This will return an Event id which you should memorize if you ever want to end the ringtone with:
-
-```sh
-gdbus call --session --dest org.sigxcpu.Feedback --object-path /org/sigxcpu/Feedback --method org.sigxcpu.Feedback.EndFeedback EVENTID
-```
+To run feedback for an event, use [fbcli](#fbcli)
 
 See `examples/` for a simple python example using GObject introspection.
 
@@ -103,6 +94,10 @@ You can add your own themes in one of two ways:
    # Add your theme file!
    $ sudo cp my_awesome_theme.json /usr/local/share/feedbackd/themes/
    ```
+
+Upon reception of `SIGHUP` signal, the daemon process will proceed to retrigger
+the above logic to find the themes, and reload the corresponding one. This can
+be used to avoid having to restart the daemon in case of configuration changes.
 
 Check out the companion [feedbackd-device-themes][1] repository for a
 selection of device-specific themes. In order for your theme to be recognized
@@ -215,4 +210,3 @@ GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.applicatio
 
 [debian/control]: ./debian/control#L5
 [1]: https://source.puri.sm/Librem5/feedbackd-device-themes)
-

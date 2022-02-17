@@ -30,7 +30,7 @@ typedef struct _FbdAsyncData {
   FbdDevSoundPlayedCallback  callback;
   FbdFeedbackSound          *feedback;
   FbdDevSound               *dev;
-  GCancellable              *playback;
+  GCancellable              *cancel;
 } FbdAsyncData;
 
 typedef struct _FbdDevSound {
@@ -81,18 +81,18 @@ fbd_async_data_new (FbdDevSound *dev, FbdFeedbackSound *feedback, FbdDevSoundPla
   data->callback = callback;
   data->feedback = g_object_ref (feedback);
   data->dev = g_object_ref (dev);
-  data->playback = g_cancellable_new ();
+  data->cancel = g_cancellable_new ();
 
   return data;
 }
 
 static void
-fbd_async_data_dispose (FbdAsyncData *object)
+fbd_async_data_dispose (FbdAsyncData *data)
 {
-  g_object_unref (object->feedback);
-  g_object_unref (object->dev);
-  g_object_unref (object->playback);
-  g_free (object);
+  g_object_unref (data->feedback);
+  g_object_unref (data->dev);
+  g_object_unref (data->cancel);
+  g_free (data);
 }
 
 static void
@@ -187,9 +187,11 @@ on_sound_play_finished_callback (GSoundContext *ctx,
     }
   }
 
+  /* Order matters here. We need to remove the feedback from the hash table before
+     invoking the callback. */
+  g_hash_table_remove (data->dev->playbacks, data->feedback);
   (*data->callback)(data->feedback);
 
-  g_hash_table_remove (data->dev->playbacks, data->feedback);
   fbd_async_data_dispose (data);
 }
 
@@ -204,9 +206,10 @@ fbd_dev_sound_play (FbdDevSound *self, FbdFeedbackSound *feedback, FbdDevSoundPl
 
   data = fbd_async_data_new (self, feedback, callback);
 
-  g_hash_table_insert (self->playbacks, feedback, data);
+  if (!g_hash_table_insert (self->playbacks, feedback, data))
+    g_warning ("Feedback %p already present", feedback);
 
-  gsound_context_play_full (self->ctx, data->playback,
+  gsound_context_play_full (self->ctx, data->cancel,
                             (GAsyncReadyCallback) on_sound_play_finished_callback,
                             data,
                             GSOUND_ATTR_EVENT_ID, fbd_feedback_sound_get_effect (feedback),
@@ -228,7 +231,7 @@ fbd_dev_sound_stop (FbdDevSound *self, FbdFeedbackSound *feedback)
   if (data == NULL)
     return FALSE;
 
-  g_cancellable_cancel (data->playback);
+  g_cancellable_cancel (data->cancel);
 
   return TRUE;
 }

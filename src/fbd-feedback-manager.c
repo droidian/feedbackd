@@ -509,37 +509,18 @@ find_themefile (void)
 static void
 fbd_feedback_manager_constructed (GObject *object)
 {
-  g_autoptr (GError) err = NULL;
   FbdFeedbackManager *self = FBD_FEEDBACK_MANAGER (object);
-  const gchar *themefile;
 
   G_OBJECT_CLASS (fbd_feedback_manager_parent_class)->constructed (object);
 
-  // Overide themefile with environment variable if requested
-  themefile = g_getenv (FEEDBACKD_THEME_VAR);
-
-  // Search for device-specific configuration
-  if (!themefile)
-    themefile = find_themefile ();
-
-  // Fallback to default configuration if needed
-  if (!themefile)
-    themefile = FEEDBACKD_THEME_DIR "/default.json";
-  g_info ("Using themefile: %s", themefile);
-
-  self->theme = fbd_feedback_theme_new_from_file (themefile, &err);
-  if (!self->theme) {
-    /* No point to carry on */
-    g_error ("Failed to load theme: %s", err->message);
-  }
+  fbd_feedback_manager_load_theme(self);
 
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
-  lfb_gdbus_feedback_set_profile (LFB_GDBUS_FEEDBACK (self),
-                                  fbd_feedback_profile_level_to_string (self->level));
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
                             G_CALLBACK (on_feedbackd_setting_changed), self);
+  on_feedbackd_setting_changed (self, FEEDBACKD_KEY_PROFILE, self->settings);
 }
 
 static void
@@ -581,7 +562,7 @@ fbd_feedback_manager_init (FbdFeedbackManager *self)
   const gchar * const subsystems[] = { "input", NULL };
 
   self->next_id = 1;
-  self->level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
+  self->level = FBD_FEEDBACK_PROFILE_LEVEL_UNKNOWN;
 
   self->client = g_udev_client_new (subsystems);
   g_signal_connect_swapped (G_OBJECT (self->client), "uevent",
@@ -632,6 +613,34 @@ fbd_feedback_manager_get_dev_leds (FbdFeedbackManager *self)
   g_return_val_if_fail (FBD_IS_FEEDBACK_MANAGER (self), NULL);
 
   return self->leds;
+}
+
+void fbd_feedback_manager_load_theme (FbdFeedbackManager *self) {
+  g_autoptr (GError) err = NULL;
+  g_autoptr (FbdFeedbackTheme) theme = NULL;
+  const gchar *themefile;
+
+  // Overide themefile with environment variable if requested
+  themefile = g_getenv (FEEDBACKD_THEME_VAR);
+
+  // Search for device-specific configuration
+  if (!themefile)
+    themefile = find_themefile ();
+
+  // Fallback to default configuration if needed
+  if (!themefile)
+    themefile = FEEDBACKD_THEME_DIR "/default.json";
+  g_info ("Using themefile: %s", themefile);
+
+  theme = fbd_feedback_theme_new_from_file (themefile, &err);
+  if (theme) {
+    g_set_object(&self->theme, theme);
+  } else {
+    if (self->theme)
+      g_warning ("Failed to reload theme: %s", err->message);
+    else
+      g_error ("Failed to load theme: %s", err->message); // No point to carry on
+  }
 }
 
 gboolean

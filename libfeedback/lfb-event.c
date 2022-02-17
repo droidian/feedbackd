@@ -294,7 +294,7 @@ lfb_event_class_init (LfbEventClass *klass)
   /**
    * LfbEvent:timeout:
    *
-   * How long feedback should be provided in milliseconds. The special value
+   * How long feedback should be provided in seconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
    * in a loop until ended explicitly via e.g. #lfb_event_end_feedback().
    */
@@ -705,9 +705,9 @@ lfb_event_get_end_reason (LfbEvent *self)
  * @profile: The feedback profile to use
  *
  * Tells the feedback server to use the given feedback profile for
- * this event. The server might ignore this request.  Valid profile
- * names and their 'noisiness' are specified in the [Feedback theme
- * specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Feedback-theme-spec-0.0.0.md).
+ * this event when it is submitted. The server might ignore this
+ * request.  Valid profile names and their 'noisiness' are specified
+ * in the [Feedback theme specification](https://source.puri.sm/Librem5/feedbackd/-/blob/master/Feedback-theme-spec-0.0.0.md).
  *
  * A value of %NULL (the default) lets the server pick the profile.
  */

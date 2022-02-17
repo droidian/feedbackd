@@ -1,3 +1,61 @@
+feedbackd (0.0.0+git20220208) byzantium; urgency=medium
+
+  [ Pablo Correa Gómez ]
+  * Reload theme on SIGHUP signal.
+    Allows for users/applications to request a theme reload
+    by sending SIGHUP signal to the daemon.
+
+  [ Evangelos Ribeiro Tzaras ]
+  * lfb-event: Clarify docstring on lfb_event_set_feedback_profile
+  * fbd-event: Fix return value for fbd_event_get_sender
+  * doc: Clarify that the timeout is in seconds
+
+  [ Guido Günther ]
+  * libfeedback: Remove unused variables
+  * tests: Remove unused variables
+  * manager: Set initial profile to unknown.
+    This makes sure we sync the profile with the DBus property after
+    fetching it from GSettings.
+  * manager: Sync profile with setting on startup.
+    On startup the GSetting is the relevant input for selecting the profle.
+    (Closes: #52)
+  * manager: Don't sync DBus profile property.
+    This will happen in on_feedbackd_setting_changed() once the
+    profile was adjusted.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 08 Feb 2022 11:29:41 +0100
+
+feedbackd (0.0.0+git20211018) byzantium; urgency=medium
+
+  [ Evangelos Ribeiro Tzaras ]
+  * fbd-dev-sound: Honour sound theme name for all GNOME based desktops.
+  * d/control: Add json-glib-tools as build dependency.
+    This will make sure that the json theme file gets validated in CI.
+  * feedback-theme: Add phone-{hangup,failure,outgoing-busy} events.
+  * naming-spec: Fix upper cases, whitespaces and punctuation.
+
+  [ Andreas Hartmann ]
+  * fbd-feedback-manager: Make sure theme path components are '/' separated.
+  * README: Add explanation on custom theme paths.
+
+  [ Pablo Correa Gómez ]
+  * feedback-manager: Search for default theme under XDG_CONFIG_HOME first.
+    This would allow users to create their own feedback profiles
+  * Fix typos in documentation
+  * README: dbus calls not usable to trigger feedback.
+    Fixes #45
+
+  [ Guido Günther ]
+  * examples: Unbreak python example.
+  * docs: Fix --profile short option. It's '-P', not '-p'.
+  * cli: Fix changing global profile.
+  * feedback-theme: Add camera related events
+  * gitlab-ci: Switch to bullseye.
+  * fbd-dev-sound: Delay sending `ended` signal. This makes sure
+    we properly end the feedback even when looping.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 19 Oct 2021 13:13:43 +0200
+
 feedbackd (0.0.0+git20210426) byzantium; urgency=medium
 
   [ Martin Bürgmann ]

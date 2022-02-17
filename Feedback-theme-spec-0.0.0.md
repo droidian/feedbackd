@@ -40,7 +40,7 @@ With the above a feedback theme in YAML format could look like:
 full:
     - event-name: phone-incoming-call
       type: Sound
-      effect: phone-incoing-call
+      effect: phone-incoming-call
     - event-name: message-new-sms
     ...
 quiet:

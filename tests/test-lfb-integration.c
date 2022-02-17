@@ -266,7 +266,6 @@ on_profile_changed (LfbGdbusFeedback *proxy, GParamSpec *psepc, const gchar **pr
 static void
 test_lfb_integration_profile (void)
 {
-  g_autoptr (GError) err = NULL;
   LfbGdbusFeedback *proxy;
   gchar *cmp = NULL;
 

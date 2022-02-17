@@ -20,6 +20,16 @@
           "effect"     : "button-released"
         },
         {
+          "event-name" : "camera-focus",
+          "type"       : "Sound",
+          "effect"     : "camera-focus"
+        },
+        {
+          "event-name" : "camera-shutter",
+          "type"       : "Sound",
+          "effect"     : "camera-shutter"
+        },
+        {
           "event-name" : "message-new-email",
           "type"       : "Sound",
           "effect"     : "message-new-email"
@@ -38,6 +48,21 @@
           "event-name" : "phone-incoming-call",
           "type"       : "Sound",
           "effect"     : "phone-incoming-call"
+        },
+        {
+          "event-name" : "phone-hangup",
+          "type"       : "Sound",
+          "effect"     : "phone-hangup"
+        },
+        {
+          "event-name" : "phone-failure",
+          "type"       : "Sound",
+          "effect"     : "phone-failure"
+        },
+        {
+          "event-name" : "phone-outgoing-busy",
+          "type"       : "Sound",
+          "effect"     : "phone-outgoing-busy"
         },
         {
           "event-name" : "timeout-completed",

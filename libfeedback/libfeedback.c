@@ -191,8 +191,6 @@ const char *
 lfb_get_feedback_profile (void)
 {
   LfbGdbusFeedback *proxy;
-  g_autofree gchar *profile = NULL;
-  g_autoptr(GVariant) var = NULL;
 
   if (!lfb_is_initted ()) {
      g_warning ("you must call lfb_init() before getting the profile");
