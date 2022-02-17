@@ -16,6 +16,7 @@
 
 #include "fbd-droid-leds-backend.h"
 #include "fbd-droid-leds-backend-hidl.h"
+#include "fbd-droid-leds-backend-aidl.h"
 
 #include <gio/gio.h>
 
@@ -51,14 +52,19 @@ initable_init (GInitable     *initable,
 
     g_debug("initializing droid leds");
 
-    self->backend = (FbdDroidLedsBackend *) fbd_droid_leds_backend_hidl_new (error);
+    /* Try with AIDL first */
+    self->backend = (FbdDroidLedsBackend *) fbd_droid_leds_backend_aidl_new (error);
 
     if (!self->backend) {
+        /* No luck, try with HIDL */
+        self->backend = (FbdDroidLedsBackend *) fbd_droid_leds_backend_hidl_new (error);
 
+        if (!self->backend) {
             g_set_error (error,
                          G_IO_ERROR, G_IO_ERROR_FAILED,
                          "Failed to obtain suitable light hal");
             return FALSE;
+        }
     }
 
     success = fbd_droid_leds_backend_is_supported (self->backend);
