@@ -13,6 +13,7 @@ sources = [
   generated_dbus_sources,
   fbd_enum_sources,
   'fbd.c',
+  'fbd-binder.c',
   'fbd-droid-vibra.c',
   'fbd-droid-leds.c',
   'fbd-dev-vibra.c',
