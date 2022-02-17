@@ -14,6 +14,7 @@ sources = [
   fbd_enum_sources,
   'fbd.c',
   'fbd-binder.c',
+  'fbd-droid-vibra-backend.c',
   'fbd-droid-vibra.c',
   'fbd-droid-leds-backend.c',
   'fbd-droid-leds-backend-hidl.c',
