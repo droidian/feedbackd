@@ -15,6 +15,7 @@ sources = [
   'fbd.c',
   'fbd-binder.c',
   'fbd-droid-vibra.c',
+  'fbd-droid-leds-backend.c',
   'fbd-droid-leds.c',
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
