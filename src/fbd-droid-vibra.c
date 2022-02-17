@@ -15,6 +15,7 @@
 
 #include "fbd-droid-vibra-backend.h"
 #include "fbd-droid-vibra-backend-hidl.h"
+#include "fbd-droid-vibra-backend-aidl.h"
 
 #include <gio/gio.h>
 
@@ -103,14 +104,19 @@ initable_init (GInitable     *initable,
 
     g_debug("initializing droid vibra");
 
-    self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_hidl_new (error);
+    /* Try with AIDL first */
+    self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_aidl_new (error);
 
     if (!self->backend) {
+        /* No luck, try with HIDL */
+        self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_hidl_new (error);
 
+        if (!self->backend) {
             g_set_error (error,
                          G_IO_ERROR, G_IO_ERROR_FAILED,
                          "Failed to obtain suitable vibrator hal");
             return FALSE;
+        }
     }
 
     g_debug ("Droid vibra device usable");
