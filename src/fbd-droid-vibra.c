@@ -1,12 +1,21 @@
 /*
  * Copyright (C) 2021 Giuseppe Corti
+ * Copyright (C) 2021 Erfan Abdi
+ * Copyright (C) 2022 Eugenio "g7" Paolantonio
  * SPDX-License-Identifier: GPL-3.0+
  * Author: Giuseppe Corti <giuseppe.corti@pm.me>
+ *         Erfan Abdi
+ *         Eugenio "g7" Paolantonio <me@medesimo.eu>
  */
 
 #define G_LOG_DOMAIN "fbd-droid-vibra"
 
 #include "fbd-droid-vibra.h"
+#include "fbd-binder.h"
+
+#include "fbd-droid-vibra-backend.h"
+#include "fbd-droid-vibra-backend-hidl.h"
+#include "fbd-droid-vibra-backend-aidl.h"
 
 #include <gio/gio.h>
 
@@ -14,8 +23,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#include <gbinder.h>
 
 /**
  * SECTION:fbd-droid-vibra
@@ -25,10 +32,6 @@
  * The #FbdDevVibra is used to interface with haptic motor via the force
  * feedback interface. It currently only supports one id at a time.
  */
-
-#define BINDER_VIBRATOR_SERVICE_DEVICE "/dev/hwbinder"
-#define BINDER_VIBRATOR_SERVICE_IFACE "android.hardware.vibrator@1.0::IVibrator"
-#define BINDER_VIBRATOR_SERVICE_SLOT "default"
 
 enum {
     PROP_0,
@@ -48,11 +51,7 @@ typedef struct _FbdDevVibra {
 
     GUdevDevice *device;
 
-    GBinderServiceManager* sm;  
-    GBinderRemoteObject* remote;
-    GBinderClient* client;
-
-    FbdDevVibraFeatureFlags features;
+    FbdDroidVibraBackend *backend;
 } FbdDevVibra;
 
 static void initable_iface_init (GInitableIface *iface);
@@ -100,35 +99,24 @@ initable_init (GInitable     *initable,
                GError       **error)
 {
     FbdDevVibra *self = FBD_DEV_VIBRA (initable);
-    char *fqname =
-        (BINDER_VIBRATOR_SERVICE_IFACE "/" BINDER_VIBRATOR_SERVICE_SLOT);
+    char *device, *iface, *fqname;
+    int i;
 
     g_debug("initializing droid vibra");
 
-    self->sm = gbinder_servicemanager_new(BINDER_VIBRATOR_SERVICE_DEVICE);
-    if (!self->sm) {
-        g_set_error (error,
-                     G_IO_ERROR, G_IO_ERROR_FAILED,
-                     "Failed to init servicemanager");
-        return FALSE;
-    }
-    self->remote = gbinder_servicemanager_get_service_sync(self->sm,
-        fqname, NULL);
-    if (!self->remote) {
-        g_set_error (error,
-                     G_IO_ERROR, G_IO_ERROR_FAILED,
-                     "Failed to get vibrator hal service remote");
-        gbinder_servicemanager_unref(self->sm);
-        return FALSE;
-    }
-    self->client = gbinder_client_new(self->remote, BINDER_VIBRATOR_SERVICE_IFACE);
-    if (!self->client) {
-        g_set_error (error,
-                     G_IO_ERROR, G_IO_ERROR_FAILED,
-                     "Failed to get vibrator hal service client");
-        gbinder_remote_object_unref(self->remote);
-        gbinder_servicemanager_unref(self->sm);
-        return FALSE;
+    /* Try with AIDL first */
+    self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_aidl_new (error);
+
+    if (!self->backend) {
+        /* No luck, try with HIDL */
+        self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_hidl_new (error);
+
+        if (!self->backend) {
+            g_set_error (error,
+                         G_IO_ERROR, G_IO_ERROR_FAILED,
+                         "Failed to obtain suitable vibrator hal");
+            return FALSE;
+        }
     }
 
     g_debug ("Droid vibra device usable");
@@ -148,7 +136,10 @@ fbd_dev_vibra_dispose (GObject *object)
 {
     FbdDevVibra *self = FBD_DEV_VIBRA (object);
 
+    g_debug("Disposing droid vibra");
+
     g_clear_object (&self->device);
+    g_clear_object (&self->backend);
 
     G_OBJECT_CLASS (fbd_dev_vibra_parent_class)->dispose (object);
 }
@@ -159,11 +150,6 @@ fbd_dev_vibra_finalize (GObject *object)
 {
     FbdDevVibra *self = FBD_DEV_VIBRA (object);
 
-    g_debug("Finalizing droid vibra");
-    if (self->client)
-        gbinder_client_unref(self->client);
-    if (self->sm)
-        gbinder_servicemanager_unref(self->sm);
     G_OBJECT_CLASS (fbd_dev_vibra_parent_class)->finalize (object);
 }
 
@@ -206,35 +192,14 @@ fbd_dev_vibra_new (GUdevDevice *device, GError **error)
                                           NULL));
 }
 
-
 gboolean
 fbd_dev_vibra_rumble (FbdDevVibra *self, guint duration, gboolean upload)
 {
     g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
     g_debug("Playing rumbling vibra effect");
-    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
-    GBinderRemoteReply* reply;
-    int status;
 
-    gbinder_local_request_append_int32(req, duration);
-    reply = gbinder_client_transact_sync_reply(self->client,
-        1 /* on */, req, &status);
-    gbinder_local_request_unref(req);
-
-    if (status == GBINDER_STATUS_OK) {
-        GBinderReader reader;
-        guint value;
-
-        gbinder_remote_reply_init_reader(reply, &reader);
-        status = gbinder_reader_read_uint32(&reader, &value);
-        if (value != GBINDER_STATUS_OK)
-            return FALSE;
-    } else {
-        return FALSE;
-    }
-
-    return TRUE;
+    return fbd_droid_vibra_backend_on (self->backend, duration);
 }
 
 
@@ -244,28 +209,8 @@ fbd_dev_vibra_periodic (FbdDevVibra *self, guint duration, guint magnitude, guin
     g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
     g_debug("Playing periodic vibra effect");
-    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
-    GBinderRemoteReply* reply;
-    int status;
 
-    gbinder_local_request_append_int32(req, duration);
-    reply = gbinder_client_transact_sync_reply(self->client,
-        1 /* on */, req, &status);
-    gbinder_local_request_unref(req);
-
-    if (status == GBINDER_STATUS_OK) {
-        GBinderReader reader;
-        guint value;
-
-        gbinder_remote_reply_init_reader(reply, &reader);
-        status = gbinder_reader_read_uint32(&reader, &value);
-        if (value != GBINDER_STATUS_OK)
-            return FALSE;
-    } else {
-        return FALSE;
-    }
-
-    return TRUE;
+    return fbd_droid_vibra_backend_on (self->backend, duration);
 }
 
 
@@ -275,27 +220,8 @@ fbd_dev_vibra_remove_effect (FbdDevVibra *self)
     g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
     g_debug("Erasing vibra effect");
-    GBinderLocalRequest* req = gbinder_client_new_request(self->client);
-    GBinderRemoteReply* reply;
-    int status;
 
-    reply = gbinder_client_transact_sync_reply(self->client,
-        2 /* off */, req, &status);
-    gbinder_local_request_unref(req);
-
-    if (status == GBINDER_STATUS_OK) {
-        GBinderReader reader;
-        guint value;
-
-        gbinder_remote_reply_init_reader(reply, &reader);
-        status = gbinder_reader_read_uint32(&reader, &value);
-        if (value != GBINDER_STATUS_OK)
-            return FALSE;
-    } else {
-        return FALSE;
-    }
-
-    return TRUE;
+    return fbd_droid_vibra_backend_off (self->backend);
 }
 
 
