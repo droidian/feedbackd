@@ -26,6 +26,7 @@
  */
 
 #define LED_BRIGHTNESS_ATTR "brightness"
+#define LED_MAX_BRIGHTNESS_ATTR "max_brightness"
 #define LED_PATTERN_ATTR    "pattern"
 #define LED_SUBSYSTEM       "leds"
 
@@ -125,7 +126,7 @@ initable_init (GInitable    *initable,
       color = g_ascii_strdown (c+1, -1);
       if (g_strstr_len (name, -1, color)) {
         g_autoptr (GError) err = NULL;
-        guint brightness = g_udev_device_get_sysfs_attr_as_int (dev, "max_brightness");
+        guint brightness = g_udev_device_get_sysfs_attr_as_int (dev, LED_MAX_BRIGHTNESS_ATTR);
 
         if (!brightness)
           continue;
