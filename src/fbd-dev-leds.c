@@ -199,14 +199,14 @@ fbd_dev_leds_new (GError **error)
  * fbd_dev_leds_start_periodic:
  * @self: The #FbdDevLeds
  * @color: The color to use for the LED pattern
- * @max_brightness: The max brightness (in percent) to use for the pattern
+ * @max_brightness_percentage: The max brightness (in percent) to use for the pattern
  * @freq: The pattern's frequency in mHz
  *
  * Start periodic feedback.
  */
 gboolean
 fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
-                             guint max_brightness, guint freq)
+                             guint max_brightness_percentage, guint freq)
 {
   FbdDevLed *led;
   gdouble max;
@@ -217,14 +217,15 @@ fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
   gboolean success;
 
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
+  g_return_val_if_fail (max_brightness_percentage <= 100.0, FALSE);
   led = find_led_by_color (self, color);
   g_return_val_if_fail (led, FALSE);
 
-  max =  led->max_brightness * (max_brightness / 100.0);
+  max =  led->max_brightness * (max_brightness_percentage / 100.0);
   /*  ms     mHz           T/2 */
   t = 1000.0 * 1000.0 / freq / 2.0;
   str = g_strdup_printf ("0 %d %d %d\n", (gint)t, (gint)max, (gint)t);
-  g_debug ("Freq %d mHz, Brightness: %d%%, Blink pattern: %s", freq, max_brightness, str);
+  g_debug ("Freq %d mHz, Brightness: %d%%, Blink pattern: %s", freq, max_brightness_percentage, str);
   success = fbd_udev_set_sysfs_path_attr_as_string (led->dev, LED_PATTERN_ATTR, str, &err);
   if (!success)
     g_warning ("Failed to set led pattern: %s", err->message);
