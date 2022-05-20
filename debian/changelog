@@ -1,3 +1,25 @@
+feedbackd (0.0.0+git20220520) byzantium; urgency=medium
+
+  [ Guido Günther ]
+  * udev: Drop pre L5 pre 5.9 workaround.
+    Not neeed in 2022.
+  * udev: Use more generic comment.
+    Make it more obvious that this isn't device specific
+
+  [ Dylan Van Assche ]
+  * fbd-dev-leds: use define for max_brightness.
+    All other attributes use a define, let's do the same for max_brightness.
+  * fbd-dev-leds: rename var to max_brightness_percentage.
+    Improve readability of the code.
+
+  [ Luca Weiss ]
+  * fbd-dev-leds: support for multicolor LEDs.
+    Add support for multicolor LEDs as supported by the kernel.
+    Used by Qualcomm devices such as SHIFT 6mq, OnePlus 6, etc.
+    Co-Developed-by: Dylan Van Assche <me@dylanvanassche.be>
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 20 May 2022 10:55:13 +0200
+
 feedbackd (0.0.0+git20220208) byzantium; urgency=medium
 
   [ Pablo Correa Gómez ]
