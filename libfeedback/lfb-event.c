@@ -189,8 +189,8 @@ on_end_feedback_finished (LfbGdbusFeedback *proxy,
   g_return_if_fail (LFB_IS_EVENT (self));
 
   success = lfb_gdbus_feedback_call_end_feedback_finish (proxy,
-							 res,
-							 &err);
+                                                         res,
+                                                         &err);
   if (!success) {
     g_task_return_error (task, g_steal_pointer (&err));
   } else
@@ -472,10 +472,10 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
 
   if (self->handler_id == 0) {
     self->handler_id = g_signal_connect_object (proxy,
-						"feedback-ended",
-						G_CALLBACK (on_feedback_ended),
-						self,
-						G_CONNECT_SWAPPED);
+                                                "feedback-ended",
+                                                G_CALLBACK (on_feedback_ended),
+                                                self,
+                                                G_CONNECT_SWAPPED);
   }
 
   data = g_new0 (LfbAsyncData, 1);
@@ -559,8 +559,8 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
  */
 gboolean
 lfb_event_end_feedback_finish (LfbEvent      *self,
-			       GAsyncResult  *res,
-			       GError       **error)
+                               GAsyncResult  *res,
+                               GError       **error)
 {
   g_return_val_if_fail (g_task_is_valid (res, self), FALSE);
 
@@ -579,9 +579,9 @@ lfb_event_end_feedback_finish (LfbEvent      *self,
  */
 void
 lfb_event_end_feedback_async (LfbEvent            *self,
-			      GCancellable        *cancellable,
-			      GAsyncReadyCallback  callback,
-			      gpointer             user_data)
+                              GCancellable        *cancellable,
+                              GAsyncReadyCallback  callback,
+                              gpointer             user_data)
 {
   LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
