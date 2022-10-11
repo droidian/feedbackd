@@ -415,10 +415,8 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
   g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-   if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before triggering events");
-     g_assert_not_reached ();
-   }
+   if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before triggering events.");
 
    proxy = _lfb_get_proxy ();
    g_return_val_if_fail (G_IS_DBUS_PROXY (proxy), FALSE);
@@ -466,10 +464,8 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before triggering events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before triggering events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
@@ -537,10 +533,8 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
   g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before ending events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_val_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy), FALSE);
@@ -593,10 +587,8 @@ lfb_event_end_feedback_async (LfbEvent            *self,
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before ending events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));

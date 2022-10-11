@@ -192,10 +192,8 @@ lfb_get_feedback_profile (void)
 {
   LfbGdbusFeedback *proxy;
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before getting the profile");
-     g_assert_not_reached ();
-   }
+  if (!lfb_is_initted ())
+    g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_val_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy), NULL);
@@ -218,10 +216,8 @@ lfb_set_feedback_profile (const gchar *profile)
 {
   LfbGdbusFeedback *proxy;
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before setting the profile");
-     g_assert_not_reached ();
-   }
+  if (!lfb_is_initted ())
+    g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
