@@ -60,6 +60,8 @@ on_feedback_ended (LfbEvent *event, LfbEvent **cmp)
 	   lfb_event_get_event (event),
 	   lfb_event_get_end_reason (event));
 
+  g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_ENDED);
+
   /* "Return" event */
   *cmp = event;
 }
@@ -159,6 +161,7 @@ on_event_end_finished (LfbEvent      *event,
   g_assert_no_error (err);
   g_assert_true (success);
 
+  /* This is not guaranteed for all types of feedback, see `feedback-ended` */
   g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_ENDED);
 
   /* "Return" event */
