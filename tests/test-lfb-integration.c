@@ -139,6 +139,8 @@ on_event_triggered (LfbEvent      *event,
   g_assert_no_error (err);
   g_assert_true (success);
 
+  g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_RUNNING);
+
   /* "Return" event */
   *cmp = event;
   g_main_loop_quit (mainloop);
@@ -159,6 +161,8 @@ on_event_end_finished (LfbEvent      *event,
   success = lfb_event_end_feedback_finish (event, res, &err);
   g_assert_no_error (err);
   g_assert_true (success);
+
+  g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_ENDED);
 
   /* "Return" event */
   *cmp = event;
