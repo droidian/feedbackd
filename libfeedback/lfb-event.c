@@ -104,10 +104,10 @@ typedef struct _LfbEvent {
 
 G_DEFINE_TYPE (LfbEvent, lfb_event, G_TYPE_OBJECT);
 
-typedef struct _LpfAsyncData {
+typedef struct _LfbAsyncData {
   LfbEvent *event;
   GTask    *task;
-} LpfAsyncData;
+} LfbAsyncData;
 
 static void
 lfb_event_set_state (LfbEvent *self, LfbEventState state)
@@ -143,7 +143,7 @@ build_hints (LfbEvent *self)
 static void
 on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
                               GAsyncResult     *res,
-                              LpfAsyncData     *data)
+                              LfbAsyncData     *data)
 
 {
   GTask *task = data->task;
@@ -176,7 +176,7 @@ on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
 static void
 on_end_feedback_finished (LfbGdbusFeedback *proxy,
                           GAsyncResult     *res,
-                          LpfAsyncData     *data)
+                          LfbAsyncData     *data)
 
 {
   GTask *task = data->task;
@@ -462,7 +462,7 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
                                   GAsyncReadyCallback  callback,
                                   gpointer             user_data)
 {
-  LpfAsyncData *data;
+  LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
@@ -482,7 +482,7 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
 						G_CONNECT_SWAPPED);
   }
 
-  data = g_new0 (LpfAsyncData, 1);
+  data = g_new0 (LfbAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
   lfb_gdbus_feedback_call_trigger_feedback (proxy,
@@ -589,7 +589,7 @@ lfb_event_end_feedback_async (LfbEvent            *self,
 			      GAsyncReadyCallback  callback,
 			      gpointer             user_data)
 {
-  LpfAsyncData *data;
+  LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
@@ -601,7 +601,7 @@ lfb_event_end_feedback_async (LfbEvent            *self,
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
 
-  data = g_new0 (LpfAsyncData, 1);
+  data = g_new0 (LfbAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
   lfb_gdbus_feedback_call_end_feedback (proxy,
