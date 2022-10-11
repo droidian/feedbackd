@@ -30,7 +30,7 @@
  *
  * |[
  *    g_autoptr (GError) err = NULL;
- *    LpfEvent *event = lfb_event_new ("message-new-instant");
+ *    LfbEvent *event = lfb_event_new ("message-new-instant");
  *    lfb_event_set_timeout (event, 0);
  *    if (!lfb_event_trigger_feedback (event, &err))
  *      g_warning ("Failed to trigger feedback: %s", err->message);
