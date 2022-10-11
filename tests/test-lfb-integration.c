@@ -68,9 +68,7 @@ static void
 test_lfb_integration_event_sync (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
-  g_autoptr(LfbEvent) event1 = NULL;
   g_autoptr(LfbEvent) event10 = NULL;
-  g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
   LfbEvent *cmp = NULL;
   gboolean success;
@@ -103,7 +101,6 @@ static void
 test_lfb_integration_event_not_found (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
-  g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
   LfbEvent *cmp = NULL;
   gboolean success;
@@ -174,8 +171,6 @@ test_lfb_integration_event_async (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
   g_autoptr(LfbEvent) event10 = NULL;
-  g_autofree gchar *evname = NULL;
-  g_autoptr (GError) err = NULL;
   LfbEvent *cmp1 = NULL, *cmp2 = NULL, *cmp3 = NULL;
 
   event0 = lfb_event_new ("test-dummy-0");
