@@ -60,6 +60,8 @@ on_feedback_ended (LfbEvent *event, LfbEvent **cmp)
 	   lfb_event_get_event (event),
 	   lfb_event_get_end_reason (event));
 
+  g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_ENDED);
+
   /* "Return" event */
   *cmp = event;
 }
@@ -68,9 +70,7 @@ static void
 test_lfb_integration_event_sync (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
-  g_autoptr(LfbEvent) event1 = NULL;
   g_autoptr(LfbEvent) event10 = NULL;
-  g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
   LfbEvent *cmp = NULL;
   gboolean success;
@@ -103,7 +103,6 @@ static void
 test_lfb_integration_event_not_found (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
-  g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
   LfbEvent *cmp = NULL;
   gboolean success;
@@ -162,6 +161,7 @@ on_event_end_finished (LfbEvent      *event,
   g_assert_no_error (err);
   g_assert_true (success);
 
+  /* This is not guaranteed for all types of feedback, see `feedback-ended` */
   g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_ENDED);
 
   /* "Return" event */
@@ -174,8 +174,6 @@ test_lfb_integration_event_async (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
   g_autoptr(LfbEvent) event10 = NULL;
-  g_autofree gchar *evname = NULL;
-  g_autoptr (GError) err = NULL;
   LfbEvent *cmp1 = NULL, *cmp2 = NULL, *cmp3 = NULL;
 
   event0 = lfb_event_new ("test-dummy-0");

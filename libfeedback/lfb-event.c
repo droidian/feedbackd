@@ -30,7 +30,7 @@
  *
  * |[
  *    g_autoptr (GError) err = NULL;
- *    LpfEvent *event = lfb_event_new ("message-new-instant");
+ *    LfbEvent *event = lfb_event_new ("message-new-instant");
  *    lfb_event_set_timeout (event, 0);
  *    if (!lfb_event_trigger_feedback (event, &err))
  *      g_warning ("Failed to trigger feedback: %s", err->message);
@@ -104,10 +104,10 @@ typedef struct _LfbEvent {
 
 G_DEFINE_TYPE (LfbEvent, lfb_event, G_TYPE_OBJECT);
 
-typedef struct _LpfAsyncData {
+typedef struct _LfbAsyncData {
   LfbEvent *event;
   GTask    *task;
-} LpfAsyncData;
+} LfbAsyncData;
 
 static void
 lfb_event_set_state (LfbEvent *self, LfbEventState state)
@@ -143,7 +143,7 @@ build_hints (LfbEvent *self)
 static void
 on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
                               GAsyncResult     *res,
-                              LpfAsyncData     *data)
+                              LfbAsyncData     *data)
 
 {
   GTask *task = data->task;
@@ -176,7 +176,7 @@ on_trigger_feedback_finished (LfbGdbusFeedback *proxy,
 static void
 on_end_feedback_finished (LfbGdbusFeedback *proxy,
                           GAsyncResult     *res,
-                          LpfAsyncData     *data)
+                          LfbAsyncData     *data)
 
 {
   GTask *task = data->task;
@@ -189,8 +189,8 @@ on_end_feedback_finished (LfbGdbusFeedback *proxy,
   g_return_if_fail (LFB_IS_EVENT (self));
 
   success = lfb_gdbus_feedback_call_end_feedback_finish (proxy,
-							 res,
-							 &err);
+                                                         res,
+                                                         &err);
   if (!success) {
     g_task_return_error (task, g_steal_pointer (&err));
   } else
@@ -415,10 +415,8 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
   g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-   if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before triggering events");
-     g_assert_not_reached ();
-   }
+   if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before triggering events.");
 
    proxy = _lfb_get_proxy ();
    g_return_val_if_fail (G_IS_DBUS_PROXY (proxy), FALSE);
@@ -462,27 +460,25 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
                                   GAsyncReadyCallback  callback,
                                   gpointer             user_data)
 {
-  LpfAsyncData *data;
+  LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before triggering events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before triggering events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
 
   if (self->handler_id == 0) {
     self->handler_id = g_signal_connect_object (proxy,
-						"feedback-ended",
-						G_CALLBACK (on_feedback_ended),
-						self,
-						G_CONNECT_SWAPPED);
+                                                "feedback-ended",
+                                                G_CALLBACK (on_feedback_ended),
+                                                self,
+                                                G_CONNECT_SWAPPED);
   }
 
-  data = g_new0 (LpfAsyncData, 1);
+  data = g_new0 (LfbAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
   lfb_gdbus_feedback_call_trigger_feedback (proxy,
@@ -537,10 +533,8 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
   g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before ending events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_val_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy), FALSE);
@@ -565,8 +559,8 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
  */
 gboolean
 lfb_event_end_feedback_finish (LfbEvent      *self,
-			       GAsyncResult  *res,
-			       GError       **error)
+                               GAsyncResult  *res,
+                               GError       **error)
 {
   g_return_val_if_fail (g_task_is_valid (res, self), FALSE);
 
@@ -585,23 +579,21 @@ lfb_event_end_feedback_finish (LfbEvent      *self,
  */
 void
 lfb_event_end_feedback_async (LfbEvent            *self,
-			      GCancellable        *cancellable,
-			      GAsyncReadyCallback  callback,
-			      gpointer             user_data)
+                              GCancellable        *cancellable,
+                              GAsyncReadyCallback  callback,
+                              gpointer             user_data)
 {
-  LpfAsyncData *data;
+  LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
 
   g_return_if_fail (LFB_IS_EVENT (self));
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before ending events");
-     g_assert_not_reached ();
-  }
+  if (!lfb_is_initted ())
+     g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));
 
-  data = g_new0 (LpfAsyncData, 1);
+  data = g_new0 (LfbAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
   lfb_gdbus_feedback_call_end_feedback (proxy,

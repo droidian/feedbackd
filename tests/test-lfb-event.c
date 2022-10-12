@@ -47,7 +47,6 @@ static void
 test_lfb_event_trigger (void)
 {
   g_autoptr(LfbEvent) event = NULL;
-  g_autofree gchar *evname = NULL;
   g_autoptr (GError) err = NULL;
 
   g_assert_true (lfb_init (TEST_APP_ID, NULL));
