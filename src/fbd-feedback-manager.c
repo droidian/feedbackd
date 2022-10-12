@@ -84,7 +84,7 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
       g_clear_object (&self->vibra);
     }
   } else if (g_strcmp0 (action, "add") == 0) {
-    if (!g_strcmp0 (g_udev_device_get_property (device, "FEEDBACKD_TYPE"), "vibra")) {
+    if (!g_strcmp0 (g_udev_device_get_property (device, FEEDBACKD_UDEV_ATTR), "vibra")) {
       g_autoptr (GError) err = NULL;
 
       g_debug ("Found hotplugged vibra device at %s", g_udev_device_get_sysfs_path (device));
@@ -139,7 +139,7 @@ init_devices (FbdFeedbackManager *self)
   for (l = devices; l != NULL; l = l->next) {
     GUdevDevice *dev = l->data;
 
-    if (!g_strcmp0 (g_udev_device_get_property (dev, "FEEDBACKD_TYPE"), "vibra")) {
+    if (!g_strcmp0 (g_udev_device_get_property (dev, FEEDBACKD_UDEV_ATTR), "vibra")) {
       g_debug ("Found vibra device");
       self->vibra = fbd_dev_vibra_new (dev, &err);
       if (!self->vibra) {
