@@ -48,6 +48,13 @@ To run the daemon use
 ```sh
 _build/run
 ```
+
+To run under gdb use
+
+``` sh
+FBD_GDB=1 _build/run
+```
+
 You can introspect and get the current theme with
 
 ```sh
