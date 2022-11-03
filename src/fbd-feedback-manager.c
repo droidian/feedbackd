@@ -323,7 +323,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
   FbdFeedbackManager *self;
   FbdEvent *event;
   GSList *feedbacks, *l;
-  gint event_id;
+  guint event_id;
   const gchar *sender;
   FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
   gboolean found_fb = FALSE;
