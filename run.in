@@ -8,5 +8,10 @@ FEEDBACK_THEME=${FEEDBACK_THEME:-"${ABS_SRCDIR}/data/default.json"}
 export FEEDBACK_THEME
 export GSETTINGS_SCHEMA_DIR="${ABS_BUILDDIR}/data"
 
+if [ "${FBD_GDB}" = 1 ]; then
+    echo "Running calls under gdb"
+    WRAPPER="gdb --args"
+fi
+
 set -x
-exec "${ABS_BUILDDIR}/src/feedbackd" "$@"
+exec ${WRAPPER} "${ABS_BUILDDIR}/src/feedbackd" "$@"
