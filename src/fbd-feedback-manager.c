@@ -384,6 +384,8 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
     found_fb = FALSE;
   }
 
+  lfb_gdbus_feedback_complete_trigger_feedback (object, invocation, event_id);
+
   if (found_fb) {
     g_signal_connect_object (event, "feedbacks-ended",
                              (GCallback) on_event_feedbacks_ended,
@@ -397,7 +399,6 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
                                             FBD_EVENT_END_REASON_NOT_FOUND);
   }
 
-  lfb_gdbus_feedback_complete_trigger_feedback (object, invocation, event_id);
   return TRUE;
 }
 
