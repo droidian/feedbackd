@@ -18,28 +18,29 @@
 static GMainLoop *loop;
 
 
-GQuark fbd_error_quark(void)
+GQuark
+fbd_error_quark (void)
 {
-    static GQuark quark = 0;
+  static GQuark quark = 0;
 
-    if (!quark)
-        quark = g_quark_from_static_string("fbd");
+  if (!quark)
+    quark = g_quark_from_static_string("fbd");
 
-    return quark;
+  return quark;
 }
 
 
 static gboolean
 quit_cb (gpointer user_data)
 {
-    g_info ("Caught signal, shutting down...");
+  g_info ("Caught signal, shutting down...");
 
-    if (loop)
-      g_idle_add ((GSourceFunc) g_main_loop_quit, loop);
-    else
-      exit (0);
+  if (loop)
+    g_idle_add ((GSourceFunc) g_main_loop_quit, loop);
+  else
+    exit (0);
 
-    return FALSE;
+  return FALSE;
 }
 
 static gboolean
