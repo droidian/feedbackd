@@ -124,8 +124,8 @@ test_lfb_integration_event_not_found (void)
 
 static void
 on_event_triggered_quit (LfbEvent      *event,
-		    GAsyncResult  *res,
-		    LfbEvent     **cmp)
+                         GAsyncResult  *res,
+                         LfbEvent     **cmp)
 {
   g_autoptr (GError) err = NULL;
   gboolean success;
@@ -178,9 +178,9 @@ test_lfb_integration_event_async (void)
 
   event0 = lfb_event_new ("test-dummy-0");
   lfb_event_trigger_feedback_async (event0,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered_quit,
-				    &cmp1);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered_quit,
+                                    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
   g_assert_true (event0 == cmp1);
@@ -194,16 +194,16 @@ test_lfb_integration_event_async (void)
 
   /* The async callback ends the main loop */
   lfb_event_trigger_feedback_async (event10,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered_quit,
-				    &cmp2);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered_quit,
+                                    &cmp2);
   g_main_loop_run (mainloop);
 
   /* The async callback ends the main loop */
   lfb_event_end_feedback_async (event10,
-				NULL,
-				(GAsyncReadyCallback)on_event_end_finished,
-				&cmp3);
+                                NULL,
+                                (GAsyncReadyCallback)on_event_end_finished,
+                                &cmp3);
   g_main_loop_run (mainloop);
 
   /* Check if callbacks saw the right event */
@@ -246,9 +246,9 @@ test_lfb_integration_event_async_error (void)
   /* Empty event names are invalid */
   event0 = lfb_event_new ("");
   lfb_event_trigger_feedback_async (event0,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_with_error_triggered,
-				    &cmp1);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_with_error_triggered,
+                                    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
   g_assert_true (event0 == cmp1);
@@ -288,29 +288,29 @@ main (gint argc, gchar *argv[])
   g_test_init (&argc, &argv, NULL);
 
   g_test_add("/feedbackd/lfb-integration/event_sync", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_sync,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_sync,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_async/success", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_async,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_async,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_async/error", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_async_error,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_async_error,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_not_found", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_not_found,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_not_found,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/profile", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_profile,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_profile,
+             (gpointer)fixture_teardown);
 
   return g_test_run();
 }
