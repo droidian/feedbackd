@@ -123,7 +123,7 @@ test_lfb_integration_event_not_found (void)
 }
 
 static void
-on_event_triggered (LfbEvent      *event,
+on_event_triggered_quit (LfbEvent      *event,
 		    GAsyncResult  *res,
 		    LfbEvent     **cmp)
 {
@@ -179,7 +179,7 @@ test_lfb_integration_event_async (void)
   event0 = lfb_event_new ("test-dummy-0");
   lfb_event_trigger_feedback_async (event0,
 				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered,
+				    (GAsyncReadyCallback)on_event_triggered_quit,
 				    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
@@ -195,7 +195,7 @@ test_lfb_integration_event_async (void)
   /* The async callback ends the main loop */
   lfb_event_trigger_feedback_async (event10,
 				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered,
+				    (GAsyncReadyCallback)on_event_triggered_quit,
 				    &cmp2);
   g_main_loop_run (mainloop);
 
