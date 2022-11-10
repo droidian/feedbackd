@@ -124,8 +124,30 @@ test_lfb_integration_event_not_found (void)
 
 static void
 on_event_triggered (LfbEvent      *event,
-		    GAsyncResult  *res,
-		    LfbEvent     **cmp)
+                    GAsyncResult  *res,
+                    LfbEvent     **cmp)
+{
+  g_autoptr (GError) err = NULL;
+  gboolean success;
+
+  g_assert_true (LFB_IS_EVENT (event));
+  g_assert_null (*cmp);
+
+  g_debug ("%s: %p, %s", __func__, event, lfb_event_get_event (event));
+  success = lfb_event_trigger_feedback_finish (event, res, &err);
+  g_assert_no_error (err);
+  g_assert_true (success);
+
+  g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_RUNNING);
+
+  /* "Return" event */
+  *cmp = event;
+}
+
+static void
+on_event_triggered_quit (LfbEvent      *event,
+                         GAsyncResult  *res,
+                         LfbEvent     **cmp)
 {
   g_autoptr (GError) err = NULL;
   gboolean success;
@@ -170,6 +192,32 @@ on_event_end_finished (LfbEvent      *event,
 }
 
 static void
+test_lfb_integration_event_not_found_async (void)
+{
+  g_autoptr(LfbEvent) event0 = NULL;
+  LfbEvent *cmp = NULL;
+  LfbEvent *cmp2 = NULL;
+
+  event0 = lfb_event_new ("test-does-not-exist");
+  g_signal_connect (event0, "feedback-ended", (GCallback)on_feedback_ended, &cmp2);
+
+  /* The main loop will only quit if the "feedback-ended" signal actually gets emitted */
+  g_signal_connect_swapped (event0, "feedback-ended", (GCallback)g_main_loop_quit, mainloop);
+
+  lfb_event_trigger_feedback_async (event0,
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered,
+                                    &cmp);
+  g_main_loop_run (mainloop);
+
+  /* If the signal fired cmp will match event */
+  g_assert_true (event0 == cmp);
+  g_assert_true (event0 == cmp2);
+  g_assert_cmpint (lfb_event_get_state (event0), ==, LFB_EVENT_STATE_ENDED);
+  g_assert_cmpint (lfb_event_get_end_reason (event0), ==, LFB_EVENT_END_REASON_NOT_FOUND);
+}
+
+static void
 test_lfb_integration_event_async (void)
 {
   g_autoptr(LfbEvent) event0 = NULL;
@@ -178,9 +226,9 @@ test_lfb_integration_event_async (void)
 
   event0 = lfb_event_new ("test-dummy-0");
   lfb_event_trigger_feedback_async (event0,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered,
-				    &cmp1);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered_quit,
+                                    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
   g_assert_true (event0 == cmp1);
@@ -194,16 +242,16 @@ test_lfb_integration_event_async (void)
 
   /* The async callback ends the main loop */
   lfb_event_trigger_feedback_async (event10,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_triggered,
-				    &cmp2);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered_quit,
+                                    &cmp2);
   g_main_loop_run (mainloop);
 
   /* The async callback ends the main loop */
   lfb_event_end_feedback_async (event10,
-				NULL,
-				(GAsyncReadyCallback)on_event_end_finished,
-				&cmp3);
+                                NULL,
+                                (GAsyncReadyCallback)on_event_end_finished,
+                                &cmp3);
   g_main_loop_run (mainloop);
 
   /* Check if callbacks saw the right event */
@@ -246,9 +294,9 @@ test_lfb_integration_event_async_error (void)
   /* Empty event names are invalid */
   event0 = lfb_event_new ("");
   lfb_event_trigger_feedback_async (event0,
-				    NULL,
-				    (GAsyncReadyCallback)on_event_with_error_triggered,
-				    &cmp1);
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_with_error_triggered,
+                                    &cmp1);
   g_main_loop_run (mainloop);
   /* The async finish callback saw the right event */
   g_assert_true (event0 == cmp1);
@@ -288,29 +336,34 @@ main (gint argc, gchar *argv[])
   g_test_init (&argc, &argv, NULL);
 
   g_test_add("/feedbackd/lfb-integration/event_sync", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_sync,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_sync,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_async/success", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_async,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_async,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_async/error", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_async_error,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_async_error,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/event_not_found", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_event_not_found,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_not_found,
+             (gpointer)fixture_teardown);
+
+  g_test_add("/feedbackd/lfb-integration/event_not_found_async", TestFixture, NULL,
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_event_not_found_async,
+             (gpointer)fixture_teardown);
 
   g_test_add("/feedbackd/lfb-integration/profile", TestFixture, NULL,
-	     (gpointer)fixture_setup,
-	     (gpointer)test_lfb_integration_profile,
-	     (gpointer)fixture_teardown);
+             (gpointer)fixture_setup,
+             (gpointer)test_lfb_integration_profile,
+             (gpointer)fixture_teardown);
 
   return g_test_run();
 }
