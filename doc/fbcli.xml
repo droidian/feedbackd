@@ -52,7 +52,7 @@ print help and exit
 <para>
   Submit the given event to <command>feedbackd</command>. Valid events are
   listes in the event naming spec at
-  <ulink url="https://source.puri.sm/Librem5/feedbackd/-/blob/master/Event-naming-spec-0.0.0.md"/>
+  <ulink url="https://source.puri.sm/Librem5/feedbackd/-/blob/main/Event-naming-spec-0.0.0.md"/>
 </para>
 </varlistentry>
 
