@@ -73,6 +73,10 @@ events. This will allow us to act as a system sound library so
 applications only need to call into this library and things like
 the quiet and silent profile work out of the box.
 
+Any feedback triggered by a client via an event will be stopped latest when the
+client disconnects from DBus. This makes sure all feedbacks get canceled if the
+app that triggered it crashes.
+
 ## Feedback theme
 Events are then mapped to a specific type of feedback (sound, led, vibra) via a
 device specific theme (since devices have different capabilities).
