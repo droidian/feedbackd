@@ -204,6 +204,11 @@ Run feedbacks for event `message-new-instant` for 10 seconds:
 _build/cli/fbcli -t 10 -E alarm-clock-elapsed
 ```
 
+## Python example
+
+There's an `example.py` script in the example/ folder of the
+repository demonstrating how to trigger feedback via an event.
+
 ## Per app profiles
 One can set the feedback profile of an individual application
 via `GSettings`. E.g. for an app with app id `sm.puri.Phosh`
