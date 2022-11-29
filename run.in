@@ -9,7 +9,7 @@ export FEEDBACK_THEME
 export GSETTINGS_SCHEMA_DIR="${ABS_BUILDDIR}/data"
 
 if [ "${FBD_GDB}" = 1 ]; then
-    echo "Running calls under gdb"
+    echo "Running feedbackd under gdb"
     WRAPPER="gdb --args"
 fi
 
