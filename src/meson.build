@@ -34,6 +34,7 @@ fbd_deps = [
   gio,
   gio_unix,
   glib,
+  gmobile,
   gobject,
   gsound,
   gudev,
