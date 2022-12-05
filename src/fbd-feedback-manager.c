@@ -25,6 +25,7 @@
 
 #define FEEDBACKD_SCHEMA_ID "org.sigxcpu.feedbackd"
 #define FEEDBACKD_KEY_PROFILE "profile"
+#define FEEDBACKD_KEY_THEME "theme"
 
 #define APP_SCHEMA FEEDBACKD_SCHEMA_ID ".application"
 #define APP_PREFIX "/org/sigxcpu/feedbackd/application/"
@@ -213,10 +214,15 @@ on_feedbackd_setting_changed (FbdFeedbackManager *self,
 
   g_return_if_fail (FBD_IS_FEEDBACK_MANAGER (self));
   g_return_if_fail (G_IS_SETTINGS (settings));
-  g_return_if_fail (!g_strcmp0 (key, FEEDBACKD_KEY_PROFILE));
 
-  profile = g_settings_get_string (settings, key);
-  fbd_feedback_manager_set_profile (self, profile);
+  if (g_str_equal (key, FEEDBACKD_KEY_PROFILE)) {
+    profile = g_settings_get_string (settings, key);
+    fbd_feedback_manager_set_profile (self, profile);
+  } else if (g_str_equal (key, FEEDBACKD_KEY_THEME)) {
+    fbd_feedback_manager_load_theme (self);
+  } else {
+    g_critical ("Unknown settings key '%s'", key);
+  }
 }
 
 static void
@@ -442,6 +448,8 @@ fbd_feedback_manager_constructed (GObject *object)
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
+  g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_THEME,
+                            G_CALLBACK (on_feedbackd_setting_changed), self);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
                             G_CALLBACK (on_feedbackd_setting_changed), self);
   on_feedbackd_setting_changed (self, FEEDBACKD_KEY_PROFILE, self->settings);
@@ -546,6 +554,8 @@ fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
   g_autoptr (FbdFeedbackTheme) theme = NULL;
   g_autoptr (GError) err = NULL;
   g_auto (GStrv) compatibles = NULL;
+  g_autofree char *theme_name = NULL;
+  const char *theme_file = g_getenv (FEEDBACKD_THEME_VAR);
 
   compatibles = gm_devicetree_get_compatibles (NULL, &err);
   if (compatibles == NULL && err) {
@@ -553,11 +563,12 @@ fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
     g_clear_error (&err);
   }
 
-  expander = fbd_theme_expander_new ((const char *const *)compatibles,
-                                     NULL,
-                                     g_getenv (FEEDBACKD_THEME_VAR));
-  theme = fbd_theme_expander_load_theme_files (expander, &err);
+  if (theme_file == NULL)
+    theme_name = g_settings_get_string (self->settings, FEEDBACKD_KEY_THEME);
 
+  expander = fbd_theme_expander_new ((const char *const *)compatibles,
+                                     theme_name, theme_file);
+  theme = fbd_theme_expander_load_theme_files (expander, &err);
   if (theme) {
     g_set_object(&self->theme, theme);
   } else {
