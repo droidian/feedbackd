@@ -439,8 +439,6 @@ fbd_feedback_manager_constructed (GObject *object)
 
   G_OBJECT_CLASS (fbd_feedback_manager_parent_class)->constructed (object);
 
-  fbd_feedback_manager_load_theme(self);
-
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);

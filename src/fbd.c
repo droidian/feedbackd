@@ -92,6 +92,7 @@ int main(int argc, char *argv[])
 {
   g_autoptr(GError) err = NULL;
   g_autoptr(GOptionContext) opt_context = NULL;
+  g_autoptr (FbdFeedbackManager) manager = NULL;
 
   opt_context = g_option_context_new ("- A daemon to trigger event feedback");
   if (!g_option_context_parse (opt_context, &argc, &argv, &err)) {
@@ -99,6 +100,9 @@ int main(int argc, char *argv[])
     g_clear_error (&err);
     return 1;
   }
+
+  manager = fbd_feedback_manager_get_default ();
+  fbd_feedback_manager_load_theme (manager);
 
   g_unix_signal_add (SIGTERM, quit_cb, NULL);
   g_unix_signal_add (SIGINT, quit_cb, NULL);
@@ -117,6 +121,4 @@ int main(int argc, char *argv[])
 
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
-
-  g_object_unref (fbd_feedback_manager_get_default ());
 }
