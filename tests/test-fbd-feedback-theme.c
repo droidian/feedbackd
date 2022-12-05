@@ -97,10 +97,15 @@ test_fbd_feedback_theme_parse (void)
   g_autoptr (GError) err = NULL;
   g_autoptr (FbdFeedbackTheme) theme = NULL;
   FbdFeedbackProfile *profile;
+  const char *name;
 
   theme = fbd_feedback_theme_new_from_data (json, &err);
   g_assert_no_error (err);
   g_assert_nonnull (theme);
+
+  name = fbd_feedback_theme_get_name (theme);
+  g_assert_cmpstr ("test", ==, name);
+
   profile = fbd_feedback_theme_get_profile (theme, "full");
   g_assert_true (FBD_IS_FEEDBACK_PROFILE(profile));
   g_assert_cmpstr ("full", ==,
