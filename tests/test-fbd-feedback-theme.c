@@ -65,6 +65,7 @@ test_fbd_feedback_theme_parse (void)
   const char *json ="                             "
         "{                                        "
         "  \"name\" : \"test\",                   "
+        "  \"parent-name\" : \"parent-test\",     "
         "  \"profiles\" : [                       "
         "    {                                    "
         "      \"name\" : \"full\",               "
@@ -105,6 +106,9 @@ test_fbd_feedback_theme_parse (void)
 
   name = fbd_feedback_theme_get_name (theme);
   g_assert_cmpstr ("test", ==, name);
+
+  name = fbd_feedback_theme_get_parent_name (theme);
+  g_assert_cmpstr ("parent-test", ==, name);
 
   profile = fbd_feedback_theme_get_profile (theme, "full");
   g_assert_true (FBD_IS_FEEDBACK_PROFILE(profile));

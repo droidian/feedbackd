@@ -18,6 +18,7 @@
 enum {
   PROP_0,
   PROP_NAME,
+  PROP_PARENT_NAME,
   PROP_PROFILES,
   PROP_LAST_PROP,
 };
@@ -27,6 +28,8 @@ typedef struct _FbdFeedbackTheme {
   GObject parent;
 
   char *name;
+  char *parent_name;
+
   GHashTable *profiles;
 } FbdFeedbackTheme;
 
@@ -125,6 +128,9 @@ fbd_feedback_theme_set_property (GObject        *object,
   case PROP_NAME:
     fbd_feedback_theme_set_name (self, g_value_get_string (value));
     break;
+  case PROP_PARENT_NAME:
+    fbd_feedback_theme_set_parent_name (self, g_value_get_string (value));
+    break;
   case PROP_PROFILES:
     if (self->profiles)
       g_hash_table_unref (self->profiles);
@@ -148,6 +154,9 @@ fbd_feedback_theme_get_property (GObject  *object,
   switch (property_id) {
   case PROP_NAME:
     g_value_set_string (value, fbd_feedback_theme_get_name (self));
+    break;
+  case PROP_PARENT_NAME:
+    g_value_set_string (value, fbd_feedback_theme_get_parent_name (self));
     break;
   case PROP_PROFILES:
     g_value_set_boxed (value, self->profiles);
@@ -201,6 +210,14 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
       "name",
       "Name",
       "The theme name",
+      NULL,
+      G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_PARENT_NAME] =
+    g_param_spec_string (
+      "parent-name",
+      "Parent theme Name",
+      "The parent theme name",
       NULL,
       G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -277,6 +294,31 @@ fbd_feedback_theme_get_name (FbdFeedbackTheme *self)
 
   return self->name;
 }
+
+
+void
+fbd_feedback_theme_set_parent_name (FbdFeedbackTheme *self, const char *parent_name)
+{
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+
+  if (g_strcmp0 (self->parent_name, parent_name) == 0)
+    return;
+
+  g_free (self->parent_name);
+  self->parent_name = g_strdup (parent_name);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARENT_NAME]);
+}
+
+
+const char *
+fbd_feedback_theme_get_parent_name (FbdFeedbackTheme *self)
+{
+  g_return_val_if_fail (FBD_IS_FEEDBACK_THEME (self), "");
+
+  return self->parent_name;
+}
+
 
 void
 fbd_feedback_theme_add_profile (FbdFeedbackTheme *self, FbdFeedbackProfile *profile)
