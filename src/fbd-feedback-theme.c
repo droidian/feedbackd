@@ -187,20 +187,6 @@ json_serializable_iface_init (JsonSerializableIface *iface)
 }
 
 static void
-fbd_feedback_theme_constructed (GObject *object)
-{
-  FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
-
-  G_OBJECT_CLASS (fbd_feedback_theme_parent_class)->constructed (object);
-
-  self->profiles = g_hash_table_new_full (g_str_hash,
-                                          g_str_equal,
-                                          g_free,
-                                          (GDestroyNotify)g_object_unref);
-}
-
-
-static void
 fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -208,7 +194,6 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
   object_class->set_property = fbd_feedback_theme_set_property;
   object_class->get_property = fbd_feedback_theme_get_property;
 
-  object_class->constructed = fbd_feedback_theme_constructed;
   object_class->dispose = fbd_feedback_theme_dispose;
   object_class->finalize = fbd_feedback_theme_finalize;
 
@@ -235,6 +220,10 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
 static void
 fbd_feedback_theme_init (FbdFeedbackTheme *self)
 {
+  self->profiles = g_hash_table_new_full (g_str_hash,
+                                          g_str_equal,
+                                          g_free,
+                                          (GDestroyNotify)g_object_unref);
 }
 
 FbdFeedbackTheme *
