@@ -35,7 +35,7 @@ typedef struct _FbdFeedbackProfile {
   GObject parent;
 
   gchar *name;
-  GHashTable *feedbacks;
+  GHashTable *feedbacks; /* key: event name, value: feedback */
 } FbdFeedbackProfile;
 
 static void json_serializable_iface_init (JsonSerializableIface *iface);
