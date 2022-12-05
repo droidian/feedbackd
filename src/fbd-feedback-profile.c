@@ -341,3 +341,33 @@ fbd_feedback_profile_level_to_string (FbdFeedbackProfileLevel level)
     return "full";
   }
 }
+
+/**
+ * fbd_profile_update:
+ * @self: The profile that should be updated
+ * @new: The profile theme we want to take new feedbacks from
+ *
+ * Updates a profile. Feedbacks are read from the `new` profile. If
+ * feedback already exists in `self` it is overwritten with the feedback
+ * from `new`.
+ *
+ * It is not allowed to update a profile with a profile of a different name.
+ */
+void
+fbd_feedback_profile_update (FbdFeedbackProfile *self, FbdFeedbackProfile *new)
+{
+  GHashTableIter iter;
+  const char *event_name;
+  FbdFeedbackBase *fb;
+
+  g_return_if_fail (FBD_IS_FEEDBACK_PROFILE (self));
+  g_return_if_fail (FBD_IS_FEEDBACK_PROFILE (new));
+
+  g_return_if_fail (g_str_equal (fbd_feedback_profile_get_name (self),
+                                 fbd_feedback_profile_get_name (new)));
+
+  g_hash_table_iter_init (&iter, new->feedbacks);
+  while (g_hash_table_iter_next (&iter, (gpointer)&event_name, (gpointer)&fb)) {
+    g_hash_table_insert (self->feedbacks, g_strdup (event_name), g_object_ref (fb));
+  }
+}
