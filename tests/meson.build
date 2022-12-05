@@ -53,7 +53,8 @@ endforeach
 if get_option('daemon')
 
 test_fbd_cflags = [
-  '-DTEST_APP_ID="org.sigxcpu.feedbackd_test"',
+    '-DTEST_APP_ID="org.sigxcpu.feedbackd_test"',
+    '-DTEST_DATA_DIR="@0@"'.format(join_paths(meson.current_source_dir(), 'data')),
 ]
 
 test_fbd_link_args = [

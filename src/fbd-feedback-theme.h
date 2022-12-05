@@ -21,8 +21,10 @@ G_DECLARE_FINAL_TYPE (FbdFeedbackTheme, fbd_feedback_theme, FBD, FEEDBACK_THEME,
 FbdFeedbackTheme   *fbd_feedback_theme_new (const char *name);
 FbdFeedbackTheme   *fbd_feedback_theme_new_from_data (const gchar *data, GError **error);
 FbdFeedbackTheme   *fbd_feedback_theme_new_from_file (const gchar *filename, GError **error);
+void                fbd_feedback_theme_update (FbdFeedbackTheme *self, FbdFeedbackTheme *from);
 
 const char         *fbd_feedback_theme_get_name (FbdFeedbackTheme *self);
+void                fbd_feedback_theme_set_name (FbdFeedbackTheme *self, const char *name);
 void                fbd_feedback_theme_add_profile (FbdFeedbackTheme *self,
 						    FbdFeedbackProfile *profile);
 FbdFeedbackProfile *fbd_feedback_theme_get_profile (FbdFeedbackTheme *self, const char *name);

@@ -319,3 +319,41 @@ fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
     g_debug ("No feedback for event %s", fbd_event_get_event (event));
   return feedbacks;
 }
+
+
+/**
+ * fbd_feedback_theme_update:
+ * @self: The feedback theme that should be updated
+ * @new: The feedback theme we want to take profiles and feedbacks new
+ *
+ * Merges two feedback themes. Feedbacks and profiles are read new
+ * the `new` theme.  If feedback already exists in the same profile
+ * of `self` it is overwritten with the feedback in `new`.
+ */
+void
+fbd_feedback_theme_update (FbdFeedbackTheme *self, FbdFeedbackTheme *new)
+{
+  GHashTableIter iter;
+  const char *profile_name;
+  FbdFeedbackProfile *profile;
+
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (new));
+
+  fbd_feedback_theme_set_name (self, fbd_feedback_theme_get_name (new));
+
+  g_hash_table_iter_init (&iter, new->profiles);
+  while (g_hash_table_iter_next (&iter, (gpointer)&profile_name, (gpointer)&profile)) {
+    FbdFeedbackProfile *current;
+
+    current = g_hash_table_lookup (self->profiles, profile_name);
+    if (current == NULL) {
+      current = fbd_feedback_profile_new (profile_name);
+      g_hash_table_insert (self->profiles,
+                           g_strdup (profile_name),
+                           current);
+    }
+
+    fbd_feedback_profile_update (current, profile);
+  }
+}
