@@ -14,6 +14,15 @@
       level given on events to the user.
     </description>
     </key>
+
+    <key name="theme" type="s">
+      <default>'default'</default>
+      <summary>The feedback theme to use</summary>
+      <description>
+        The feedback theme determines which feedbacks are triggered when
+        feedbackd receives an event.
+      </description>
+    </key>
   </schema>
 
   <schema id="org.sigxcpu.feedbackd.application">
