@@ -126,3 +126,11 @@ static void
 fbd_feedback_dummy_init (FbdFeedbackDummy *self)
 {
 }
+
+guint
+fbd_feedback_dummy_get_duration (FbdFeedbackDummy *self)
+{
+  g_return_val_if_fail (FBD_IS_FEEDBACK_DUMMY (self), 0);
+
+  return self->duration;
+}

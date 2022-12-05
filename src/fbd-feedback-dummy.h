@@ -13,4 +13,6 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (FbdFeedbackDummy, fbd_feedback_dummy, FBD, FEEDBACK_DUMMY, FbdFeedbackBase);
 
+guint fbd_feedback_dummy_get_duration (FbdFeedbackDummy *self);
+
 G_END_DECLS
