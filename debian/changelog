@@ -13,7 +13,7 @@ feedbackd (0.0.1) byzantium; urgency=medium
     invocation of the user provided callback when g_task_return_*() is
     called.
     Currently GTask is completed first and only afterwards is the state of
-    the event being updated which can lead to suprising behaviour.
+    the event being updated which can lead to surprising behaviour.
   * feedback-manager: Use guint for event id.
     The ID is inserted into a hashtable below with GUINT_TO_POINTER
     and is set using self->next_id++ with next_id also being a guint,
@@ -26,7 +26,8 @@ feedbackd (0.0.1) byzantium; urgency=medium
     as we will shortly introduce a variant that does not quit.
   * tests/integration: Fix whitespace.
     Remove all tabs in favour of spaces and align function arguments.
-  * tests/integration: Test that "feedback-ended" is propagated through LfbEvent.
+  * tests/integration: Test that "feedback-ended" is propagated through
+    LfbEvent.
     When no feedbacks are available (either because the requested event does
     not exist in the theme or because the system does not have required
     capabilities, e.g. no vibration motor or LED) feedbackd will emit a
@@ -46,7 +47,7 @@ feedbackd (0.0.1) byzantium; urgency=medium
   * lfb-event: Fix typo. It's LfbEvent
   * lfb-event: Use consistent prefix.
     Make async data use the same prefix.
-  * Use g_error() when library is not initalized.
+  * Use g_error() when library is not initialized.
     This makes sure it still works when asserts are disabled.
   * lfb-event: Untabify
   * tests: Drop unused variable
