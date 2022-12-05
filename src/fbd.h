@@ -13,6 +13,7 @@ G_BEGIN_DECLS
 
 typedef enum {
     FBD_ERROR_FAILED = 0,
+    FBD_ERROR_THEME_EXPAND = 1,
 } FbdError;
 
 GQuark fbd_error_quark (void);

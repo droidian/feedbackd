@@ -27,6 +27,7 @@ sources = [
   'fbd-feedback-vibra.c',
   'fbd-feedback-vibra-periodic.c',
   'fbd-feedback-vibra-rumble.c',
+  'fbd-theme-expander.c',
   'fbd-udev.c',
 ]
 

@@ -14,6 +14,10 @@
 #include "fbd-feedback-vibra.h"
 #include "fbd-feedback-manager.h"
 #include "fbd-feedback-theme.h"
+#include "fbd-theme-expander.h"
+
+#define GMOBILE_USE_UNSTABLE_API
+#include <gmobile.h>
 
 #include <gio/gio.h>
 #include <glib-unix.h>
@@ -21,14 +25,11 @@
 
 #define FEEDBACKD_SCHEMA_ID "org.sigxcpu.feedbackd"
 #define FEEDBACKD_KEY_PROFILE "profile"
-#define FEEDBACKD_THEME_VAR "FEEDBACK_THEME"
 
 #define APP_SCHEMA FEEDBACKD_SCHEMA_ID ".application"
 #define APP_PREFIX "/org/sigxcpu/feedbackd/application/"
 
-#define DEVICE_TREE_PATH "/sys/firmware/devicetree/base/compatible"
-#define DEVICE_NAME_MAX 1024
-
+#define FEEDBACKD_THEME_VAR "FEEDBACK_THEME"
 
 /**
  * SECTION:fbd-feedback-manager
@@ -430,65 +431,6 @@ fbd_feedback_manager_handle_end_feedback (LfbGdbusFeedback      *object,
   return TRUE;
 }
 
-static const gchar *
-find_themefile (void)
-{
-  gint i = 0;
-  gsize len;
-  const gchar *comp;
-
-  g_autoptr (GError) err = NULL;
-  g_autofree gchar *user_config_path = NULL;
-  gchar **xdg_data_dirs = (gchar **) g_get_system_data_dirs ();
-  g_autofree gchar *compatibles = NULL;
-
-  // First look for a default file under $XDG_DATA_HOME
-  user_config_path = g_build_filename (g_get_user_config_dir (), "feedbackd",
-                                       "themes", "default.json", NULL);
-  if (g_file_test (user_config_path, (G_FILE_TEST_EXISTS))) {
-    g_debug ("Found user themefile at: %s", user_config_path);
-    return g_steal_pointer (&user_config_path);
-  }
-
-  // Try to read the device name
-  if (g_file_test (DEVICE_TREE_PATH, (G_FILE_TEST_EXISTS))) {
-    g_debug ("Found device tree device compatible at %s", DEVICE_TREE_PATH);
-
-    // Check if feedbackd has a proper config available this device
-    if (!g_file_get_contents (DEVICE_TREE_PATH, &compatibles, &len, &err))
-      g_warning ("Unable to read: %s", err->message);
-
-    comp = compatibles;
-    while (comp - compatibles < len) {
-
-      // Iterate over $XDG_DATA_DIRS
-      for (i = 0; i < g_strv_length (xdg_data_dirs); i++) {
-        g_autofree gchar *config_path = NULL;
-        g_autofree gchar *theme_file_name = NULL;
-
-        // We leave it to g_build_filename to add/remove erroneous path separators
-        theme_file_name = g_strconcat (comp, ".json", NULL);
-        config_path = g_build_filename (xdg_data_dirs[i], "feedbackd", "themes",
-                                        theme_file_name, NULL);
-        g_debug ("Searching for device specific themefile in %s", config_path);
-
-        // Check if file exist
-        if (g_file_test (config_path, (G_FILE_TEST_EXISTS))) {
-          g_debug ("Found themefile for this device at: %s", config_path);
-          return g_steal_pointer (&config_path);
-        }
-      }
-
-      // Next compatible
-      comp = strchr (comp, 0);
-      comp++;
-    }
-  }else  {
-    g_debug ("Device tree path does not exist: %s", DEVICE_TREE_PATH);
-  }
-
-  return NULL;
-}
 
 static void
 fbd_feedback_manager_constructed (GObject *object)
@@ -599,31 +541,31 @@ fbd_feedback_manager_get_dev_leds (FbdFeedbackManager *self)
   return self->leds;
 }
 
-void fbd_feedback_manager_load_theme (FbdFeedbackManager *self) {
-  g_autoptr (GError) err = NULL;
+void
+fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
+{
+  g_autoptr (FbdThemeExpander) expander = NULL;
   g_autoptr (FbdFeedbackTheme) theme = NULL;
-  const gchar *themefile;
+  g_autoptr (GError) err = NULL;
+  g_auto (GStrv) compatibles = NULL;
 
-  // Overide themefile with environment variable if requested
-  themefile = g_getenv (FEEDBACKD_THEME_VAR);
+  compatibles = gm_devicetree_get_compatibles (NULL, &err);
+  if (compatibles == NULL && err) {
+    g_debug ("Failed to get compatibles: %s", err->message);
+    g_clear_error (&err);
+  }
 
-  // Search for device-specific configuration
-  if (!themefile)
-    themefile = find_themefile ();
+  expander = fbd_theme_expander_new ((const char *const *)compatibles,
+                                     g_getenv (FEEDBACKD_THEME_VAR));
+  theme = fbd_theme_expander_load_theme_files (expander, &err);
 
-  // Fallback to default configuration if needed
-  if (!themefile)
-    themefile = FEEDBACKD_THEME_DIR "/default.json";
-  g_info ("Using themefile: %s", themefile);
-
-  theme = fbd_feedback_theme_new_from_file (themefile, &err);
   if (theme) {
     g_set_object(&self->theme, theme);
   } else {
     if (self->theme)
       g_warning ("Failed to reload theme: %s", err->message);
     else
-      g_error ("Failed to load theme: %s", err->message); // No point to carry on
+      g_error ("Failed to load any theme: %s", err->message); // No point to carry on
   }
 }
 
