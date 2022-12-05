@@ -115,9 +115,9 @@ fbd_theme_serializable_deserialize_property (JsonSerializable *serializable,
 
 static void
 fbd_feedback_theme_set_property (GObject        *object,
-                                   guint         property_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec)
+                                 guint         property_id,
+                                 const GValue *value,
+                                 GParamSpec   *pspec)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
@@ -140,9 +140,9 @@ fbd_feedback_theme_set_property (GObject        *object,
 
 static void
 fbd_feedback_theme_get_property (GObject  *object,
-                                   guint       property_id,
-                                   GValue     *value,
-                                   GParamSpec *pspec)
+                                 guint       property_id,
+                                 GValue     *value,
+                                 GParamSpec *pspec)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
