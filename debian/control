@@ -6,6 +6,7 @@ Build-Depends:
  dbus,
  debhelper-compat (= 12),
  dh-sequence-gir,
+ gsettings-desktop-schemas <!nocheck>,
  gtk-doc-tools,
  json-glib-tools,
  libgirepository1.0-dev,
