@@ -556,6 +556,7 @@ fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
   }
 
   expander = fbd_theme_expander_new ((const char *const *)compatibles,
+                                     NULL,
                                      g_getenv (FEEDBACKD_THEME_VAR));
   theme = fbd_theme_expander_load_theme_files (expander, &err);
 

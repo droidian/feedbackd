@@ -12,9 +12,6 @@
 #include "fbd-feedback-theme.h"
 #include "fbd-theme-expander.h"
 
-#define DEVICE_TREE_PATH "/sys/firmware/devicetree/base/compatible"
-#define DEVICE_NAME_MAX 1024
-
 #define DEFAULT_THEME_NAME  "default"
 #define DEVICE_THEME_NAME   "$device"
 
@@ -31,6 +28,7 @@
 
 enum {
   PROP_0,
+  PROP_THEME_NAME,
   PROP_THEME_FILE,
   PROP_COMPATIBLES,
   PROP_LAST_PROP
@@ -40,6 +38,7 @@ static GParamSpec *props[PROP_LAST_PROP];
 struct _FbdThemeExpander {
   GObject    parent;
 
+  char      *theme_name;
   char      *theme_file;
   gboolean   device_theme_loaded;
   GStrv      compatibles;
@@ -59,6 +58,20 @@ fbd_theme_expander_set_compatibles (FbdThemeExpander *self, const char * const *
   self->device_theme_loaded = FALSE;
 }
 
+static void
+fbd_theme_expander_set_theme_name (FbdThemeExpander *self, const char *theme_name)
+{
+  g_return_if_fail (FBD_IS_THEME_EXPANDER (self));
+
+  g_free (self->theme_name);
+  if (theme_name)
+    self->theme_name = g_strdup (theme_name);
+  else
+    self->theme_name = g_strdup (DEFAULT_THEME_NAME);
+
+  /* Make sure we reload the device theme */
+  self->device_theme_loaded = FALSE;
+}
 
 static void
 fbd_theme_expander_set_theme_file (FbdThemeExpander *self, const char *theme_file)
@@ -187,6 +200,9 @@ fbd_theme_expander_set_property (GObject      *object,
   FbdThemeExpander *self = FBD_THEME_EXPANDER (object);
 
   switch (property_id) {
+  case PROP_THEME_NAME:
+    fbd_theme_expander_set_theme_name (self, g_value_get_string (value));
+    break;
   case PROP_THEME_FILE:
     fbd_theme_expander_set_theme_file (self, g_value_get_string (value));
     break;
@@ -209,6 +225,9 @@ fbd_theme_expander_get_property (GObject    *object,
   FbdThemeExpander *self = FBD_THEME_EXPANDER (object);
 
   switch (property_id) {
+  case PROP_THEME_NAME:
+    g_value_set_string (value, fbd_theme_expander_get_theme_name (self));
+    break;
   case PROP_THEME_FILE:
     g_value_set_string (value, fbd_theme_expander_get_theme_file (self));
     break;
@@ -227,6 +246,7 @@ fbd_theme_expander_finalize (GObject *object)
 {
   FbdThemeExpander *self = FBD_THEME_EXPANDER(object);
 
+  g_clear_pointer (&self->theme_name, g_free);
   g_clear_pointer (&self->theme_file, g_free);
   g_clear_pointer (&self->compatibles, g_strfreev);
 
@@ -243,6 +263,18 @@ fbd_theme_expander_class_init (FbdThemeExpanderClass *klass)
   object_class->set_property = fbd_theme_expander_set_property;
   object_class->finalize = fbd_theme_expander_finalize;
 
+  /**
+   * FbdThemeExpander:theme-name:
+   *
+   * Specifies the theme to expand. Assumes `default` if unset.
+   *
+   * The `compatibles` defines which device specific theme bits are loaded.
+   */
+  props[PROP_THEME_NAME] =
+    g_param_spec_string ("theme-name", "", "",
+                         DEFAULT_THEME_NAME,
+                         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY |
+                         G_PARAM_STATIC_STRINGS);
   /**
    * FbdThemeExpander:theme-file:
    *
@@ -278,9 +310,12 @@ fbd_theme_expander_init (FbdThemeExpander *self)
 
 
 FbdThemeExpander *
-fbd_theme_expander_new (const char * const *compatibles, const char *theme_file)
+fbd_theme_expander_new (const char * const *compatibles,
+                        const char *theme_name,
+                        const char *theme_file)
 {
   return FBD_THEME_EXPANDER (g_object_new (FBD_TYPE_THEME_EXPANDER,
+                                           "theme-name", theme_name,
                                            "theme-file", theme_file,
                                            "compatibles", compatibles,
                                            NULL));
@@ -322,10 +357,10 @@ fbd_theme_expander_load_theme_files (FbdThemeExpander *self, GError **err)
   g_return_val_if_fail (FBD_IS_THEME_EXPANDER (self), NULL);
   g_return_val_if_fail (err == NULL || *err == NULL, NULL);
 
-  if (self->theme_file)
+  if (self->theme_file) {
     theme_file = g_strdup (self->theme_file);
-  else {
-    theme_file = fbd_theme_expander_find_theme_path (self, DEFAULT_THEME_NAME);
+  } else {
+    theme_file = fbd_theme_expander_find_theme_path (self, self->theme_name);
     if (g_strcmp0 (self->theme_file, theme_file)) {
       self->theme_file = g_steal_pointer (&theme_file);
       g_object_notify_by_pspec (G_OBJECT (self), props[PROP_THEME_FILE]);
@@ -380,7 +415,17 @@ fbd_theme_expander_load_theme_files (FbdThemeExpander *self, GError **err)
   /* Merge themes bottom to top */
   g_queue_foreach (queue, update_theme, merged);
 
+  fbd_feedback_theme_set_name (merged, self->theme_name);
   return g_steal_pointer (&merged);
+}
+
+const char *
+fbd_theme_expander_get_theme_name (FbdThemeExpander *self)
+{
+  g_return_val_if_fail (FBD_IS_THEME_EXPANDER (self), NULL);
+
+  return self->theme_name;
+
 }
 
 const char *
