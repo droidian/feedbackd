@@ -147,7 +147,8 @@ fbd_feedback_vibra_init (FbdFeedbackVibra *self)
 {
 }
 
-guint fbd_feedback_vibra_get_duration (FbdFeedbackVibra *self)
+guint
+fbd_feedback_vibra_get_duration (FbdFeedbackVibra *self)
 {
   FbdFeedbackVibraPrivate *priv;
 
