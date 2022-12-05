@@ -12,7 +12,7 @@ stages:
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get -y update
     - apt-get -y build-dep .
-    - apt-get -y install gcovr
+    - apt-get -y install gcovr git
 
 .image: &image
   image:
