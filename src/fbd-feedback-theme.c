@@ -123,8 +123,7 @@ fbd_feedback_theme_set_property (GObject        *object,
 
   switch (property_id) {
   case PROP_NAME:
-    g_free (self->name);
-    self->name = g_value_dup_string (value);
+    fbd_feedback_theme_set_name (self, g_value_get_string (value));
     break;
   case PROP_PROFILES:
     if (self->profiles)
@@ -203,7 +202,7 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
       "Name",
       "The theme name",
       NULL,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+      G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_PROFILES] =
     g_param_spec_boxed (
@@ -255,6 +254,20 @@ fbd_feedback_theme_new_from_file (const gchar *filename, GError **error)
     return NULL;
 
   return fbd_feedback_theme_new_from_data (data, error);
+}
+
+void
+fbd_feedback_theme_set_name (FbdFeedbackTheme *self, const char *name)
+{
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+
+  if (g_strcmp0 (self->name, name) == 0)
+    return;
+
+  g_free (self->name);
+  self->name = g_strdup (name);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_NAME]);
 }
 
 const char *
