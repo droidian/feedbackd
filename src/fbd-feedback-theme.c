@@ -148,7 +148,7 @@ fbd_feedback_theme_get_property (GObject  *object,
 
   switch (property_id) {
   case PROP_NAME:
-    g_value_set_string (value, self->name);
+    g_value_set_string (value, fbd_feedback_theme_get_name (self));
     break;
   case PROP_PROFILES:
     g_value_set_boxed (value, self->profiles);
