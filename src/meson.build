@@ -12,7 +12,7 @@ fbd_enum_sources = gnome.mkenums_simple('fbd-enums',
 sources = [
   generated_dbus_sources,
   fbd_enum_sources,
-  'fbd.c',
+  'fbd-error.c',
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
   'fbd-dev-leds.c',

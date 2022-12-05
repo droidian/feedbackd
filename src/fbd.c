@@ -17,19 +17,6 @@
 
 static GMainLoop *loop;
 
-
-GQuark
-fbd_error_quark (void)
-{
-  static GQuark quark = 0;
-
-  if (!quark)
-    quark = g_quark_from_static_string("fbd");
-
-  return quark;
-}
-
-
 static gboolean
 quit_cb (gpointer user_data)
 {
