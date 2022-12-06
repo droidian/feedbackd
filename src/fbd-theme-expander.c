@@ -133,7 +133,7 @@ fbd_theme_expander_find_device_theme_path (FbdThemeExpander *self, const char *t
 
     theme_path = fbd_theme_expander_find_theme_in_xdg_data (compatible);
     if (theme_path) {
-      g_info ("Loading themefile for compatible '%s' at: %s", compatible, theme_path);
+      g_debug ("Loading themefile for compatible '%s' at: %s", compatible, theme_path);
       return g_steal_pointer (&theme_path);
     }
   }
@@ -367,6 +367,7 @@ fbd_theme_expander_load_theme_files (FbdThemeExpander *self, GError **err)
     }
   }
 
+  g_info ("Loading theme file at '%s'", self->theme_file);
   theme = fbd_feedback_theme_new_from_file (self->theme_file, err);
   if (theme == NULL)
       return NULL;
