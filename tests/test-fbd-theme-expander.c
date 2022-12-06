@@ -38,7 +38,9 @@ test_fbd_theme_expander_device (void)
 
   theme = fbd_theme_expander_load_theme_files (expander, &err);
   compatibles2 = fbd_theme_expander_get_compatibles (expander);
+#if GLIB_CHECK_VERSION(2, 68, 0)
   g_assert_cmpstrv (compatibles2, compatibles);
+#endif
   g_assert_no_error (err);
   profile = fbd_feedback_theme_get_profile (theme, "silent");
   g_assert_null (profile);
@@ -53,7 +55,9 @@ test_fbd_theme_expander_device (void)
   compatibles[0] = "chainup";
   expander = fbd_theme_expander_new (compatibles, NULL, NULL);
   compatibles2 = fbd_theme_expander_get_compatibles (expander);
+#if GLIB_CHECK_VERSION(2, 68, 0)
   g_assert_cmpstrv (compatibles2, compatibles);
+#endif
   theme = fbd_theme_expander_load_theme_files (expander, &err);
   g_assert_no_error (err);
   profile = fbd_feedback_theme_get_profile (theme, "silent");
@@ -69,7 +73,9 @@ test_fbd_theme_expander_device (void)
   compatibles[0] = "replace";
   expander = fbd_theme_expander_new (compatibles, NULL, NULL);
   compatibles2 = fbd_theme_expander_get_compatibles (expander);
+#if GLIB_CHECK_VERSION(2, 68, 0)
   g_assert_cmpstrv (compatibles2, compatibles);
+#endif
   theme = fbd_theme_expander_load_theme_files (expander, &err);
   g_assert_no_error (err);
   profile = fbd_feedback_theme_get_profile (theme, "full");
