@@ -4,6 +4,8 @@ expand_content_md_files = [
   'overview.md',
   'build-howto.md',
   'initialization.md',
+  'Event-naming-spec-0.0.0.md',
+  'Feedback-theme-spec-0.0.0.md',
 ]
 
 toml_data = configuration_data()

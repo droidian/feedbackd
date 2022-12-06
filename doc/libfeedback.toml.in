@@ -39,4 +39,6 @@ content_files = [
   "overview.md",
   "build-howto.md",
   "initialization.md",
+  "Event-naming-spec-0.0.0.md",
+  "Feedback-theme-spec-0.0.0.md",
 ]

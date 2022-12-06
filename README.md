@@ -67,7 +67,7 @@ See `examples/` for a simple python example using GObject introspection.
 
 # How it works
 
-We're using a [event naming spec](./Event-naming-spec-0.0.0.md)
+We're using a [event naming spec](./doc/Event-naming-spec-0.0.0.md)
 similar to http://0pointer.de/public/sound-naming-spec.html to name
 events. This will allow us to act as a system sound library so
 applications only need to call into this library and things like
@@ -221,8 +221,8 @@ GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.applicatio
 # Documentation
 
 - [Libfeedback API](https://honk.sigxcpu.org/projects/feedbackd/doc/)
-- [Event naming spec draft](./Event-naming-spec-0.0.0.md)
-- [Feedback-theme-spec draft](./Feedback-theme-spec-0.0.0.md)
+- [Event naming spec draft](./doc/Event-naming-spec-0.0.0.md)
+- [Feedback-theme-spec draft](./doc/Feedback-theme-spec-0.0.0.md)
 
 [debian/control]: ./debian/control#L5
-[1]: https://source.puri.sm/Librem5/feedbackd-device-themes)
+[1]: https://source.puri.sm/Librem5/feedbackd-device-themes
