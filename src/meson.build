@@ -80,4 +80,13 @@ executable(
   install_dir: libexecdir,
 )
 
+executable(
+  'fbd-theme-validate',
+  sources : ['fbd-theme-validate.c'],
+  include_directories : fbd_inc,
+  dependencies : fbd_dep,
+  install : true,
+  install_dir: bindir,
+)
+
 endif

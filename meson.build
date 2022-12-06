@@ -28,6 +28,7 @@ endif
 
 prefix = get_option('prefix')
 
+bindir = join_paths(prefix, get_option('bindir'))
 datadir = join_paths(prefix, get_option('datadir'))
 libdir = join_paths(prefix, get_option('libdir'))
 girdir = join_paths(prefix, join_paths(datadir, 'gir-1.0'))
@@ -90,6 +91,7 @@ endif
 global_c_args = [
   '-DFEEDBACKD_THEME_DIR="@0@"'.format(feedbackd_theme_dir),
   '-DLIBFEEDBACK_COMPILATION',
+  '-DFBD_VERSION="@0@"'.format(meson.project_version()),
 ]
 
 add_project_arguments(
