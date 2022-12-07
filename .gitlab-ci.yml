@@ -65,9 +65,9 @@ test:native-debian-bookworm:
     variables:
       - $PKG_ONLY == "1"
 
-package:deb-pureos-byzantium:arm64:
+package:deb-debian-bookwarm:arm64:
   variables:
-    L5_DOCKER_IMAGE: pureos/byzantium
+    L5_DOCKER_IMAGE: debian:bookworm
   extends: .l5-build-debian-package
   tags:
     - librem5:arm64
