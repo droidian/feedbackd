@@ -51,6 +51,7 @@ endif
 if get_option('man')
   manpages = [
     ['fbcli', 1],
+    ['fbd-theme-validate', 1],
     ['feedbackd', 8],
   ]
 
