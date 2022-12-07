@@ -50,31 +50,30 @@ endif
 
 if get_option('man')
   manpages = [
-    'fbcli',
-    'feedbackd',
+    ['fbcli', 1],
+    ['feedbackd', 8],
   ]
 
-  xsltproc = find_program('xsltproc', required : true)
-  xsltproc_command = [
-    xsltproc,
-    '--nonet',
-    '--stringparam', 'man.output.quietly', '1',
-    '--stringparam', 'funcsynopsis.style', 'ansi',
-    '--stringparam', 'man.th.extra1.suppress', '1',
-    '--stringparam', 'man.authors.section.enabled', '0',
-    '--stringparam', 'man.copyright.section.enabled', '0',
-    '-o', '@OUTPUT@',
-    'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl',
-    '@INPUT@',
+  rst2man = find_program('rst2man', 'rst2man.py', required: false)
+  rst2man_flags = [
+    '--syntax-highlight=none',
   ]
-  man1_dir = get_option('mandir') + '/man1'
 
-  foreach page : manpages
-    custom_target(page + '-man',
-      input  : page + '.xml',
-      output : page + '.1',
-      command: xsltproc_command,
+  foreach manpage: manpages
+    man_name = manpage[0]
+    man_section = manpage[1]
+
+    custom_target('man-@0@'.format(man_name),
+      input: '@0@.rst'.format(man_name),
+      output: '@0@.@1@'.format(man_name, man_section),
+      command: [
+        rst2man,
+        rst2man_flags,
+        '@INPUT@',
+      ],
+      capture: true,
       install: true,
-      install_dir: man1_dir)
+      install_dir: get_option('mandir') / 'man@0@'.format(man_section),
+    )
   endforeach
 endif
