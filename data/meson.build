@@ -59,7 +59,7 @@ if json_glib_validate.found()
 		build_by_default: true,
 		input: theme_json,
 		output: 'json_validate_stamp',
-		command: [json_glib_validate.path()] + jsons)
+		command: [json_glib_validate.full_path()] + jsons)
 endif
 
 endif # daemon

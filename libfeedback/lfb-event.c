@@ -10,7 +10,7 @@
 #include <gio/gio.h>
 
 /**
- * SECTION:lfb-event
+ * LfbEvent:
  * @Short_description: An event triggering feedback to the user
  * @Title: LfbEvent
  *
@@ -23,53 +23,53 @@
  * One event can trigger multiple feedbacks at once (e.g. audio and
  * haptic feedback). This is determined by the feedback theme in
  * use (which is not under the appliction's control) and the active
- * feedback profile (see #lfb_set_feedback_profile()).
+ * feedback profile (see [func@Lfb.set_feedback_profile]().
  *
- * After initializing the library via #lfb_init() feedback can be
+ * After initializing the library via [func@Lfb.init]() feedback can be
  * triggered like:
  *
- * |[
- *    g_autoptr (GError) err = NULL;
- *    LfbEvent *event = lfb_event_new ("message-new-instant");
- *    lfb_event_set_timeout (event, 0);
- *    if (!lfb_event_trigger_feedback (event, &err))
- *      g_warning ("Failed to trigger feedback: %s", err->message);
- * ]|
+ * ```c
+ *   g_autoptr (GError) err = NULL;
+ *   LfbEvent *event = lfb_event_new ("message-new-instant");
+ *   lfb_event_set_timeout (event, 0);
+ *   if (!lfb_event_trigger_feedback (event, &err))
+ *     g_warning ("Failed to trigger feedback: %s", err->message);
+ * ```
  *
- * When all feedback for this event has ended the #LfbEvent::feedback-ended
+ * When all feedback for this event has ended the [signal@LfbEvent::feedback-ended]
  * signal is emitted. If you want to end the feedback ahead of time use
- * #lfb_event_end_feedback ():
+ * [method@LfbEvent.end_feedback]():
  *
- * |[
- *    if (!lfb_event_end_feedback (event, &err))
- *      g_warning ("Failed to end feedback: %s", err->message);
- * ]|
+ * ```c
+ *   if (!lfb_event_end_feedback (event, &err))
+ *     g_warning ("Failed to end feedback: %s", err->message);
+ * ```
  *
  * Since these methods involve DBus calls there are asynchronous variants
- * available, e.g. #lfb_event_trigger_feedback_async():
+ * available, e.g. [method@LfbEvent.trigger_feedback_async]():
  *
- * |[
- *    static void
- *    on_feedback_triggered (LfbEvent      *event,
- *                           GAsyncResult  *res,
- *                           gpointer      unused)
- *    {
- *       g_autoptr (GError) err = NULL;
- *       if (!lfb_event_trigger_feedback_finish (event, res, &err)) {
- *          g_warning ("Failed to trigger feedback for %s: %s",
- *                     lfb_event_get_event (event), err->message);
- *       }
- *    }
+ * ```c
+ *   static void
+ *   on_feedback_triggered (LfbEvent      *event,
+ *                          GAsyncResult  *res,
+ *                          gpointer      unused)
+ *   {
+ *      g_autoptr (GError) err = NULL;
+ *      if (!lfb_event_trigger_feedback_finish (event, res, &err)) {
+ *         g_warning ("Failed to trigger feedback for %s: %s",
+ *                    lfb_event_get_event (event), err->message);
+ *      }
+ *   }
  *
- *    static void
- *    my_function ()
- *    {
- *      LfbEvent *event = lfb_event_new ("message-new-instant");
- *      lfb_event_trigger_feedback_async (event, NULL,
- *                                       (GAsyncReadyCallback)on_feedback_triggered,
- *                                       NULL);
- *    }
- * ]|
+ *   static void
+ *   my_function ()
+ *   {
+ *     LfbEvent *event = lfb_event_new ("message-new-instant");
+ *     lfb_event_trigger_feedback_async (event, NULL,
+ *                                      (GAsyncReadyCallback)on_feedback_triggered,
+ *                                      NULL);
+ *   }
+ * ```
  */
 
 enum {
@@ -294,7 +294,7 @@ lfb_event_class_init (LfbEventClass *klass)
    *
    * How long feedback should be provided in seconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
-   * in a loop until ended explicitly via e.g. #lfb_event_end_feedback().
+   * in a loop until ended explicitly via e.g. [method@LfbEvent.end_feedback]().
    */
   props[PROP_TIMEOUT] =
     g_param_spec_int (
@@ -326,7 +326,7 @@ lfb_event_class_init (LfbEventClass *klass)
    * LfbEvent:feedback-profile:
    *
    * The name of the feedback profile to use for this event. See
-   * #lfb_event_set_feedback_profile() for details.
+   * [method@LfbEvent.set_feedback_profile]() for details.
    */
   props[PROP_FEEDBACK_PROFILE] =
     g_param_spec_string (
@@ -363,10 +363,10 @@ lfb_event_init (LfbEvent *self)
  * lfb_event_new:
  * @event: The event's name.
  *
- * Creates a new #LfbEvent based on the given event
- * name. See #LfbEvent:event for details.
+ * Creates a new [class@Lfb.Event] based on the given event
+ * name. See [property@Lfb.Event:event] for details.
  *
- * Returns: The #LfbEvent.
+ * Returns: The [class@Lfb.Event].
  */
 LfbEvent *
 lfb_event_new (const char *event)
@@ -446,13 +446,13 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
 /**
  * lfb_event_trigger_feedback_async:
  * @self: The event to trigger feedback for.
- * @cancellable: (nullable): A #GCancellable or %NULL.
+ * @cancellable: (nullable): A #GCancellable to cancel the operation or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
  *
  * Tells the feedback server to provide proper feedback for the give
  * event to the user. This is the sync version of
- * #lfb_event_trigger_feedback.
+ * [method@LfbEvent.trigger_feedback]().
  */
 void
 lfb_event_trigger_feedback_async (LfbEvent            *self,
@@ -494,11 +494,10 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
 /**
  * lfb_event_trigger_feedback_finish:
  * @self: the event
- * @res: Result object passed to the callback of
- *  #lfb_event_trigger_feedback_async
+ * @res: Result object passed to the callback of [method@LfbEvent.trigger_feedback_async]
  * @error: Return location for error
  *
- * Finish an async operation started by lfb_event_trigger_feedback_async. You
+ * Finish an async operation started by [method@LfbEvent.trigger_feedback_async](). You
  * must call this function in the callback to free memory and receive any
  * errors which occurred.
  *
@@ -544,8 +543,7 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
 /**
  * lfb_event_end_feedback_finish:
  * @self: the event
- * @res: Result object passed to the callback of
- *  #lfb_event_end_feedback_async
+ * @res: Result object passed to the callback of [method@LfbEvent.end_feedback_async]()
  * @error: Return location for error
  *
  * Finish an async operation started by lfb_event_end_feedback_async. You
@@ -553,7 +551,7 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
  * errors which occurred.
  *
  * This does not mean that the feedbacks finished right away. Connect to the
- * #LfbEvent::feedback-ended signal for this.
+ * [@signal@LfbEvent::feedback-ended] signal for this.
  *
  * Returns: %TRUE if ending the feedbacks was successful
  */
@@ -570,7 +568,7 @@ lfb_event_end_feedback_finish (LfbEvent      *self,
 /**
  * lfb_event_end_feedback_async:
  * @self: The event to end feedback for.
- * @cancellable: (nullable): A #GCancellable or %NULL.
+ * @cancellable: (nullable): A #GCancellable to cancel the operation or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
  *
@@ -611,10 +609,10 @@ lfb_event_end_feedback_async (LfbEvent            *self,
  * Tells the feedback server to end feedack after #timeout seconds.
  * The value -1 indicates to not set a timeout and let feedbacks stop
  * on their own while 0 indicates to loop all feedbacks endlessly.
- * They must be stopped via #lfb_event_end_feedback () in this case.
+ * They must be stopped via [method@LfbEvent.end_feedback]() in this case.
  *
  * It is an error to change the timeout after the feedback has been triggered
- * via lfb_event_trigger.
+ * via [method@LfbEvent.trigger_feedback]().
  */
 void
 lfb_event_set_timeout (LfbEvent *self, gint timeout)
@@ -649,7 +647,7 @@ lfb_event_get_event (LfbEvent *self)
  *
  * Get the currently set timeout.
  *
- * Returns: The event timeout in msecs
+ * Returns: The event timeout in milliseconds
  */
 gint
 lfb_event_get_timeout (LfbEvent *self)

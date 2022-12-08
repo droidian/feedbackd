@@ -1,3 +1,6 @@
+Title: Feedback Theme Specification
+Slug: Feedback Theme Specification
+
 # Overview
 
 A feedback theme defines the kind of feedback that events (as
@@ -64,7 +67,7 @@ silent:
 ```
 
 At the time of writing the theme format is daemon dependent. E.g. feedbackd
-uses a format [similar to the above in JSON](./data/default.json).
+uses a format [similar to the above in JSON](https://source.puri.sm/Librem5/feedbackd/-/blob/main/data/default.json)
 
 
 # Recommendations
@@ -75,4 +78,4 @@ uses a format [similar to the above in JSON](./data/default.json).
   be used.
 - The full feedback theme can use any available feedback mechanisms
 
-[Event naming spec]: ./Event-naming-spec-0.0.0.md
+[Event naming spec]: https://source.puri.sm/Librem5/feedbackd/-/blob/main/doc/Event-naming-spec-0.0.0.md

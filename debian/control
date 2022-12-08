@@ -5,9 +5,10 @@ Maintainer: Guido Günther <agx@sigxcpu.org>
 Build-Depends:
  dbus,
  debhelper-compat (= 12),
+ docbook-xsl <!nodoc>,
  dh-sequence-gir,
  gsettings-desktop-schemas <!nocheck>,
- gtk-doc-tools,
+ gi-docgen <!nodoc>,
  json-glib-tools,
  libgirepository1.0-dev,
  libglib2.0-dev,
@@ -17,6 +18,7 @@ Build-Depends:
  meson,
  pkg-config,
  valac,
+ xsltproc <!nodoc>,
 Standards-Version: 4.4.0
 Homepage: https://source.puri.sm/Librem5/feedbackd
 
@@ -80,8 +82,6 @@ Description: Development files for libfeedback
 Package: gir1.2-lfb-0.0
 Architecture: any
 Section: introspection
-Breaks: gir1.2-feedback-0.0 (<< 0.0.0+git20200420)
-Replaces: gir1.2-feedback-0.0 (<< 0.0.0+git20200420)
 Depends:
  ${gir:Depends},
  ${misc:Depends},

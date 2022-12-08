@@ -1,4 +1,5 @@
-This is similar in spirit (and heavily based on) to the [Sound naming spec][].
+Title: Event Naming Specification
+Slug: Event Naming Specification
 
 # Overview
 
@@ -10,6 +11,8 @@ Event creation, as well as providing a minimal list of must have
 Events, and a larger list with many more examples to help with the
 creation of extended Events for third party applications, with
 different event types and usage.
+
+This is similar in spirit (and heavily based on) to the [Sound naming spec][].
 
 # Context
 
