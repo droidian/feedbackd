@@ -65,6 +65,7 @@ test_fbd_feedback_theme_parse (void)
   const char *json ="                             "
         "{                                        "
         "  \"name\" : \"test\",                   "
+        "  \"parent-name\" : \"parent-test\",     "
         "  \"profiles\" : [                       "
         "    {                                    "
         "      \"name\" : \"full\",               "
@@ -97,10 +98,18 @@ test_fbd_feedback_theme_parse (void)
   g_autoptr (GError) err = NULL;
   g_autoptr (FbdFeedbackTheme) theme = NULL;
   FbdFeedbackProfile *profile;
+  const char *name;
 
   theme = fbd_feedback_theme_new_from_data (json, &err);
   g_assert_no_error (err);
   g_assert_nonnull (theme);
+
+  name = fbd_feedback_theme_get_name (theme);
+  g_assert_cmpstr ("test", ==, name);
+
+  name = fbd_feedback_theme_get_parent_name (theme);
+  g_assert_cmpstr ("parent-test", ==, name);
+
   profile = fbd_feedback_theme_get_profile (theme, "full");
   g_assert_true (FBD_IS_FEEDBACK_PROFILE(profile));
   g_assert_cmpstr ("full", ==,
@@ -111,6 +120,71 @@ test_fbd_feedback_theme_parse (void)
 		   fbd_feedback_profile_get_name (profile));
 }
 
+
+static void
+test_fbd_feedback_theme_update (void)
+{
+  g_autoptr (GError) err = NULL;
+  FbdFeedbackTheme *theme, *from;
+  FbdFeedbackProfile *profile;
+  FbdFeedbackBase *fb;
+  const char *name;
+
+  /* test-dummy-1x feedbacks */
+  from = fbd_feedback_theme_new_from_file (TEST_DATA_DIR "/parent/test.json", &err);
+  g_assert_no_error (err);
+  g_assert_true (FBD_IS_FEEDBACK_THEME (from));
+
+  /* test-dummy-0{0,1} feedbacks */
+  theme = fbd_feedback_theme_new_from_file (TEST_DATA_DIR "/parent/base.json", &err);
+  g_assert_no_error (err);
+  g_assert_true (FBD_IS_FEEDBACK_THEME (theme));
+
+  name = fbd_feedback_theme_get_name (from);
+  g_assert_cmpstr ("test", ==, name);
+
+  name = fbd_feedback_theme_get_name (theme);
+  g_assert_cmpstr ("base", ==, name);
+
+  /* `theme` is lacking "silent" while `from` has it */
+  profile = fbd_feedback_theme_get_profile (theme, "silent");
+  g_assert_null (profile);
+  profile = fbd_feedback_theme_get_profile (from, "silent");
+  g_assert_true (FBD_IS_FEEDBACK_PROFILE(profile));
+
+  fbd_feedback_theme_update (theme, from);
+
+  /* After merging `theme` has a silent profile too */
+  profile = fbd_feedback_theme_get_profile (theme, "silent");
+  g_assert_true (FBD_IS_FEEDBACK_PROFILE(profile));
+  g_assert_cmpstr ("silent", ==, fbd_feedback_profile_get_name (profile));
+
+  /* Name updated */
+  name = fbd_feedback_theme_get_name (theme);
+  g_assert_cmpstr ("test", ==, name);
+
+  /* test-dummy-10 added */
+  profile = fbd_feedback_theme_get_profile (theme, "full");
+  fb = fbd_feedback_profile_get_feedback (profile, "test-dummy-10");
+  g_assert_cmpstr ("test-dummy-10", ==, fbd_feedback_get_event_name (fb));
+  profile = fbd_feedback_theme_get_profile (theme, "quiet");
+  fb = fbd_feedback_profile_get_feedback (profile, "test-dummy-10");
+  g_assert_cmpstr ("test-dummy-10", ==, fbd_feedback_get_event_name (fb));
+  profile = fbd_feedback_theme_get_profile (theme, "silent");
+  fb = fbd_feedback_profile_get_feedback (profile, "test-dummy-10");
+  g_assert_cmpstr ("test-dummy-10", ==, fbd_feedback_get_event_name (fb));
+
+  /* test-dummy-00 updated */
+  profile = fbd_feedback_theme_get_profile (theme, "full");
+  fb = fbd_feedback_profile_get_feedback (profile, "test-dummy-00");
+  g_assert_cmpstr ("test-dummy-00", ==, fbd_feedback_get_event_name (fb));
+  g_assert_cmpint (fbd_feedback_dummy_get_duration (FBD_FEEDBACK_DUMMY (fb)), ==, 0x10);
+
+  g_assert_finalize_object (from);
+  g_assert_finalize_object (theme);
+}
+
+
 gint
 main (gint argc, gchar *argv[])
 {
@@ -119,6 +193,7 @@ main (gint argc, gchar *argv[])
   g_test_add_func("/feedbackd/fbd/feedback-theme/name", test_fbd_feedback_theme_name);
   g_test_add_func("/feedbackd/fbd/feedback-theme/profiles", test_fbd_feedback_theme_profiles);
   g_test_add_func("/feedbackd/fbd/feedback-theme/parse", test_fbd_feedback_theme_parse);
+  g_test_add_func("/feedbackd/fbd/feedback-theme/update", test_fbd_feedback_theme_update);
 
   return g_test_run();
 }

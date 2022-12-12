@@ -1,0 +1,30 @@
+{
+  "name" : "base",
+  "profiles" : [
+    {
+      "name" : "full",
+      "feedbacks" : [
+        {
+          "type"       : "Dummy",
+          "event-name" : "test-dummy-00",
+          "duration"   : 0x01
+        },
+        {
+          "type"       : "Dummy",
+          "event-name" : "test-dummy-01",
+          "duration"   : 0x02
+        }
+      ]
+    },
+    {
+      "name" : "quiet",
+      "feedbacks" : [
+        {
+          "type"       : "Dummy",
+          "event-name" : "test-dummy-00",
+          "duration"   : 0x03
+        }
+      ]
+    }
+  ]
+}

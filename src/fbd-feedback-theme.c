@@ -18,6 +18,7 @@
 enum {
   PROP_0,
   PROP_NAME,
+  PROP_PARENT_NAME,
   PROP_PROFILES,
   PROP_LAST_PROP,
 };
@@ -27,6 +28,8 @@ typedef struct _FbdFeedbackTheme {
   GObject parent;
 
   char *name;
+  char *parent_name;
+
   GHashTable *profiles;
 } FbdFeedbackTheme;
 
@@ -115,16 +118,18 @@ fbd_theme_serializable_deserialize_property (JsonSerializable *serializable,
 
 static void
 fbd_feedback_theme_set_property (GObject        *object,
-                                   guint         property_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec)
+                                 guint         property_id,
+                                 const GValue *value,
+                                 GParamSpec   *pspec)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
   switch (property_id) {
   case PROP_NAME:
-    g_free (self->name);
-    self->name = g_value_dup_string (value);
+    fbd_feedback_theme_set_name (self, g_value_get_string (value));
+    break;
+  case PROP_PARENT_NAME:
+    fbd_feedback_theme_set_parent_name (self, g_value_get_string (value));
     break;
   case PROP_PROFILES:
     if (self->profiles)
@@ -140,15 +145,18 @@ fbd_feedback_theme_set_property (GObject        *object,
 
 static void
 fbd_feedback_theme_get_property (GObject  *object,
-                                   guint       property_id,
-                                   GValue     *value,
-                                   GParamSpec *pspec)
+                                 guint       property_id,
+                                 GValue     *value,
+                                 GParamSpec *pspec)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
   switch (property_id) {
   case PROP_NAME:
-    g_value_set_string (value, self->name);
+    g_value_set_string (value, fbd_feedback_theme_get_name (self));
+    break;
+  case PROP_PARENT_NAME:
+    g_value_set_string (value, fbd_feedback_theme_get_parent_name (self));
     break;
   case PROP_PROFILES:
     g_value_set_boxed (value, self->profiles);
@@ -187,20 +195,6 @@ json_serializable_iface_init (JsonSerializableIface *iface)
 }
 
 static void
-fbd_feedback_theme_constructed (GObject *object)
-{
-  FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
-
-  G_OBJECT_CLASS (fbd_feedback_theme_parent_class)->constructed (object);
-
-  self->profiles = g_hash_table_new_full (g_str_hash,
-                                          g_str_equal,
-                                          g_free,
-                                          (GDestroyNotify)g_object_unref);
-}
-
-
-static void
 fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -208,7 +202,6 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
   object_class->set_property = fbd_feedback_theme_set_property;
   object_class->get_property = fbd_feedback_theme_get_property;
 
-  object_class->constructed = fbd_feedback_theme_constructed;
   object_class->dispose = fbd_feedback_theme_dispose;
   object_class->finalize = fbd_feedback_theme_finalize;
 
@@ -218,7 +211,15 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
       "Name",
       "The theme name",
       NULL,
-      G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+      G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_PARENT_NAME] =
+    g_param_spec_string (
+      "parent-name",
+      "Parent theme Name",
+      "The parent theme name",
+      NULL,
+      G_PARAM_EXPLICIT_NOTIFY | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_PROFILES] =
     g_param_spec_boxed (
@@ -235,6 +236,10 @@ fbd_feedback_theme_class_init (FbdFeedbackThemeClass *klass)
 static void
 fbd_feedback_theme_init (FbdFeedbackTheme *self)
 {
+  self->profiles = g_hash_table_new_full (g_str_hash,
+                                          g_str_equal,
+                                          g_free,
+                                          (GDestroyNotify)g_object_unref);
 }
 
 FbdFeedbackTheme *
@@ -268,6 +273,20 @@ fbd_feedback_theme_new_from_file (const gchar *filename, GError **error)
   return fbd_feedback_theme_new_from_data (data, error);
 }
 
+void
+fbd_feedback_theme_set_name (FbdFeedbackTheme *self, const char *name)
+{
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+
+  if (g_strcmp0 (self->name, name) == 0)
+    return;
+
+  g_free (self->name);
+  self->name = g_strdup (name);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_NAME]);
+}
+
 const char *
 fbd_feedback_theme_get_name (FbdFeedbackTheme *self)
 {
@@ -275,6 +294,31 @@ fbd_feedback_theme_get_name (FbdFeedbackTheme *self)
 
   return self->name;
 }
+
+
+void
+fbd_feedback_theme_set_parent_name (FbdFeedbackTheme *self, const char *parent_name)
+{
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+
+  if (g_strcmp0 (self->parent_name, parent_name) == 0)
+    return;
+
+  g_free (self->parent_name);
+  self->parent_name = g_strdup (parent_name);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PARENT_NAME]);
+}
+
+
+const char *
+fbd_feedback_theme_get_parent_name (FbdFeedbackTheme *self)
+{
+  g_return_val_if_fail (FBD_IS_FEEDBACK_THEME (self), "");
+
+  return self->parent_name;
+}
+
 
 void
 fbd_feedback_theme_add_profile (FbdFeedbackTheme *self, FbdFeedbackProfile *profile)
@@ -316,4 +360,42 @@ fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
   if (!g_slist_length (feedbacks))
     g_debug ("No feedback for event %s", fbd_event_get_event (event));
   return feedbacks;
+}
+
+
+/**
+ * fbd_feedback_theme_update:
+ * @self: The feedback theme that should be updated
+ * @new: The feedback theme we want to take profiles and feedbacks new
+ *
+ * Merges two feedback themes. Feedbacks and profiles are read new
+ * the `new` theme.  If feedback already exists in the same profile
+ * of `self` it is overwritten with the feedback in `new`.
+ */
+void
+fbd_feedback_theme_update (FbdFeedbackTheme *self, FbdFeedbackTheme *new)
+{
+  GHashTableIter iter;
+  const char *profile_name;
+  FbdFeedbackProfile *profile;
+
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (self));
+  g_return_if_fail (FBD_IS_FEEDBACK_THEME (new));
+
+  fbd_feedback_theme_set_name (self, fbd_feedback_theme_get_name (new));
+
+  g_hash_table_iter_init (&iter, new->profiles);
+  while (g_hash_table_iter_next (&iter, (gpointer)&profile_name, (gpointer)&profile)) {
+    FbdFeedbackProfile *current;
+
+    current = g_hash_table_lookup (self->profiles, profile_name);
+    if (current == NULL) {
+      current = fbd_feedback_profile_new (profile_name);
+      g_hash_table_insert (self->profiles,
+                           g_strdup (profile_name),
+                           current);
+    }
+
+    fbd_feedback_profile_update (current, profile);
+  }
 }

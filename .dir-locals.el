@@ -11,5 +11,9 @@
  (css-mode . (
             (css-indent-offset . 2)
             ))
+ (js-mode . (
+	     (indent-tabs-mode . nil)
+             (js-indent-level . 2)
+            ))
 )
 
