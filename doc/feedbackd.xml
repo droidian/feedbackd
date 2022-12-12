@@ -38,7 +38,15 @@
 </para>
 <para>
   The feedback triggered by a given event is determined by the feedback
-  theme in use. Events are submitted via a DBus API. For details
+  theme in use. Events are submitted via a DBus API. 
+</para>
+<para>
+  Any feedback triggered by a client via an event will be stopped latest 
+  when the client disconnects from DBus. This makes sure all feedbacks 
+  get canceled if the app that triggered it crashes.
+</para>
+<para>
+  For details
   refer to the event and feedback theme specs at
   <ulink url="https://source.puri.sm/Librem5/feedbackd/"/>
 </para>
