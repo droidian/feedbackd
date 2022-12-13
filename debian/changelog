@@ -2,9 +2,14 @@ feedbackd (0.0.2) experimental; urgency=medium
 
   [ Chris Vogel ]
   * docs: Update references to documentation from branch master to branch main.
-  * README: Mention that DBus disconnect ends feedback
   * README: Mention python example
   * doc: feedback stops when client disconnects
+  * run: Export GI_TYPELIB_PATH as well.
+    This is needed for programs needing GObject introspection data
+  * run: Don't hardcode feedbackd.
+    This allows arbitrary executables from the source tree with
+    a well defined environment.
+  * example: Document usage
 
   [ Guido Günther ]
   * run: Fix daemon name.
@@ -75,6 +80,15 @@ feedbackd (0.0.2) experimental; urgency=medium
     Update the theme when the gsetting changes
   * README: Document custom themes
   * tests: Help old glib on PureOS along
+  * theme-expander: Also log initial theme file
+  * Add theme validator.
+    Recursively loads a given theme file.
+  * ci: Use bookworm image for package build too.
+    No need to fight against old glib and friends in PureOS
+  * doc: Convert manpages to rst.
+    This will make it more fun to add details and more manpages.
+  * doc: Add manual page for fbd-theme-validate
+  * d/rules: Don't build tests with nocheck
 
  -- Guido Günther <agx@sigxcpu.org>  Tue, 13 Dec 2022 13:53:57 +0100
 
