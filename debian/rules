@@ -2,8 +2,12 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+  CONFIGURE_OPTS += -Dtests=false
+endif
+
 ifeq (,$(filter nodoc,$(DEB_BUILD_PROFILES)))
-  CONFIGURE_OPTS = -Dgtk_doc=true -Dman=true
+  CONFIGURE_OPTS += -Dgtk_doc=true -Dman=true
 endif
 
 %:
