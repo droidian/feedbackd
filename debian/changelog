@@ -1,3 +1,83 @@
+feedbackd (0.0.2) experimental; urgency=medium
+
+  [ Chris Vogel ]
+  * docs: Update references to documentation from branch master to branch main.
+  * README: Mention that DBus disconnect ends feedback
+  * README: Mention python example
+  * doc: feedback stops when client disconnects
+
+  [ Guido Günther ]
+  * run: Fix daemon name.
+    Fixes: 99fc8c2 ("run: Make it easy to run under gdb and document usage")
+  * example: Wait a bit before ending
+    feedbackd terminates feedback when clients disconnect from DBus so
+    we need to wait a bit before quitting as otherwise no feedback will
+    be played. (Closes: #65)
+  * d/gbp.conf: Update branch.
+    Missed that one when switching to 'main'
+  * ci: Switch build to bookworm / byzantium.
+    Use Debian bookworm for the tests and PureOS byzantium for the
+    package build
+    We use the arm64 builder as the amd64 one fails to find a shell in the
+    bookworm image.
+  * d/control: Add settings schema for the tests
+  * d/control: Drop Breaks/Replaces on packages long gone
+  * d/rules: Support nodoc build profile
+  * build: Bump required meson version
+  * Switch library documentation to gi-docgen.
+    Switch from gtk-doc to gi-docgen for the library documentation and
+    adjust the source files accordingly.
+    We don't bother about the daemon doc headers as they're not built into
+    any docs atm. (Closes: #56)
+  * Include specifications in the documentation.
+    Now that we can use markdown easily add them as they provide
+    help to the developer what events exist, etc.
+  * dir-locals: Simlify consistent JS indenting
+  * feedback-vibra: Fix indentation
+  * tests: Test feedback theme name
+  * feedback-theme: No need for constructed.
+    We can do all that in init
+  * feedback-theme: Fix indentation
+  * feedback-theme: Use getter.
+    Ensures we stay consistent with future changes
+  * feedback-theme: Allow to set name
+  * feedback-profile: Document hash types
+  * feedback-dummy: Add getter for duration.
+    Useful in tests
+  * feedback-profile: Allow to update profiles.
+    Allow to add feedbacks from a profile to another one
+  * feedback-theme: Allow to update theme.
+    New profiles are added, existing profiles updated. This will
+    allow to merge themes.
+  * feedback-theme: Allow to get and set parent theme name.
+    If set the parent theme's feedbackd and profiles should be merged into
+    this theme.
+  * ci: Install git.
+    Needed for the submodule
+  * Add gmobile library
+  * build: Don't include main in lib.
+    For that move the error quark to a separate file.
+  * Recursively load themes.
+    Themes (other than the default theme) can specify a `parent-name` in the
+    json file. This theme will be used as a base for the theme. Events and
+    profiles of the children override those in the parents.
+    For this we move the lookup code into it's separate class and also add
+    tests. (Closes: #38)
+  * theme-expander: Allow to set the theme to expand
+  * data: Allow to set feedback theme
+  * manager: Don't load theme in constructor.
+    Loading the theme can trigger calls to
+    fbd_feedback_manager_get_default() which then results in an endless look
+    as the object isn't fully initialized in constructed. Instead do
+    the setup in main() which has the advantage that the manager's life
+    cycle becomes more obvious too.
+  * feedback-manager: Handle theme gsetting.
+    Update the theme when the gsetting changes
+  * README: Document custom themes
+  * tests: Help old glib on PureOS along
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 13 Dec 2022 13:53:57 +0100
+
 feedbackd (0.0.1) byzantium; urgency=medium
 
   [ Evangelos Ribeiro Tzaras ]
