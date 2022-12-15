@@ -7,6 +7,7 @@ FEEDBACK_THEME=${FEEDBACK_THEME:-"${ABS_SRCDIR}/data/default.json"}
 
 export FEEDBACK_THEME
 export GSETTINGS_SCHEMA_DIR="${ABS_BUILDDIR}/data"
+export GI_TYPELIB_PATH="${ABS_BUILDDIR}/libfeedback:$GI_TYPELIB_PATH"
 
 if [ "${FBD_GDB}" = 1 ]; then
     echo "Running feedbackd under gdb"
@@ -14,4 +15,4 @@ if [ "${FBD_GDB}" = 1 ]; then
 fi
 
 set -x
-exec ${WRAPPER} "${ABS_BUILDDIR}/src/feedbackd" "$@"
+exec ${WRAPPER} "$@"

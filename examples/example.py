@@ -1,6 +1,11 @@
 #!/usr/bin/python3
 #
-# export GI_TYPELIB_PATH=/usr/local/lib/x86_64-linux-gnu/girepository-1.0/
+# depends on GObject introspection data for libfeedback
+#
+# After building from source you can start this example like this:
+#   _build/run examples/example.py
+# Otherwise like this:
+#   GI_TYPELIB_PATH=</somepath/girepository-x.y/> example.py
 
 import gi
 import time
