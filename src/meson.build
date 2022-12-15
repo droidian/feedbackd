@@ -57,6 +57,7 @@ fbd_lib = static_library(
 )
 
 fbd_dep = declare_dependency(
+  sources: generated_dbus_sources,
   include_directories : fbd_inc,
   link_with : fbd_lib,
   dependencies : fbd_deps,
