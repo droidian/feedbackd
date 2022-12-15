@@ -46,13 +46,13 @@ way to get going is to do the following:
 To run the daemon use
 
 ```sh
-_build/run
+_build/run _build/src/feedbackd
 ```
 
 To run under gdb use
 
 ``` sh
-FBD_GDB=1 _build/run
+FBD_GDB=1 _build/run _build/src/feedbackd
 ```
 
 You can introspect and get the current theme with

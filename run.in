@@ -15,4 +15,4 @@ if [ "${FBD_GDB}" = 1 ]; then
 fi
 
 set -x
-exec ${WRAPPER} "${ABS_BUILDDIR}/src/feedbackd" "$@"
+exec ${WRAPPER} "$@"
