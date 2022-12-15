@@ -1,0 +1,18 @@
+feedbackd 0.0.2
+---------------
+Released December 2022
+* Support theme merging
+* Support user themes (`theme` gsetting)
+* Add theme validator
+* Doc updates
+* Switch documentation to gi-docgen
+* Switch manpages to reStructuredText
+* Contributors:
+	Chris Vogel
+	Guido Günther
+
+feedbackd 0.0.1
+---------------
+Released November 2022
+* Initial release (all version before were
+  git snapshots)
