@@ -11,8 +11,8 @@
 
 /**
  * LfbEvent:
- * @Short_description: An event triggering feedback to the user
- * @Title: LfbEvent
+ *
+ * An event triggering feedback to the user
  *
  * #LfbEvent represents an event that should trigger
  * audio, haptic and/or visual feedback to the user by triggering
