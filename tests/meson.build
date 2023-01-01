@@ -5,13 +5,13 @@ test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
 test_env.set('G_DEBUG', 'gc-friendly,fatal-warnings')
 test_env.set('GSETTINGS_BACKEND', 'memory')
-test_env.set('GSETTINGS_SCHEMA_DIR', '@0@/data'.format(meson.build_root()))
+test_env.set('GSETTINGS_SCHEMA_DIR', '@0@/data'.format(meson.project_build_root()))
 test_env.set('PYTHONDONTWRITEBYTECODE', 'yes')
 test_env.set('MALLOC_CHECK_', '2')
-test_env.set('XDG_CONFIG_HOME', meson.current_source_dir())
+test_env.set('XDG_CONFIG_HOME', meson.current_source_dir() / 'data' / 'user-config')
 test_env.set('XDG_CONFIG_DIRS', meson.current_source_dir())
 
-# Shared lfbrary Unit tests
+# Shared library Unit tests
 
 test_lfb_cflags = [
   '-DTEST_APP_ID="org.sigxcpu.feedbackd_test"',
@@ -52,9 +52,13 @@ endforeach
 # Daemon Unit tests
 if get_option('daemon')
 
+test_env_fbd = test_env
+test_env_fbd.set('XDG_DATA_DIRS', meson.current_source_dir() / 'data' / 'xdg-data')
+
 test_fbd_cflags = [
-  '-DTEST_APP_ID="org.sigxcpu.feedbackd_test"',
-]
+    '-DTEST_APP_ID="org.sigxcpu.feedbackd_test"',
+    '-DTEST_DATA_DIR="@0@"'.format(join_paths(meson.current_source_dir(), 'data')),
+  ]
 
 test_fbd_link_args = [
   '-fPIC',
@@ -68,6 +72,7 @@ fbd_tests = [
   'fbd-feedback-profile',
   'fbd-feedback-theme',
   'fbd-event',
+  'fbd-theme-expander',
 ]
 
 foreach test : fbd_tests
@@ -78,7 +83,7 @@ foreach test : fbd_tests
                  link_args : test_fbd_link_args,
 		 include_directories : fbd_inc,
                  dependencies : test_fbd_deps)
-  test(test, t, env : test_env)
+  test(test, t, env : test_env_fbd)
 endforeach
 
 

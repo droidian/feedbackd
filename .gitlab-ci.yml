@@ -1,30 +1,33 @@
 include:
- - 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-definitions.yml'
- - 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-bullseye-jobs.yml'
+ - remote: 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-definitions.yml'
+ - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/34039cd573a2df832d465bc9e4c5f543571f5241/templates/ci-fairy.yml'
 
 stages:
  - build
  - test
  - package
- - test-package
 
 .before_script: &before_script
   before_script:
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get -y update
     - apt-get -y build-dep .
-    - apt-get -y install gcovr
+    - apt-get -y install gcovr git
+
+.image: &image
+  image:
+    name: debian:bookworm
 
 .tags: &tags
   tags:
-    - librem5
+    - librem5:arm64
 
 # Regular, full build
-build:native-debian-bullseye:full:
+build:native-debian-bookworm:full:
   <<: *tags
+  <<: *image
   <<: *before_script
   stage: build
-  image: debian:bullseye
   artifacts:
     paths:
       - _build
@@ -36,11 +39,11 @@ build:native-debian-bullseye:full:
       - $PKG_ONLY == "1"
 
 # Minimal build for e.g. submodule usage
-build:native-debian-bullseye:lib:
+build:native-debian-bookworm:lib:
   <<: *tags
+  <<: *image
   <<: *before_script
   stage: build
-  image: debian:bullseye
   script:
     - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
     - ninja -C _build
@@ -48,13 +51,13 @@ build:native-debian-bullseye:lib:
     variables:
       - $PKG_ONLY == "1"
 
-test:native-debian-bullseye:
+test:native-debian-bookworm:
   <<: *tags
+  <<: *image
   <<: *before_script
   stage: test
-  image: debian:bullseye
   needs:
-    - build:native-debian-bullseye:full
+    - build:native-debian-bookworm:full
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
   script:
     - dbus-run-session ninja -C _build test coverage
@@ -62,3 +65,9 @@ test:native-debian-bullseye:
     variables:
       - $PKG_ONLY == "1"
 
+package:deb-debian-bookwarm:arm64:
+  variables:
+    L5_DOCKER_IMAGE: debian:bookworm
+  extends: .l5-build-debian-package
+  tags:
+    - librem5:arm64

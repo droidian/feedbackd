@@ -9,34 +9,6 @@
 
 #include "lfb-names.h"
 
-/**
- * SECTION:libfeedback
- * @Short_description: Library initialization and helpers
- * @Title: libfeedback
- *
- * To use the library call #lfb_init() with the id of your application
- * (usually the desktop file name without the .desktop extension).
- * After initializing the library you can trigger feedback using
- * #LfbEvent objects.  When your application finishes call
- * #lfb_uninit() to free any resources:
- *
- * |[<!-- language="C" -->
- *    #define LIBFEEDBACK_USE_UNSTABLE_API
- *    #include <libfeedback.h>
- *
- *    int main(void)
- *    {
- *       g_autoptr (GError) *err = NULL;
- *       if (lfb_init ("com.example.appid", &err)) {
- *         g_error ("%s", err->message);
- *       }
- *       ...
- *       lfb_uninit ();
- *       return 0;
- *    }
- * ]|
- */
-
 static LfbGdbusFeedback *_proxy;
 static char             *_app_id;
 static gboolean          _initted;
@@ -99,7 +71,7 @@ _lfb_get_proxy (void)
  * @app_id: The application id
  * @error: Error information
  *
- * Initialize libfeedback. This must be called before any other functions.
+ * Initialize libfeedback. This must be called before any other of libfeedback's functions.
  *
  * Returns: %TRUE if successful, or %FALSE on error.
  */
@@ -159,6 +131,8 @@ lfb_set_app_id (const char *app_id)
 /**
  * lfb_get_app_id:
  *
+ * Get the application id set via [func@Lfb.set_app_id]().
+ *
  * Returns:  the application id.
  */
 const gchar *
@@ -192,10 +166,8 @@ lfb_get_feedback_profile (void)
 {
   LfbGdbusFeedback *proxy;
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before getting the profile");
-     g_assert_not_reached ();
-   }
+  if (!lfb_is_initted ())
+    g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_val_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy), NULL);
@@ -218,10 +190,8 @@ lfb_set_feedback_profile (const gchar *profile)
 {
   LfbGdbusFeedback *proxy;
 
-  if (!lfb_is_initted ()) {
-     g_warning ("you must call lfb_init() before setting the profile");
-     g_assert_not_reached ();
-   }
+  if (!lfb_is_initted ())
+    g_error ("You must call lfb_init() before ending events.");
 
   proxy = _lfb_get_proxy ();
   g_return_if_fail (LFB_GDBUS_IS_FEEDBACK (proxy));

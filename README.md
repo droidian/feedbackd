@@ -46,8 +46,15 @@ way to get going is to do the following:
 To run the daemon use
 
 ```sh
-_build/run
+_build/run _build/src/feedbackd
 ```
+
+To run under gdb use
+
+``` sh
+FBD_GDB=1 _build/run _build/src/feedbackd
+```
+
 You can introspect and get the current theme with
 
 ```sh
@@ -60,25 +67,57 @@ See `examples/` for a simple python example using GObject introspection.
 
 # How it works
 
-We're using a [event naming spec](./Event-naming-spec-0.0.0.md)
+We're using a [event naming spec](./doc/Event-naming-spec-0.0.0.md)
 similar to http://0pointer.de/public/sound-naming-spec.html to name
 events. This will allow us to act as a system sound library so
 applications only need to call into this library and things like
 the quiet and silent profile work out of the box.
 
+Any feedback triggered by a client via an event will be stopped latest when the
+client disconnects from DBus. This makes sure all feedbacks get canceled if the
+app that triggered it crashes.
+
 ## Feedback theme
 Events are then mapped to a specific type of feedback (sound, led, vibra) via a
-device specific theme (since devices have different capabilities).
+device specific theme - since devices have different capabilities and
+different users different needs.
 
 Feedbackd is shipped with a default theme `default.json`.
-You can add your own themes in one of two ways:
+You can add your own themes in multiple ways:
 
 1. By exporting an environment variable `FEEDBACK_THEME` with a path to a
    valid theme file (not recommended, use for testing only), or
 2. By creating a theme file under `$XDG_CONFIG_HOME/feedbackd/themes/default.json`.
    If `XDG_CONFIG_HOME` environment variable is not set or empty, it will
    default to `$HOME/.config`, or
-3. By adding your theme file to one of the folders in the `XDG_DATA_DIRS`
+3. By creating a theme file under `$XDG_CONFIG_HOME/feedbackd/themes/custom.json`.
+   You only specify the values you want to change in that theme and add an entry
+   ```json
+   {
+      "name: "custom"
+      "parent-theme": "default"
+	  "profiles" : [
+	   ...(entries you want to change go here)...
+	   ]
+   }
+   ```
+   next to the `name` entry in. This has the upside that your theme
+   gets way smaller and that new entries added to the default theme
+   will automatically be used by your theme too. See
+   [here](./tests/data/user-config/feedbackd/themes/custom.json) for
+   an example. Once you have the file in place, tell feedbackd the
+   them you want to use:
+
+        gsettings set org.sigxcpu.feedbackd theme custom
+
+   When you want to go back to the default theme just do:
+
+        gsettings reset org.sigxcpu.feedbackd theme
+
+   Note that you can name your theme as you wish but avoid theme names
+   starting with `__` or `$` as this namespace is reserved.
+
+4. By adding your theme file to one of the folders in the `XDG_DATA_DIRS`
    environment variable, appended with `feedbackd/themes/`. This folder isn't
    created automatically, so you have to create it yourself. Here's an example:
    ```bash
@@ -193,6 +232,11 @@ Run feedbacks for event `message-new-instant` for 10 seconds:
 _build/cli/fbcli -t 10 -E alarm-clock-elapsed
 ```
 
+## Python example
+
+There's an `example.py` script in the example/ folder of the
+repository demonstrating how to trigger feedback via an event.
+
 ## Per app profiles
 One can set the feedback profile of an individual application
 via `GSettings`. E.g. for an app with app id `sm.puri.Phosh`
@@ -205,8 +249,8 @@ GSETTINGS_SCHEMA_DIR=_build/data/ gsettings set org.sigxcpu.feedbackd.applicatio
 # Documentation
 
 - [Libfeedback API](https://honk.sigxcpu.org/projects/feedbackd/doc/)
-- [Event naming spec draft](./Event-naming-spec-0.0.0.md)
-- [Feedback-theme-spec draft](./Feedback-theme-spec-0.0.0.md)
+- [Event naming spec draft](./doc/Event-naming-spec-0.0.0.md)
+- [Feedback-theme-spec draft](./doc/Feedback-theme-spec-0.0.0.md)
 
 [debian/control]: ./debian/control#L5
-[1]: https://source.puri.sm/Librem5/feedbackd-device-themes)
+[1]: https://source.puri.sm/Librem5/feedbackd-device-themes

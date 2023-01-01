@@ -1,7 +1,7 @@
 project('feedbackd', 'c',
-          version : '0.0.0',
+          version : '0.0.2',
           license : 'LGPLv3+',
-    meson_version : '>= 0.49.0',
+    meson_version : '>= 0.56.0',
   default_options : [
     'warning_level=1',
     'buildtype=debugoptimized',
@@ -14,6 +14,13 @@ gio_unix       = dependency('gio-unix-2.0', version: '>=2.50.0')
 glib           = dependency('glib-2.0', version: '>=2.50.0')
 if get_option('daemon')
   gobject        = dependency('gobject-2.0', version: '>=2.50.0')
+  gmobile_subp   = subproject('gmobile',
+                              default_options: [
+                                'examples=false',
+                                'gtk_doc=false',
+                                'tests=false',
+                              ])
+  gmobile        = gmobile_subp.get_variable('libgmobile_dep')
   gsound         = dependency('gsound')
   gudev          = dependency('gudev-1.0', version: '>=232')
   json_glib      = dependency('json-glib-1.0')
@@ -21,6 +28,7 @@ endif
 
 prefix = get_option('prefix')
 
+bindir = join_paths(prefix, get_option('bindir'))
 datadir = join_paths(prefix, get_option('datadir'))
 libdir = join_paths(prefix, get_option('libdir'))
 girdir = join_paths(prefix, join_paths(datadir, 'gir-1.0'))
@@ -83,6 +91,7 @@ endif
 global_c_args = [
   '-DFEEDBACKD_THEME_DIR="@0@"'.format(feedbackd_theme_dir),
   '-DLIBFEEDBACK_COMPILATION',
+  '-DFBD_VERSION="@0@"'.format(meson.project_version()),
 ]
 
 add_project_arguments(

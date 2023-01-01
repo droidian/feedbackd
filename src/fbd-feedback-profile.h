@@ -24,6 +24,8 @@ typedef enum _FbdFeedbackProfileLevel {
 G_DECLARE_FINAL_TYPE (FbdFeedbackProfile, fbd_feedback_profile, FBD, FEEDBACK_PROFILE, GObject);
 
 FbdFeedbackProfile      *fbd_feedback_profile_new (const gchar *name);
+void                     fbd_feedback_profile_update (FbdFeedbackProfile *self,
+                                                      FbdFeedbackProfile *new);
 const gchar             *fbd_feedback_profile_get_name (FbdFeedbackProfile *self);
 void                     fbd_feedback_profile_add_feedback (FbdFeedbackProfile *self,
                                                             FbdFeedbackBase *feedback);

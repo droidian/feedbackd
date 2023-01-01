@@ -1,70 +1,80 @@
 if get_option('gtk_doc')
 
-subdir('xml')
-
-private_headers = [
+expand_content_md_files = [
+  'overview.md',
+  'build-howto.md',
+  'initialization.md',
+  'Event-naming-spec-0.0.0.md',
+  'Feedback-theme-spec-0.0.0.md',
 ]
 
-content_files = [
-  'overview.xml',
-]
+toml_data = configuration_data()
+toml_data.set('VERSION', meson.project_version())
 
-glib_prefix = dependency('glib-2.0').get_pkgconfig_variable('prefix')
-glib_docpath = join_paths(glib_prefix, 'share', 'gtk-doc', 'html')
-docpath = join_paths(get_option('datadir'), 'gtk-doc', 'html')
+libfeedback_toml = configure_file(
+  input: 'libfeedback.toml.in',
+  output: 'libfeedback.toml',
+  configuration: toml_data
+)
 
-gnome.gtkdoc('libfeedback',
-           main_xml: 'libfeedback-docs.xml',
-            src_dir: [
-                       join_paths(meson.source_root(), 'libfeedback'),
-                       join_paths(meson.build_root(), 'libfeedback'),
-		       join_paths(meson.build_root(), 'data'),
-                     ],
-       dependencies: libfeedback_dep,
-  gobject_typesfile: 'libfeedback.types',
-          scan_args: [
-                       '--rebuild-types',
-                       '--ignore-headers=' + ' '.join(private_headers),
-                     ],
-       fixxref_args: [
-                       '--html-dir=@0@'.format(docpath),
-                       '--extra-dir=@0@'.format(join_paths(glib_docpath, 'glib')),
-                       '--extra-dir=@0@'.format(join_paths(glib_docpath, 'gobject')),
-                       '--extra-dir=@0@'.format(join_paths(glib_docpath, 'gio')),
-                       '--extra-dir=@0@'.format(join_paths(glib_docpath, 'gi')),
-                     ],
-        install_dir: 'libfeedback',
-      content_files: content_files,
-            install: true)
+dependency('gi-docgen', version: '>= 2021.1',
+           fallback: ['gi-docgen', 'dummy_dep'],
+           native: true,
+           required: get_option('gtk_doc'))
+
+gidocgen = find_program('gi-docgen')
+
+docs_dir = datadir / 'doc'
+
+custom_target('libfeedback-doc',
+  input: [ libfeedback_toml, libfeedback_gir[0] ],
+  output: 'libfeedback-0',
+  command: [
+    gidocgen,
+    'generate',
+    '--quiet',
+    '--add-include-path=@0@'.format(meson.current_build_dir() / '../src'),
+    '--config=@INPUT0@',
+    '--output-dir=@OUTPUT@',
+    '--no-namespace-dir',
+    '--content-dir=@0@'.format(meson.current_source_dir()),
+    '@INPUT1@',
+  ],
+  depend_files: [ expand_content_md_files ],
+  build_by_default: true,
+  install: true,
+  install_dir: docs_dir,
+)
+
 endif
 
 if get_option('man')
   manpages = [
-    'fbcli',
-    'feedbackd',
+    ['fbcli', 1],
+    ['fbd-theme-validate', 1],
+    ['feedbackd', 8],
   ]
 
-  xsltproc = find_program('xsltproc', required : true)
-  xsltproc_command = [
-    xsltproc,
-    '--nonet',
-    '--stringparam', 'man.output.quietly', '1',
-    '--stringparam', 'funcsynopsis.style', 'ansi',
-    '--stringparam', 'man.th.extra1.suppress', '1',
-    '--stringparam', 'man.authors.section.enabled', '0',
-    '--stringparam', 'man.copyright.section.enabled', '0',
-    '-o', '@OUTPUT@',
-    'http://docbook.sourceforge.net/release/xsl/current/manpages/docbook.xsl',
-    '@INPUT@',
+  rst2man = find_program('rst2man', 'rst2man.py', required: false)
+  rst2man_flags = [
+    '--syntax-highlight=none',
   ]
-  man1_dir = get_option('mandir') + '/man1'
 
-  foreach page : manpages
-    custom_target(page + '-man',
-      input  : page + '.xml',
-      output : page + '.1',
-      command: xsltproc_command,
+  foreach manpage: manpages
+    man_name = manpage[0]
+    man_section = manpage[1]
+
+    custom_target('man-@0@'.format(man_name),
+      input: '@0@.rst'.format(man_name),
+      output: '@0@.@1@'.format(man_name, man_section),
+      command: [
+        rst2man,
+        rst2man_flags,
+        '@INPUT@',
+      ],
+      capture: true,
       install: true,
-      install_dir: man1_dir)
+      install_dir: get_option('mandir') / 'man@0@'.format(man_section),
+    )
   endforeach
 endif

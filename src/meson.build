@@ -12,7 +12,7 @@ fbd_enum_sources = gnome.mkenums_simple('fbd-enums',
 sources = [
   generated_dbus_sources,
   fbd_enum_sources,
-  'fbd.c',
+  'fbd-error.c',
   'fbd-binder.c',
   'fbd-droid-vibra-backend.c',
   'fbd-droid-vibra-backend-hidl.c',
@@ -36,6 +36,7 @@ sources = [
   'fbd-feedback-vibra.c',
   'fbd-feedback-vibra-periodic.c',
   'fbd-feedback-vibra-rumble.c',
+  'fbd-theme-expander.c',
   'fbd-udev.c',
 ]
 
@@ -43,6 +44,7 @@ fbd_deps = [
   gio,
   gio_unix,
   glib,
+  gmobile,
   gobject,
   gsound,
   gudev,
@@ -65,6 +67,7 @@ fbd_lib = static_library(
 )
 
 fbd_dep = declare_dependency(
+  sources: generated_dbus_sources,
   include_directories : fbd_inc,
   link_with : fbd_lib,
   dependencies : fbd_deps,
@@ -86,6 +89,15 @@ executable(
   dependencies : [glib],
   install : true,
   install_dir: libexecdir,
+)
+
+executable(
+  'fbd-theme-validate',
+  sources : ['fbd-theme-validate.c'],
+  include_directories : fbd_inc,
+  dependencies : fbd_dep,
+  install : true,
+  install_dir: bindir,
 )
 
 endif

@@ -9,7 +9,7 @@ option('gtk_doc',
        description: 'Whether to generate the API reference for Libfeedback')
 option('man',
        type: 'boolean', value : false,
-       description : 'generate man pages (requires xsltproc)')
+       description : 'generate man pages (requires rst2man)')
 option('tests',
        type: 'boolean', value: true,
        description: 'Whether to compile unit tests')

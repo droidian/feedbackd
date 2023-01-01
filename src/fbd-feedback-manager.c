@@ -20,6 +20,10 @@
 #include "fbd-feedback-vibra.h"
 #include "fbd-feedback-manager.h"
 #include "fbd-feedback-theme.h"
+#include "fbd-theme-expander.h"
+
+#define GMOBILE_USE_UNSTABLE_API
+#include <gmobile.h>
 
 #include <gio/gio.h>
 #include <glib-unix.h>
@@ -27,14 +31,12 @@
 
 #define FEEDBACKD_SCHEMA_ID "org.sigxcpu.feedbackd"
 #define FEEDBACKD_KEY_PROFILE "profile"
-#define FEEDBACKD_THEME_VAR "FEEDBACK_THEME"
+#define FEEDBACKD_KEY_THEME "theme"
 
 #define APP_SCHEMA FEEDBACKD_SCHEMA_ID ".application"
 #define APP_PREFIX "/org/sigxcpu/feedbackd/application/"
 
-#define DEVICE_TREE_PATH "/sys/firmware/devicetree/base/compatible"
-#define DEVICE_NAME_MAX 1024
-
+#define FEEDBACKD_THEME_VAR "FEEDBACK_THEME"
 
 /**
  * SECTION:fbd-feedback-manager
@@ -90,7 +92,7 @@ device_changes (FbdFeedbackManager *self, gchar *action, GUdevDevice *device,
       g_clear_object (&self->vibra);
     }
   } else if (g_strcmp0 (action, "add") == 0) {
-    if (!g_strcmp0 (g_udev_device_get_property (device, "FEEDBACKD_TYPE"), "vibra")) {
+    if (!g_strcmp0 (g_udev_device_get_property (device, FEEDBACKD_UDEV_ATTR), "vibra")) {
       g_autoptr (GError) err = NULL;
 
       g_debug ("Found hotplugged vibra device at %s", g_udev_device_get_sysfs_path (device));
@@ -154,7 +156,7 @@ init_devices (FbdFeedbackManager *self)
   for (l = devices; l != NULL; l = l->next) {
     GUdevDevice *dev = l->data;
 
-    if (!g_strcmp0 (g_udev_device_get_property (dev, "FEEDBACKD_TYPE"), "vibra")) {
+    if (!g_strcmp0 (g_udev_device_get_property (dev, FEEDBACKD_UDEV_ATTR), "vibra")) {
       g_debug ("Found vibra device");
       self->vibra = fbd_dev_vibra_new (dev, &err);
       if (!self->vibra) {
@@ -229,10 +231,15 @@ on_feedbackd_setting_changed (FbdFeedbackManager *self,
 
   g_return_if_fail (FBD_IS_FEEDBACK_MANAGER (self));
   g_return_if_fail (G_IS_SETTINGS (settings));
-  g_return_if_fail (!g_strcmp0 (key, FEEDBACKD_KEY_PROFILE));
 
-  profile = g_settings_get_string (settings, key);
-  fbd_feedback_manager_set_profile (self, profile);
+  if (g_str_equal (key, FEEDBACKD_KEY_PROFILE)) {
+    profile = g_settings_get_string (settings, key);
+    fbd_feedback_manager_set_profile (self, profile);
+  } else if (g_str_equal (key, FEEDBACKD_KEY_THEME)) {
+    fbd_feedback_manager_load_theme (self);
+  } else {
+    g_critical ("Unknown settings key '%s'", key);
+  }
 }
 
 static void
@@ -340,7 +347,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
   FbdFeedbackManager *self;
   FbdEvent *event;
   GSList *feedbacks, *l;
-  gint event_id;
+  guint event_id;
   const gchar *sender;
   FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
   gboolean found_fb = FALSE;
@@ -401,6 +408,8 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
     found_fb = FALSE;
   }
 
+  lfb_gdbus_feedback_complete_trigger_feedback (object, invocation, event_id);
+
   if (found_fb) {
     g_signal_connect_object (event, "feedbacks-ended",
                              (GCallback) on_event_feedbacks_ended,
@@ -414,7 +423,6 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
                                             FBD_EVENT_END_REASON_NOT_FOUND);
   }
 
-  lfb_gdbus_feedback_complete_trigger_feedback (object, invocation, event_id);
   return TRUE;
 }
 
@@ -446,65 +454,6 @@ fbd_feedback_manager_handle_end_feedback (LfbGdbusFeedback      *object,
   return TRUE;
 }
 
-static const gchar *
-find_themefile (void)
-{
-  gint i = 0;
-  gsize len;
-  const gchar *comp;
-
-  g_autoptr (GError) err = NULL;
-  g_autofree gchar *user_config_path = NULL;
-  gchar **xdg_data_dirs = (gchar **) g_get_system_data_dirs ();
-  g_autofree gchar *compatibles = NULL;
-
-  // First look for a default file under $XDG_DATA_HOME
-  user_config_path = g_build_filename (g_get_user_config_dir (), "feedbackd",
-                                       "themes", "default.json", NULL);
-  if (g_file_test (user_config_path, (G_FILE_TEST_EXISTS))) {
-    g_debug ("Found user themefile at: %s", user_config_path);
-    return g_steal_pointer (&user_config_path);
-  }
-
-  // Try to read the device name
-  if (g_file_test (DEVICE_TREE_PATH, (G_FILE_TEST_EXISTS))) {
-    g_debug ("Found device tree device compatible at %s", DEVICE_TREE_PATH);
-
-    // Check if feedbackd has a proper config available this device
-    if (!g_file_get_contents (DEVICE_TREE_PATH, &compatibles, &len, &err))
-      g_warning ("Unable to read: %s", err->message);
-
-    comp = compatibles;
-    while (comp - compatibles < len) {
-
-      // Iterate over $XDG_DATA_DIRS
-      for (i = 0; i < g_strv_length (xdg_data_dirs); i++) {
-        g_autofree gchar *config_path = NULL;
-        g_autofree gchar *theme_file_name = NULL;
-
-        // We leave it to g_build_filename to add/remove erroneous path separators
-        theme_file_name = g_strconcat (comp, ".json", NULL);
-        config_path = g_build_filename (xdg_data_dirs[i], "feedbackd", "themes",
-                                        theme_file_name, NULL);
-        g_debug ("Searching for device specific themefile in %s", config_path);
-
-        // Check if file exist
-        if (g_file_test (config_path, (G_FILE_TEST_EXISTS))) {
-          g_debug ("Found themefile for this device at: %s", config_path);
-          return g_steal_pointer (&config_path);
-        }
-      }
-
-      // Next compatible
-      comp = strchr (comp, 0);
-      comp++;
-    }
-  }else  {
-    g_debug ("Device tree path does not exist: %s", DEVICE_TREE_PATH);
-  }
-
-  return NULL;
-}
 
 static void
 fbd_feedback_manager_constructed (GObject *object)
@@ -513,11 +462,11 @@ fbd_feedback_manager_constructed (GObject *object)
 
   G_OBJECT_CLASS (fbd_feedback_manager_parent_class)->constructed (object);
 
-  fbd_feedback_manager_load_theme(self);
-
   g_signal_connect (self, "notify::profile", (GCallback)on_profile_changed, NULL);
 
   self->settings = g_settings_new (FEEDBACKD_SCHEMA_ID);
+  g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_THEME,
+                            G_CALLBACK (on_feedbackd_setting_changed), self);
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
                             G_CALLBACK (on_feedbackd_setting_changed), self);
   on_feedbackd_setting_changed (self, FEEDBACKD_KEY_PROFILE, self->settings);
@@ -615,31 +564,35 @@ fbd_feedback_manager_get_dev_leds (FbdFeedbackManager *self)
   return self->leds;
 }
 
-void fbd_feedback_manager_load_theme (FbdFeedbackManager *self) {
-  g_autoptr (GError) err = NULL;
+void
+fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
+{
+  g_autoptr (FbdThemeExpander) expander = NULL;
   g_autoptr (FbdFeedbackTheme) theme = NULL;
-  const gchar *themefile;
+  g_autoptr (GError) err = NULL;
+  g_auto (GStrv) compatibles = NULL;
+  g_autofree char *theme_name = NULL;
+  const char *theme_file = g_getenv (FEEDBACKD_THEME_VAR);
 
-  // Overide themefile with environment variable if requested
-  themefile = g_getenv (FEEDBACKD_THEME_VAR);
+  compatibles = gm_devicetree_get_compatibles (NULL, &err);
+  if (compatibles == NULL && err) {
+    g_debug ("Failed to get compatibles: %s", err->message);
+    g_clear_error (&err);
+  }
 
-  // Search for device-specific configuration
-  if (!themefile)
-    themefile = find_themefile ();
+  if (theme_file == NULL)
+    theme_name = g_settings_get_string (self->settings, FEEDBACKD_KEY_THEME);
 
-  // Fallback to default configuration if needed
-  if (!themefile)
-    themefile = FEEDBACKD_THEME_DIR "/default.json";
-  g_info ("Using themefile: %s", themefile);
-
-  theme = fbd_feedback_theme_new_from_file (themefile, &err);
+  expander = fbd_theme_expander_new ((const char *const *)compatibles,
+                                     theme_name, theme_file);
+  theme = fbd_theme_expander_load_theme_files (expander, &err);
   if (theme) {
     g_set_object(&self->theme, theme);
   } else {
     if (self->theme)
       g_warning ("Failed to reload theme: %s", err->message);
     else
-      g_error ("Failed to load theme: %s", err->message); // No point to carry on
+      g_error ("Failed to load any theme: %s", err->message); // No point to carry on
   }
 }
 

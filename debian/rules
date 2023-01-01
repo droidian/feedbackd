@@ -2,11 +2,19 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+  CONFIGURE_OPTS += -Dtests=false
+endif
+
+ifeq (,$(filter nodoc,$(DEB_BUILD_PROFILES)))
+  CONFIGURE_OPTS += -Dgtk_doc=true -Dman=true
+endif
+
 %:
 	dh $@ --builddirectory=_build
 
 override_dh_auto_configure:
-	dh_auto_configure -- -Dgtk_doc=true -Dman=true
+	dh_auto_configure -- $(CONFIGURE_OPTS)
 
 override_dh_installudev:
 	# Make sure all the symlink rules in 60 ran:

@@ -6,11 +6,8 @@ ACTION=="remove", GOTO="feedbackd_end"
 
 SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT}=="1", ENV{ID_PATH}=="platform-vibrator", TAG+="uaccess", ENV{FEEDBACKD_TYPE}="vibra"
 
-# Front leds of the Librem5 (pre 5.9)
-SUBSYSTEM=="leds", DEVPATH=="*/phone:*:front", ENV{FEEDBACKD_TYPE}="led", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
-# Front leds of the Librem5 (5.9 and later)
+# See include/dt-bindings/leds/common.h in the linux kernel
 SUBSYSTEM=="leds", DEVPATH=="*/*:status", ENV{FEEDBACKD_TYPE}="led", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
-# Front leds of the PinePhone
 SUBSYSTEM=="leds", DEVPATH=="*/*:indicator", ENV{FEEDBACKD_TYPE}="led", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
 
 LABEL="feedbackd_end"
