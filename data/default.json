@@ -65,6 +65,11 @@
           "effect"     : "phone-outgoing-busy"
         },
         {
+          "event-name" : "screen-capture",
+          "type"       : "Sound",
+          "effect"     : "screen-capture"
+        },
+        {
           "event-name" : "timeout-completed",
           "type"       : "Sound",
           "effect"     : "complete"

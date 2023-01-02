@@ -94,6 +94,7 @@ These events are meant to be used by applications.
 ### Actions
 
 - bell-terminal: The sound to use as a terminal bell.
+- screen-capture: A screenshot was made
 - theme-demo: A event that should be played for demoing this theme. Usually
   this should just be an alias for a very representative sound (such as
   a incoming phone call) of a theme that would work nicely as a demo event for
