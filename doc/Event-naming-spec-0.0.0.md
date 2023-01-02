@@ -51,14 +51,15 @@ name space clashes with future standardized names. Example:
 
 This section describes the standard Event names that should be used
 by artists when creating themes, and by developers when writing
-applications which will use the Feedback Theme Specification.
+applications which will use the Feedback Theme Specification. Application
+developers should only use event names from the *Applications*
+section as the other sections are reserved for system components.
 
-### Alerts
+### Applications
 
-- battery-low: The Event used when the battery is low (below 20%, for example).
-- power-unplug-battery-low: The power cable has been unplugged and the battery level is low.
+These events are meant to be used by applications.
 
-### Notifications
+#### Notifications
 
 - camera-focus: The event used when the camera got focus.
 - camera-shutter: The event used when a photo was taken.
@@ -74,27 +75,46 @@ applications which will use the Feedback Theme Specification.
 - phone-outgoing-busy: The event used when for outgoing phone/voip call when the responder is busy/not available.
 - phone-hangup: The event used when a phone/voip call is hung up.
 - phone-failure: The event used when a phone/voip call is terminated because of a failure.
-- battery-caution: The event used when the battery is nearing exhaustion (below 40%, for example).
-- battery-full:	The event used when the battery is fully loaded up.
-- device-added: The event used when a device has become available to the desktop, i.e. due to USB plugging.
-- power-plug: The power cable has been plugged in.
-- power-unplug: The power cable has been unplugged.
 - alarm-clock-elapsed: A user configured alarm elapsed.
 - timeout-completed: A user configured timeout completed (e.g. a stop watch).
 
-### Actions
+#### Actions
 
 - message-sent-instant: The sound used when a new IM is sent.
+
+#### Input Events
+
+- button-pressed:	The event used when a button is pressed.
+- button-released:  The event used when a button is released.
+
+### System Components
+
+These events are meant to be used by applications.
+
+### Actions
+
 - bell-terminal: The sound to use as a terminal bell.
 - theme-demo: A event that should be played for demoing this theme. Usually
   this should just be an alias for a very representative sound (such as
   a incoming phone call) of a theme that would work nicely as a demo event for
   a theme in the theme selector dialog.
 
-### Input Event
+### Alerts
 
-- button-pressed:	The event used when a button is pressed.
-- button-released:  The event used when a button is released.
+- battery-low: The Event used when the battery is low (below 20%, for example).
+- power-unplug-battery-low: The power cable has been unplugged and the battery level is low.
+
+### Notifications
+
+- battery-caution: The event used when the battery is nearing exhaustion (below 40%, for example).
+- battery-full:	The event used when the battery is fully loaded up.
+- device-added: The event used when a device has become available to the desktop, i.e. due to USB plugging.
+- power-plug: The power cable has been plugged in.
+- power-unplug: The power cable has been unplugged.
+
+#### Input Events
+
 - window-close:     The sound used when an existing window is closed.
+
 
 [Sound naming spec]: http://0pointer.de/public/sound-naming-spec.html
