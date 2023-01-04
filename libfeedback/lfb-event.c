@@ -18,7 +18,7 @@
  * audio, haptic and/or visual feedback to the user by triggering
  * feedback on a feedback daemon. Valid event names are specified
  * in the
- * [Event naming specification](https://source.puri.sm/Librem5/feedbackd/-/blob/main/Event-naming-spec-0.0.0.md).
+ * [Event naming specification](Event-naming-spec-0.0.0.html).
  *
  * One event can trigger multiple feedbacks at once (e.g. audio and
  * haptic feedback). This is determined by the feedback theme in
@@ -695,7 +695,7 @@ lfb_event_get_end_reason (LfbEvent *self)
  * Tells the feedback server to use the given feedback profile for
  * this event when it is submitted. The server might ignore this
  * request.  Valid profile names and their 'noisiness' are specified
- * in the [Feedback theme specification](https://source.puri.sm/Librem5/feedbackd/-/blob/main/Feedback-theme-spec-0.0.0.md).
+ * in the [Feedback theme specification](Feedback-theme-spec-0.0.0.html).
  *
  * A value of %NULL (the default) lets the server pick the profile.
  */
