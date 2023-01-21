@@ -17,8 +17,8 @@ G_BEGIN_DECLS
 
 G_DECLARE_DERIVABLE_TYPE (FbdDevLed, fbd_dev_led, FBD, DEV_LED, GObject)
 
+FbdDevLed          *fbd_dev_led_new  (GUdevDevice *dev, GError **err);
 gboolean            fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness);
-FbdDevLed          *fbd_dev_led_new  (GUdevDevice *dev);
 gboolean            fbd_dev_led_start_periodic (FbdDevLed           *led,
                                                 FbdFeedbackLedColor  color,
                                                 guint                max_brightness_percentage,

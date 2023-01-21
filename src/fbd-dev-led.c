@@ -12,6 +12,8 @@
 #include "fbd-enums.h"
 #include "fbd-udev.h"
 
+#include <gio/gio.h>
+
 #define LED_BRIGHTNESS_ATTR      "brightness"
 #define LED_MAX_BRIGHTNESS_ATTR  "max_brightness"
 #define LED_MULTI_INDEX_ATTR     "multi_index"
@@ -42,7 +44,11 @@ typedef struct _FbdDevLedPrivate {
 } FbdDevLedPrivate;
 
 
-G_DEFINE_TYPE_WITH_PRIVATE (FbdDevLed, fbd_dev_led, G_TYPE_OBJECT)
+static void initable_iface_init (GInitableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (FbdDevLed, fbd_dev_led, G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (FbdDevLed)
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init))
 
 
 static void
@@ -97,6 +103,83 @@ fbd_dev_led_finalize (GObject *object)
 }
 
 
+static gboolean
+initable_init (GInitable    *initable,
+               GCancellable *cancellable,
+               GError      **error)
+{
+  FbdDevLed *led = FBD_DEV_LED (initable);
+  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
+  const gchar *name, *path;
+  gboolean success;
+
+  name = g_udev_device_get_name (priv->dev);
+  /* We don't know anything about diffusors that can combine different
+     color LEDSs so go with fixed colors until the kernel gives us
+     enough information */
+  for (int i = 0; i <= FBD_FEEDBACK_LED_COLOR_LAST; i++) {
+    g_autofree char *color = NULL;
+    g_autofree char *enum_name = NULL;
+    const gchar * const *index;
+    guint counter = 0;
+    gchar *c;
+
+    enum_name = g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i);
+    c = strrchr (enum_name, '_');
+    color = g_ascii_strdown (c+1, -1);
+    if (g_strstr_len (name, -1, color)) {
+      g_autoptr (GError) err = NULL;
+      guint brightness = g_udev_device_get_sysfs_attr_as_int (priv->dev, LED_MAX_BRIGHTNESS_ATTR);
+      index = g_udev_device_get_sysfs_attr_as_strv (priv->dev, LED_MULTI_INDEX_ATTR);
+
+      if (!brightness)
+        continue;
+
+      priv->color = i;
+      priv->max_brightness = brightness;
+
+      if (index) {
+        for (int j = 0; j < g_strv_length ((gchar **) index); j++) {
+          g_debug ("Index: %s", index[j]);
+          if (g_strcmp0 (index[j], LED_MULTI_INDEX_RED) == 0) {
+            priv->red_index = counter;
+            counter++;
+          } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_GREEN) == 0) {
+            priv->green_index = counter;
+            counter++;
+          } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_BLUE) == 0) {
+            priv->blue_index = counter;
+            counter++;
+          } else {
+            g_warning ("Unsupport LED color index: %d %s", counter, index[j]);
+          }
+        }
+      }
+
+      path = g_udev_device_get_sysfs_path (priv->dev);
+      g_debug ("LED at '%s' usable", path);
+      success = TRUE;
+      break;
+    }
+  }
+
+  if (!success) {
+    g_set_error (error,
+                 G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                 "%s not usable as RBG LED", name);
+  }
+
+  return success;
+}
+
+
+static void
+initable_iface_init (GInitableIface *iface)
+{
+  iface->init = initable_init;
+}
+
+
 static void
 fbd_dev_led_class_init (FbdDevLedClass *klass)
 {
@@ -122,65 +205,9 @@ fbd_dev_led_init (FbdDevLed *self)
 
 
 FbdDevLed *
-fbd_dev_led_new (GUdevDevice *dev)
+fbd_dev_led_new (GUdevDevice *dev, GError **err)
 {
-  FbdDevLed *led = NULL;
-  FbdDevLedPrivate *priv;
-  const gchar *name, *path;
-
-  name = g_udev_device_get_name (dev);
-  /* We don't know anything about diffusors that can combine different
-     color LEDSs so go with fixed colors until the kernel gives us
-     enough information */
-  for (int i = 0; i <= FBD_FEEDBACK_LED_COLOR_LAST; i++) {
-    g_autofree char *color = NULL;
-    g_autofree char *enum_name = NULL;
-    const gchar * const *index;
-    guint counter = 0;
-    gchar *c;
-
-    enum_name = g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i);
-    c = strrchr (enum_name, '_');
-    color = g_ascii_strdown (c+1, -1);
-    if (g_strstr_len (name, -1, color)) {
-      g_autoptr (GError) err = NULL;
-      guint brightness = g_udev_device_get_sysfs_attr_as_int (dev, LED_MAX_BRIGHTNESS_ATTR);
-      index = g_udev_device_get_sysfs_attr_as_strv (dev, LED_MULTI_INDEX_ATTR);
-
-      if (!brightness)
-        continue;
-
-      led = g_object_new (FBD_TYPE_DEV_LED, NULL);
-      priv = fbd_dev_led_get_instance_private (led);
-      priv->dev = g_object_ref (dev);
-      priv->color = i;
-      priv->max_brightness = brightness;
-
-      if (index) {
-        for (int j = 0; j < g_strv_length ((gchar **) index); j++) {
-          g_debug ("Index: %s", index[j]);
-          if (g_strcmp0 (index[j], LED_MULTI_INDEX_RED) == 0) {
-            priv->red_index = counter;
-            counter++;
-          } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_GREEN) == 0) {
-            priv->green_index = counter;
-            counter++;
-          } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_BLUE) == 0) {
-            priv->blue_index = counter;
-            counter++;
-          } else {
-            g_warning ("Unsupport LED color index: %d %s", counter, index[j]);
-          }
-        }
-      }
-
-      path = g_udev_device_get_sysfs_path (dev);
-      g_debug ("LED at '%s' usable", path);
-      break;
-    }
-  }
-
-  return led;
+  return g_initable_new (FBD_TYPE_DEV_LED, NULL, err, "dev", dev, NULL);
 }
 
 
@@ -260,6 +287,7 @@ fbd_dev_led_start_periodic (FbdDevLed           *led,
   t = 1000.0 * 1000.0 / freq / 2.0;
   str = g_strdup_printf ("0 %d %d %d\n", (gint)t, (gint)max, (gint)t);
   g_debug ("Freq %d mHz, Brightness: %d%%, Blink pattern: %s", freq, max_brightness_percentage, str);
+
   success = fbd_udev_set_sysfs_path_attr_as_string (priv->dev, LED_PATTERN_ATTR, str, &err);
   if (!success)
     g_warning ("Failed to set led pattern: %s", err->message);

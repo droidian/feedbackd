@@ -69,6 +69,7 @@ initable_init (GInitable    *initable,
   leds = g_udev_client_query_by_subsystem (self->client, LED_SUBSYSTEM);
 
   for (GList *l = leds; l != NULL; l = l->next) {
+    g_autoptr (GError) err = NULL;
     GUdevDevice *dev = G_UDEV_DEVICE (l->data);
     FbdDevLed *led;
 
@@ -77,10 +78,12 @@ initable_init (GInitable    *initable,
       continue;
     }
 
-    led = fbd_dev_led_new (dev);
+    led = fbd_dev_led_new (dev, &err);
     if (led) {
       self->leds = g_slist_append (self->leds, led);
       found = TRUE;
+    } else {
+      g_debug ("Led not usable: %s", err->message);
     }
   }
 
