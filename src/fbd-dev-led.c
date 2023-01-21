@@ -165,3 +165,10 @@ fbd_dev_led_start_periodic (FbdDevLed           *led,
 
   return success;
 }
+
+
+gboolean
+fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color)
+{
+  return (led->color == FBD_FEEDBACK_LED_COLOR_RGB || led->color == color);
+}

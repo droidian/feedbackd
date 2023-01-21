@@ -46,7 +46,7 @@ find_led_by_color (FbdDevLeds *self, FbdFeedbackLedColor color)
 
   for (GSList *l = self->leds; l != NULL; l = l->next) {
     FbdDevLed *led = l->data;
-    if (led->color == FBD_FEEDBACK_LED_COLOR_RGB || led->color == color)
+    if (fbd_dev_led_has_color (led, color))
       return led;
   }
 

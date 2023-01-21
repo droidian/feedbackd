@@ -33,5 +33,6 @@ gboolean            fbd_dev_led_start_periodic (FbdDevLed           *led,
                                                 FbdFeedbackLedColor  color,
                                                 guint                max_brightness_percentage,
                                                 guint                freq);
+gboolean            fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color);
 
 G_END_DECLS
