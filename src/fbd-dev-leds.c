@@ -16,15 +16,6 @@
 
 #include <gio/gio.h>
 
-/**
- * SECTION:fbd-dev-led
- * @short_description: LED device interface
- * @Title: FbdDevLeds
- *
- * #FbdDevLeds is used to interface with LEDS via sysfs
- * It currently only supports one pattern per led at a time.
- */
-
 #define LED_BRIGHTNESS_ATTR      "brightness"
 #define LED_MAX_BRIGHTNESS_ATTR  "max_brightness"
 #define LED_MULTI_INDEX_ATTR     "multi_index"
@@ -48,6 +39,14 @@ typedef struct _FbdDevLed {
   FbdFeedbackLedColor color;
 } FbdDevLed;
 
+/**
+ * FbdDevLeds:
+ *
+ * LED device interface
+ *
+ * #FbdDevLeds is used to interface with LEDS via sysfs
+ * It currently only supports one pattern per led at a time.
+ */
 typedef struct _FbdDevLeds {
   GObject      parent;
 
