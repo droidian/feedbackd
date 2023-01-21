@@ -29,5 +29,9 @@ typedef struct _FbdDevLed {
 void                fbd_dev_led_free (FbdDevLed *led);
 gboolean            fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness);
 FbdDevLed          *fbd_dev_led_new  (GUdevDevice *dev);
+gboolean            fbd_dev_led_start_periodic (FbdDevLed           *led,
+                                                FbdFeedbackLedColor  color,
+                                                guint                max_brightness_percentage,
+                                                guint                freq);
 
 G_END_DECLS

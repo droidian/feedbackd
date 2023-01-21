@@ -17,8 +17,6 @@
 
 #include <gio/gio.h>
 
-#define LED_MULTI_INTENSITY_ATTR "multi_intensity"
-#define LED_PATTERN_ATTR         "pattern"
 #define LED_SUBSYSTEM            "leds"
 
 /**
@@ -151,65 +149,13 @@ fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
                              guint max_brightness_percentage, guint freq)
 {
   FbdDevLed *led;
-  gdouble max;
-  gdouble t;
-  g_autofree gchar *str = NULL;
-
-  g_autoptr (GError) err = NULL;
-  gboolean success;
 
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
   g_return_val_if_fail (max_brightness_percentage <= 100.0, FALSE);
   led = find_led_by_color (self, color);
   g_return_val_if_fail (led, FALSE);
 
-  if (led->color == FBD_FEEDBACK_LED_COLOR_RGB) {
-    g_autofree char *intensity = NULL;
-    guint colors[] = { 0, 0, 0 };
-    switch (color) {
-    case FBD_FEEDBACK_LED_COLOR_WHITE:
-      colors[led->red_index] = led->max_brightness;
-      colors[led->green_index] = led->max_brightness;
-      colors[led->blue_index] = led->max_brightness;
-      break;
-    case FBD_FEEDBACK_LED_COLOR_RED:
-      colors[led->red_index] = led->max_brightness;
-      colors[led->green_index] = 0;
-      colors[led->blue_index] = 0;
-      break;
-    case FBD_FEEDBACK_LED_COLOR_GREEN:
-      colors[led->red_index] = 0;
-      colors[led->green_index] = led->max_brightness;
-      colors[led->blue_index] = 0;
-      break;
-    case FBD_FEEDBACK_LED_COLOR_BLUE:
-      colors[led->red_index] = 0;
-      colors[led->green_index] = 0;
-      colors[led->blue_index] = led->max_brightness;
-      break;
-    default:
-      g_warning("Unhandled color: %d\n", color);
-      return FALSE;
-    }
-    intensity = g_strdup_printf ("%d %d %d\n", colors[0], colors[1], colors[2]);
-    fbd_dev_led_set_brightness (led, led->max_brightness);
-    success = fbd_udev_set_sysfs_path_attr_as_string (led->dev, LED_MULTI_INTENSITY_ATTR, intensity, &err);
-    if (!success) {
-      g_warning ("Failed to set multi intensity: %s", err->message);
-      g_clear_error (&err);
-    }
-  }
-
-  max =  led->max_brightness * (max_brightness_percentage / 100.0);
-  /*  ms     mHz           T/2 */
-  t = 1000.0 * 1000.0 / freq / 2.0;
-  str = g_strdup_printf ("0 %d %d %d\n", (gint)t, (gint)max, (gint)t);
-  g_debug ("Freq %d mHz, Brightness: %d%%, Blink pattern: %s", freq, max_brightness_percentage, str);
-  success = fbd_udev_set_sysfs_path_attr_as_string (led->dev, LED_PATTERN_ATTR, str, &err);
-  if (!success)
-    g_warning ("Failed to set led pattern: %s", err->message);
-
-  return success;
+  return fbd_dev_led_start_periodic (led, color, max_brightness_percentage, freq);
 }
 
 gboolean
