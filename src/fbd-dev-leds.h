@@ -6,9 +6,9 @@
 #pragma once
 
 #include "fbd-feedback-led.h"
+#include "fbd-udev.h"
 
 #include <glib-object.h>
-#include <gudev/gudev.h>
 
 G_BEGIN_DECLS
 

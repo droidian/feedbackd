@@ -10,13 +10,13 @@
 
 #include "fbd.h"
 #include "fbd-enums.h"
+#include "fbd-dev-led.h"
 #include "fbd-dev-leds.h"
 #include "fbd-feedback-led.h"
 #include "fbd-udev.h"
 
 #include <gio/gio.h>
 
-#define LED_BRIGHTNESS_ATTR      "brightness"
 #define LED_MAX_BRIGHTNESS_ATTR  "max_brightness"
 #define LED_MULTI_INDEX_ATTR     "multi_index"
 #define LED_MULTI_INTENSITY_ATTR "multi_intensity"
@@ -25,19 +25,6 @@
 #define LED_MULTI_INDEX_BLUE     "blue"
 #define LED_PATTERN_ATTR         "pattern"
 #define LED_SUBSYSTEM            "leds"
-
-typedef struct _FbdDevLed {
-  GUdevDevice        *dev;
-  guint               max_brightness;
-  guint               red_index;
-  guint               green_index;
-  guint               blue_index;
-  /*
-   * We just use the colors from the feedback until we
-   * do rgb mixing, etc
-   */
-  FbdFeedbackLedColor color;
-} FbdDevLed;
 
 /**
  * FbdDevLeds:
@@ -58,27 +45,6 @@ static void initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (FbdDevLeds, fbd_dev_leds, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init));
-
-
-static void
-fbd_dev_led_free (FbdDevLed *led)
-{
-  g_object_unref (led->dev);
-  g_free (led);
-}
-
-static gboolean
-fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness)
-{
-  g_autoptr (GError) err = NULL;
-
-  if (!fbd_udev_set_sysfs_path_attr_as_int (led->dev, LED_BRIGHTNESS_ATTR, brightness, &err)) {
-    g_warning ("Failed to setup brightness: %s", err->message);
-    return FALSE;
-  }
-
-  return TRUE;
-}
 
 static FbdDevLed *
 find_led_by_color (FbdDevLeds *self, FbdFeedbackLedColor color)
