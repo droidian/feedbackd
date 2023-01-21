@@ -13,9 +13,10 @@
 
 G_BEGIN_DECLS
 
-typedef struct _FbdDevLed FbdDevLed;
+#define FBD_TYPE_DEV_LED fbd_dev_led_get_type()
 
-void                fbd_dev_led_free (FbdDevLed *led);
+G_DECLARE_DERIVABLE_TYPE (FbdDevLed, fbd_dev_led, FBD, DEV_LED, GObject)
+
 gboolean            fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness);
 FbdDevLed          *fbd_dev_led_new  (GUdevDevice *dev);
 gboolean            fbd_dev_led_start_periodic (FbdDevLed           *led,
@@ -23,5 +24,9 @@ gboolean            fbd_dev_led_start_periodic (FbdDevLed           *led,
                                                 guint                max_brightness_percentage,
                                                 guint                freq);
 gboolean            fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color);
+
+struct _FbdDevLedClass {
+  GObjectClass parent_class;
+};
 
 G_END_DECLS

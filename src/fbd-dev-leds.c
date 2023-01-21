@@ -107,7 +107,7 @@ fbd_dev_leds_dispose (GObject *object)
   FbdDevLeds *self = FBD_DEV_LEDS (object);
 
   g_clear_object (&self->client);
-  g_slist_free_full (self->leds, (GDestroyNotify)fbd_dev_led_free);
+  g_slist_free_full (self->leds, (GDestroyNotify)g_object_unref);
   self->leds = NULL;
 
   G_OBJECT_CLASS (fbd_dev_leds_parent_class)->dispose (object);
