@@ -13,18 +13,7 @@
 
 G_BEGIN_DECLS
 
-typedef struct _FbdDevLed {
-  GUdevDevice        *dev;
-  guint               max_brightness;
-  guint               red_index;
-  guint               green_index;
-  guint               blue_index;
-  /*
-   * We just use the colors from the feedback until we
-   * do rgb mixing, etc
-   */
-  FbdFeedbackLedColor color;
-} FbdDevLed;
+typedef struct _FbdDevLed FbdDevLed;
 
 void                fbd_dev_led_free (FbdDevLed *led);
 gboolean            fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness);

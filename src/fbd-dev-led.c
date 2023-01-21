@@ -21,6 +21,21 @@
 #define LED_MULTI_INTENSITY_ATTR "multi_intensity"
 #define LED_PATTERN_ATTR         "pattern"
 
+
+struct _FbdDevLed {
+  GUdevDevice        *dev;
+  guint               max_brightness;
+  guint               red_index;
+  guint               green_index;
+  guint               blue_index;
+  /*
+   * We just use the colors from the feedback until we
+   * do rgb mixing, etc
+   */
+  FbdFeedbackLedColor color;
+};
+
+
 void
 fbd_dev_led_free (FbdDevLed *led)
 {
