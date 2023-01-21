@@ -11,6 +11,7 @@
 #include "fbd.h"
 #include "fbd-enums.h"
 #include "fbd-dev-led.h"
+#include "fbd-dev-led-multicolor.h"
 #include "fbd-dev-leds.h"
 #include "fbd-feedback-led.h"
 #include "fbd-udev.h"
@@ -78,12 +79,18 @@ initable_init (GInitable    *initable,
       continue;
     }
 
-    led = fbd_dev_led_new (dev, &err);
+    /* Try multicolor first, fall back to single color */
+    led = fbd_dev_led_multicolor_new (dev, &err);
+    if (led == NULL) {
+      g_debug ("Led not usable as multicolor: '%s'", err->message);
+      led = fbd_dev_led_new (dev, &err);
+      if (led == NULL)
+        g_debug ("Led not usable as single color: '%s'", err->message);
+    }
+
     if (led) {
       self->leds = g_slist_append (self->leds, led);
       found = TRUE;
-    } else {
-      g_debug ("Led not usable: %s", err->message);
     }
   }
 
