@@ -27,6 +27,14 @@ gboolean            fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor c
 
 struct _FbdDevLedClass {
   GObjectClass parent_class;
+
+  gboolean (*probe)          (FbdDevLed           *led, GError **error);
+  gboolean (*start_periodic) (FbdDevLed           *led,
+                              FbdFeedbackLedColor  color,
+                              guint                max_brightness_percentage,
+                              guint                freq);
+  gboolean (*has_color)      (FbdDevLed           *led,
+                              FbdFeedbackLedColor  color);
 };
 
 G_END_DECLS

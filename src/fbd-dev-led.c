@@ -50,65 +50,9 @@ G_DEFINE_TYPE_WITH_CODE (FbdDevLed, fbd_dev_led, G_TYPE_OBJECT,
                          G_ADD_PRIVATE (FbdDevLed)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init))
 
-
-static void
-fbd_dev_led_set_property (GObject      *object,
-                          guint         property_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
-{
-  FbdDevLed *led = FBD_DEV_LED (object);
-  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
-
-  switch (property_id) {
-  case PROP_DEV:
-    priv->dev = g_value_dup_object (value);
-    break;
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
-  }
-}
-
-
-static void
-fbd_dev_led_get_property (GObject    *object,
-                          guint       property_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
-{
-  FbdDevLed *led = FBD_DEV_LED (object);
-  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
-
-  switch (property_id) {
-  case PROP_DEV:
-    g_value_set_object (value, priv->dev);
-    break;
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
-  }
-}
-
-
-static void
-fbd_dev_led_finalize (GObject *object)
-{
-  FbdDevLed *self = FBD_DEV_LED (object);
-  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (self);
-
-  g_clear_object (&priv->dev);
-
-  G_OBJECT_CLASS (fbd_dev_led_parent_class)->finalize (object);
-}
-
-
 static gboolean
-initable_init (GInitable    *initable,
-               GCancellable *cancellable,
-               GError      **error)
+fbd_dev_led_probe_default (FbdDevLed *led, GError **error)
 {
-  FbdDevLed *led = FBD_DEV_LED (initable);
   FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
   const gchar *name, *path;
   gboolean success;
@@ -173,67 +117,11 @@ initable_init (GInitable    *initable,
 }
 
 
-static void
-initable_iface_init (GInitableIface *iface)
-{
-  iface->init = initable_init;
-}
-
-
-static void
-fbd_dev_led_class_init (FbdDevLedClass *klass)
-{
-  GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  object_class->get_property = fbd_dev_led_get_property;
-  object_class->set_property = fbd_dev_led_set_property;
-  object_class->finalize = fbd_dev_led_finalize;
-
-  props[PROP_DEV] =
-    g_param_spec_object ("dev", "", "",
-                         G_UDEV_TYPE_DEVICE,
-                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
-
-  g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
-}
-
-
-static void
-fbd_dev_led_init (FbdDevLed *self)
-{
-}
-
-
-FbdDevLed *
-fbd_dev_led_new (GUdevDevice *dev, GError **err)
-{
-  return g_initable_new (FBD_TYPE_DEV_LED, NULL, err, "dev", dev, NULL);
-}
-
-
-gboolean
-fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness)
-{
-  FbdDevLedPrivate *priv;
-  g_autoptr (GError) err = NULL;
-
-  g_return_val_if_fail (FBD_IS_DEV_LED (led), FALSE);
-  priv = fbd_dev_led_get_instance_private (led);
-
-  if (!fbd_udev_set_sysfs_path_attr_as_int (priv->dev, LED_BRIGHTNESS_ATTR, brightness, &err)) {
-    g_warning ("Failed to setup brightness: %s", err->message);
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
-
-gboolean
-fbd_dev_led_start_periodic (FbdDevLed           *led,
-                            FbdFeedbackLedColor  color,
-                            guint                max_brightness_percentage,
-                            guint                freq)
+static gboolean
+fbd_dev_led_start_periodic_default (FbdDevLed           *led,
+                                    FbdFeedbackLedColor  color,
+                                    guint                max_brightness_percentage,
+                                    guint                freq)
 {
   FbdDevLedPrivate *priv;
   g_autoptr (GError) err = NULL;
@@ -296,8 +184,8 @@ fbd_dev_led_start_periodic (FbdDevLed           *led,
 }
 
 
-gboolean
-fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color)
+static gboolean
+fbd_dev_led_has_color_default (FbdDevLed *led, FbdFeedbackLedColor color)
 {
   FbdDevLedPrivate *priv;
 
@@ -305,4 +193,153 @@ fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color)
   priv = fbd_dev_led_get_instance_private (led);
 
   return (priv->color == FBD_FEEDBACK_LED_COLOR_RGB || priv->color == color);
+}
+
+
+static void
+fbd_dev_led_set_property (GObject      *object,
+                          guint         property_id,
+                          const GValue *value,
+                          GParamSpec   *pspec)
+{
+  FbdDevLed *led = FBD_DEV_LED (object);
+  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
+
+  switch (property_id) {
+  case PROP_DEV:
+    priv->dev = g_value_dup_object (value);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
+  }
+}
+
+
+static void
+fbd_dev_led_get_property (GObject    *object,
+                          guint       property_id,
+                          GValue     *value,
+                          GParamSpec *pspec)
+{
+  FbdDevLed *led = FBD_DEV_LED (object);
+  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (led);
+
+  switch (property_id) {
+  case PROP_DEV:
+    g_value_set_object (value, priv->dev);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
+    break;
+  }
+}
+
+
+static void
+fbd_dev_led_finalize (GObject *object)
+{
+  FbdDevLed *self = FBD_DEV_LED (object);
+  FbdDevLedPrivate *priv = fbd_dev_led_get_instance_private (self);
+
+  g_clear_object (&priv->dev);
+
+  G_OBJECT_CLASS (fbd_dev_led_parent_class)->finalize (object);
+}
+
+
+static gboolean
+initable_init (GInitable    *initable,
+               GCancellable *cancellable,
+               GError      **error)
+{
+  FbdDevLedClass *fbd_dev_led_class = FBD_DEV_LED_GET_CLASS (initable);
+
+  return fbd_dev_led_class->probe (FBD_DEV_LED (initable), error);
+}
+
+
+static void
+initable_iface_init (GInitableIface *iface)
+{
+  iface->init = initable_init;
+}
+
+
+static void
+fbd_dev_led_class_init (FbdDevLedClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+  FbdDevLedClass *fbd_dev_led_class = FBD_DEV_LED_CLASS (klass);
+
+  object_class->get_property = fbd_dev_led_get_property;
+  object_class->set_property = fbd_dev_led_set_property;
+  object_class->finalize = fbd_dev_led_finalize;
+
+  fbd_dev_led_class->probe = fbd_dev_led_probe_default;
+  fbd_dev_led_class->start_periodic = fbd_dev_led_start_periodic_default;
+  fbd_dev_led_class->has_color = fbd_dev_led_has_color_default;
+
+  props[PROP_DEV] =
+    g_param_spec_object ("dev", "", "",
+                         G_UDEV_TYPE_DEVICE,
+                         G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
+
+  g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
+}
+
+
+static void
+fbd_dev_led_init (FbdDevLed *self)
+{
+}
+
+
+FbdDevLed *
+fbd_dev_led_new (GUdevDevice *dev, GError **err)
+{
+  return g_initable_new (FBD_TYPE_DEV_LED, NULL, err, "dev", dev, NULL);
+}
+
+
+gboolean
+fbd_dev_led_set_brightness (FbdDevLed *led, guint brightness)
+{
+  FbdDevLedPrivate *priv;
+  g_autoptr (GError) err = NULL;
+
+  g_return_val_if_fail (FBD_IS_DEV_LED (led), FALSE);
+  priv = fbd_dev_led_get_instance_private (led);
+
+  if (!fbd_udev_set_sysfs_path_attr_as_int (priv->dev, LED_BRIGHTNESS_ATTR, brightness, &err)) {
+    g_warning ("Failed to setup brightness: %s", err->message);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+
+gboolean
+fbd_dev_led_start_periodic (FbdDevLed           *led,
+                            FbdFeedbackLedColor  color,
+                            guint                max_brightness_percentage,
+                            guint                freq)
+{
+  FbdDevLedClass *fbd_dev_led_class = FBD_DEV_LED_GET_CLASS (led);
+
+  g_return_val_if_fail (FBD_IS_DEV_LED (led), FALSE);
+
+  return fbd_dev_led_class->start_periodic (led, color, max_brightness_percentage, freq);
+}
+
+
+gboolean
+fbd_dev_led_has_color (FbdDevLed *led, FbdFeedbackLedColor color)
+{
+  FbdDevLedClass *fbd_dev_led_class = FBD_DEV_LED_GET_CLASS (led);
+
+  g_return_val_if_fail (FBD_IS_DEV_LED (led), FALSE);
+
+  return fbd_dev_led_class->has_color (led, color);
 }
