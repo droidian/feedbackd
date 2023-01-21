@@ -20,7 +20,7 @@ if get_option('daemon')
                                 'gtk_doc=false',
                                 'tests=false',
                               ])
-  gmobile        = gmobile_subp.get_variable('libgmobile_dep')
+  gmobile        = gmobile_subp.get_variable('gmobile_dep')
   gsound         = dependency('gsound')
   gudev          = dependency('gudev-1.0', version: '>=232')
   json_glib      = dependency('json-glib-1.0')
