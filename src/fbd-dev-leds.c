@@ -17,12 +17,7 @@
 
 #include <gio/gio.h>
 
-#define LED_MAX_BRIGHTNESS_ATTR  "max_brightness"
-#define LED_MULTI_INDEX_ATTR     "multi_index"
 #define LED_MULTI_INTENSITY_ATTR "multi_intensity"
-#define LED_MULTI_INDEX_RED      "red"
-#define LED_MULTI_INDEX_GREEN    "green"
-#define LED_MULTI_INDEX_BLUE     "blue"
 #define LED_PATTERN_ATTR         "pattern"
 #define LED_SUBSYSTEM            "leds"
 
@@ -77,65 +72,17 @@ initable_init (GInitable    *initable,
 
   for (GList *l = leds; l != NULL; l = l->next) {
     GUdevDevice *dev = G_UDEV_DEVICE (l->data);
-    const gchar *name, *path;
-    FbdDevLed *led = NULL;
+    FbdDevLed *led;
 
     if (g_strcmp0 (g_udev_device_get_property (dev, FEEDBACKD_UDEV_ATTR),
                    FEEDBACKD_UDEV_VAL_LED)) {
       continue;
     }
-    name = g_udev_device_get_name (dev);
 
-    /* We don't know anything about diffusors that can combine different
-       color LEDSs so go with fixed colors until the kernel gives us
-       enough information */
-    for (int i = 0; i <= FBD_FEEDBACK_LED_COLOR_LAST; i++) {
-      g_autofree char *color = NULL;
-      g_autofree char *enum_name = NULL;
-      const gchar * const *index;
-      guint counter = 0;
-      gchar *c;
-
-      enum_name = g_enum_to_string (FBD_TYPE_FEEDBACK_LED_COLOR, i);
-      c = strrchr (enum_name, '_');
-      color = g_ascii_strdown (c+1, -1);
-      if (g_strstr_len (name, -1, color)) {
-        g_autoptr (GError) err = NULL;
-        guint brightness = g_udev_device_get_sysfs_attr_as_int (dev, LED_MAX_BRIGHTNESS_ATTR);
-        index = g_udev_device_get_sysfs_attr_as_strv (dev, LED_MULTI_INDEX_ATTR);
-
-        if (!brightness)
-          continue;
-
-        led = g_malloc0 (sizeof(FbdDevLed));
-        led->dev = g_object_ref (dev);
-        led->color = i;
-        led->max_brightness = brightness;
-
-	if (index) {
-          for (int j = 0; j < g_strv_length ((gchar **) index); j++) {
-            g_debug ("Index: %s", index[j]);
-            if (g_strcmp0 (index[j], LED_MULTI_INDEX_RED) == 0) {
-              led->red_index = counter;
-              counter++;
-            } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_GREEN) == 0) {
-              led->green_index = counter;
-              counter++;
-            } else if (g_strcmp0 (index[j], LED_MULTI_INDEX_BLUE) == 0) {
-              led->blue_index = counter;
-              counter++;
-            } else {
-              g_warning ("Unsupport LED color index: %d %s", counter, index[j]);
-	    }
-          }
-        }
-
-        path = g_udev_device_get_sysfs_path (dev);
-        g_debug ("LED at '%s' usable", path);
-        self->leds = g_slist_append (self->leds, led);
-        found = TRUE;
-        break;
-      }
+    led = fbd_dev_led_new (dev);
+    if (led) {
+      self->leds = g_slist_append (self->leds, led);
+      found = TRUE;
     }
   }
 
