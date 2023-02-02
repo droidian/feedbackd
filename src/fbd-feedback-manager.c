@@ -557,7 +557,7 @@ fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
   g_autofree char *theme_name = NULL;
   const char *theme_file = g_getenv (FEEDBACKD_THEME_VAR);
 
-  compatibles = gm_devicetree_get_compatibles (NULL, &err);
+  compatibles = gm_device_tree_get_compatibles (NULL, &err);
   if (compatibles == NULL && err) {
     g_debug ("Failed to get compatibles: %s", err->message);
     g_clear_error (&err);
