@@ -1,3 +1,13 @@
+feedbackd 0.0.3
+---------------
+Released Febrary 2023
+* spec: Separate system and application events
+* theme: add screen-shot event
+* Build and doc fixes
+* Update gmobile to 0.0.1
+* Contributors:
+    * Guido Günther
+
 feedbackd 0.0.2
 ---------------
 Released December 2022
