@@ -1,3 +1,25 @@
+feedbackd (0.0.3) experimental; urgency=medium
+
+  * build: Add dbus sources to the lib dependency.  Otherwise we might fail to
+    generate it for the executables
+  * event-naming-spec: Separate application and system events.
+    Make it obvious which events are meant to be used by "normal" GUI
+    applications in contrast to system components like desktop shells or
+    components monitoring the battery, etc.
+    This was prompted by
+    https://github.com/flatpak/xdg-desktop-portal/issues/929
+  * feedback-theme: Add screen-shot event.
+    Used to indicate that a screen shot is being taken.
+  * lfb-event: Fix docstring.
+    This allows gi-docgen to pick it up
+  * doc: Fix link to spec in manpage
+  * libfeedback: Fix link to specs.
+    Since we now have them as part of the API docs we can avoid any remote
+    URLs
+  * Update gmobile to 0.0.1
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 02 Feb 2023 12:10:51 +0100
+
 feedbackd (0.0.2) experimental; urgency=medium
 
   [ Chris Vogel ]
