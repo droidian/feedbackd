@@ -42,9 +42,9 @@ G_DEFINE_TYPE_WITH_CODE (FbdFeedbackTheme, fbd_feedback_theme, G_TYPE_OBJECT,
 
 static JsonNode *
 fbd_theme_serializable_serialize_property (JsonSerializable *serializable,
-					   const gchar *property_name,
-					   const GValue *value,
-					   GParamSpec *pspec)
+					   const gchar      *property_name,
+					   const GValue     *value,
+					   GParamSpec       *pspec)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (serializable);
   JsonNode *node = NULL;
@@ -71,10 +71,10 @@ fbd_theme_serializable_serialize_property (JsonSerializable *serializable,
 
 static gboolean
 fbd_theme_serializable_deserialize_property (JsonSerializable *serializable,
-					     const gchar *property_name,
-					     GValue *value,
-					     GParamSpec *pspec,
-					     JsonNode *property_node)
+					     const gchar      *property_name,
+					     GValue           *value,
+					     GParamSpec       *pspec,
+					     JsonNode         *property_node)
 {
   if (g_strcmp0 (property_name, "profiles") == 0) {
     if (JSON_NODE_TYPE (property_node) == JSON_NODE_NULL) {
@@ -117,7 +117,7 @@ fbd_theme_serializable_deserialize_property (JsonSerializable *serializable,
 }
 
 static void
-fbd_feedback_theme_set_property (GObject        *object,
+fbd_feedback_theme_set_property (GObject      *object,
                                  guint         property_id,
                                  const GValue *value,
                                  GParamSpec   *pspec)
