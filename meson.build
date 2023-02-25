@@ -1,5 +1,5 @@
 project('feedbackd', 'c',
-          version : '0.0.3',
+          version : '0.1.0',
           license : 'LGPLv3+',
     meson_version : '>= 0.56.0',
   default_options : [

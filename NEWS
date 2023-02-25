@@ -1,6 +1,17 @@
+feedbackd 0.1.0
+---------------
+Released February 2023
+* Make LED class more flexible. This will
+  allow e.g. hw based implementations
+* Trigger module load via udev. This avoids
+  shipping another conf file
+* Contributors:
+    * Dylan Van Assche
+    * Guido Günther
+
 feedbackd 0.0.3
 ---------------
-Released Febrary 2023
+Released February 2023
 * spec: Separate system and application events
 * theme: add screen-shot event
 * Build and doc fixes
