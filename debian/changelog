@@ -1,3 +1,44 @@
+feedbackd (0.1.0) experimental; urgency=medium
+
+  [ Dylan Van Assche ]
+  * udev: load the required kernel modules.
+    Loading the required kernel modules such as ledtrig-pattern via
+    /etc/modules-load.d may introduce a race condition on some systems such
+    as non-systemd based distros. Load the kernel modules using the builtin
+    'kmod load' udev command instead.
+
+  [ Guido Günther ]
+  * debian: Drop obsolete conf file.
+    As this is now handled via udev's kmod builtin we can drop this.
+  * theme: Fix some indentation
+  * fbd-dev-leds: Use gi-docgen compatible format.
+    We don't document the server classes via gi-docgen atm but
+    as we use it for the lib update classes we touch.
+  * Move LED device to separate file.
+    We separate out the led as different LED types have different
+    ways to set patterns, etc
+  * fbd-dev-leds: Move led creation into fbd-dev-led.
+    This will allow us to separate the different led types
+  * fbd-dev-leds: Move pattern trigger into fbd-dev-led
+  * fbd-dev-led: Allow to lookup color.
+    This allows us to make the led structure into an opaque in
+    the next commit
+  * fbd-dev-led: Make structure opaque.
+    This will allow us to turn it into a GObject
+  * fbd-dev-led: Turn into a GObject.
+    This is just the minimal changes to switch to a derivable GObject
+  * fbd-dev-led: Use GInitable.
+    Use default GObject patterns instead of stuffing things into the
+    fbd_dev_led_new () so derived classes can override it.
+  * fbd-dev-led: Add class methods so derived classes can override functionality
+  * fbd-dev-led: Move multicolor handling to separate class.
+    Everything related to multicolor moves into the new class and we add the
+    necessary getters and setters so derived classes can access the parent
+    classes attributes where needed.
+  * d/gbp.conf: Be less strict when matching the meson version field
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 25 Feb 2023 14:04:43 +0100
+
 feedbackd (0.0.3) experimental; urgency=medium
 
   * build: Add dbus sources to the lib dependency.  Otherwise we might fail to
