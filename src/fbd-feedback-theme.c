@@ -182,6 +182,7 @@ fbd_feedback_theme_finalize (GObject *object)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
+  g_clear_pointer (&self->parent_name, g_free);
   g_clear_pointer (&self->name, g_free);
 
   G_OBJECT_CLASS (fbd_feedback_theme_parent_class)->finalize (object);
