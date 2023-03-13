@@ -37,10 +37,10 @@ test_fbd_feedback_theme_profiles (void)
 							"event-name", "event2",
 							NULL);
   g_autoptr(FbdFeedbackTheme) theme = fbd_feedback_theme_new (THEME_NAME);
-
   FbdFeedbackProfile *profile_full = fbd_feedback_profile_new ("full");
   FbdFeedbackProfile *profile_quiet = fbd_feedback_profile_new ("quiet");
   FbdFeedbackProfile *profile;
+  g_autofree char *json = NULL;
 
   fbd_feedback_profile_add_feedback (profile_quiet, FBD_FEEDBACK_BASE(quiet_fb1));
   fbd_feedback_profile_add_feedback (profile_quiet, FBD_FEEDBACK_BASE(quiet_fb2));
@@ -55,7 +55,8 @@ test_fbd_feedback_theme_profiles (void)
   profile = fbd_feedback_theme_get_profile (theme, "full");
   g_assert_true (FBD_IS_FEEDBACK_PROFILE (profile));
 
-  g_print ("%s\n", json_gobject_to_data (G_OBJECT(theme), NULL));
+  json = json_gobject_to_data (G_OBJECT(theme), NULL);
+  g_print ("%s\n", json);
 }
 
 
