@@ -68,7 +68,7 @@ test_fbd_feedback_profile_parse (void)
         "    }                                    ";
   g_autoptr (GError) err = NULL;
   g_autoptr (FbdFeedbackProfile) profile = NULL;
-  JsonNode *node;
+  g_autoptr (JsonNode) node = NULL;
   FbdFeedbackBase *fb;
 
   node = json_from_string(json, &err);
