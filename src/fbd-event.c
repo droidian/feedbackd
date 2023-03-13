@@ -376,8 +376,6 @@ fbd_event_remove_feedback (FbdEvent *self, FbdFeedbackBase *feedback)
 void
 fbd_event_run_feedbacks (FbdEvent *self)
 {
-  GSList *l;
-
   g_return_if_fail (FBD_IS_EVENT (self));
 
   g_debug ("Running %d feedbacks for event %d", g_slist_length (self->feedbacks), self->id);
@@ -392,7 +390,7 @@ fbd_event_run_feedbacks (FbdEvent *self)
     g_source_set_name_by_id (self->timeout_id, "event timeout source");
   }
 
-  for (l = self->feedbacks; l; l = l->next) {
+  for (GSList *l = self->feedbacks; l; l = l->next) {
     FbdFeedbackBase *fb = FBD_FEEDBACK_BASE (l->data);
     fbd_feedback_run (fb);
   }
