@@ -53,7 +53,7 @@ fbd_theme_serializable_serialize_property (JsonSerializable *serializable,
     GHashTableIter iter;
     gpointer key;
     FbdFeedbackProfile *profile;
-    JsonArray *array = json_array_sized_new (FBD_FEEDBACK_PROFILE_N_PROFILES);
+    g_autoptr (JsonArray) array = json_array_sized_new (FBD_FEEDBACK_PROFILE_N_PROFILES);
 
     g_hash_table_iter_init (&iter, self->profiles);
     while (g_hash_table_iter_next (&iter, (gpointer *)&key, (gpointer *) &profile)) {
