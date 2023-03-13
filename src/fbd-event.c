@@ -390,10 +390,12 @@ fbd_event_run_feedbacks (FbdEvent *self)
     g_source_set_name_by_id (self->timeout_id, "event timeout source");
   }
 
+  g_object_ref (self);
   for (GSList *l = self->feedbacks; l; l = l->next) {
     FbdFeedbackBase *fb = FBD_FEEDBACK_BASE (l->data);
     fbd_feedback_run (fb);
   }
+  g_object_unref (self);
 }
 
 /**
