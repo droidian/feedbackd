@@ -53,7 +53,7 @@ fbd_theme_serializable_serialize_property (JsonSerializable *serializable,
     GHashTableIter iter;
     gpointer key;
     FbdFeedbackProfile *profile;
-    JsonArray *array = json_array_sized_new (FBD_FEEDBACK_PROFILE_N_PROFILES);
+    g_autoptr (JsonArray) array = json_array_sized_new (FBD_FEEDBACK_PROFILE_N_PROFILES);
 
     g_hash_table_iter_init (&iter, self->profiles);
     while (g_hash_table_iter_next (&iter, (gpointer *)&key, (gpointer *) &profile)) {
@@ -182,6 +182,7 @@ fbd_feedback_theme_finalize (GObject *object)
 {
   FbdFeedbackTheme *self = FBD_FEEDBACK_THEME (object);
 
+  g_clear_pointer (&self->parent_name, g_free);
   g_clear_pointer (&self->name, g_free);
 
   G_OBJECT_CLASS (fbd_feedback_theme_parent_class)->finalize (object);

@@ -87,7 +87,6 @@ if introspection
     '--quiet',
     '-DLIBFEEDBACK_COMPILATION',
     '-DLIBFEEDBACK_USE_UNSTABLE_API',
-    '--warn-error',
     '--warn-all',
   ]
 
@@ -104,6 +103,7 @@ if introspection
         install_dir_gir : girdir,
     install_dir_typelib : typelibdir,
              extra_args : libfeedback_gir_extra_args,
+         fatal_warnings : true,
    )
 
   if get_option('vapi')
