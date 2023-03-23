@@ -1,3 +1,29 @@
+feedbackd (0.1.1) experimental; urgency=medium
+
+  * build: Avoid meson deprecation warning
+  * fbd-event: Make sure we iterate the list safely.
+    When all feedbacks are done the event signals "feedbacks-ended" which
+    lets the manager dispose the feedback. When all feedbacks end instantly
+    and synchronously (as is the case with the dummy feedback) this triggers
+    the disposal of the event within the loop leading to a crash.
+    Make sure the object doesn't go away be referencing it during the loop
+    iteration.
+    We didn't see this before as glib's slice allocator for lists papered
+    over this for us.
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/69
+  * tests: Don't leak json string
+  * tests: Don't leak profiles and test that.
+    We finalize the theme first so the last reference is dropped when
+    finalizing the profiles.
+  * feedback-profile: Don't leak json array when serializing profile
+    json_array_add_element doesn't transfer ownership
+  * feedback-theme: Don't leak json array when serializing profile
+    json_array_add_element doesn't transfer ownership.
+  * feedback-theme: Don't leak parent name
+  * tests/profile: Don't leak json node
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 23 Mar 2023 10:35:01 +0100
+
 feedbackd (0.1.0) experimental; urgency=medium
 
   [ Dylan Van Assche ]
