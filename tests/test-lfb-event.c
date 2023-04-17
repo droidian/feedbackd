@@ -21,17 +21,18 @@ test_lfb_event_props (void)
   event = lfb_event_new ("window-close");
   g_assert_true (LFB_IS_EVENT (event));
 
-  g_object_get (event, "event", &evname, NULL);
+  g_object_get (event,
+                "event", &evname,
+                "timeout", &timeout,
+                "feedback-profile", &profile,
+                NULL);
   g_assert_cmpstr (evname, ==, "window-close");
-
-  g_object_get (event, "timeout", &timeout, NULL);
   g_assert_cmpint (timeout, ==, -1);
+  g_assert_null (profile);
 
   g_assert_cmpint (lfb_event_get_end_reason (event), ==, LFB_EVENT_END_REASON_NATURAL);
   g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_NONE);
 
-  g_object_get (event, "feedback-profile", &profile, NULL);
-  g_assert_null (profile);
   g_object_set (event, "feedback-profile", "full", NULL);
   g_object_get (event, "feedback-profile", &profile, NULL);
   g_assert_cmpstr (profile, ==, "full");
