@@ -35,9 +35,7 @@ test_lfb_event_props (void)
   g_object_set (event, "feedback-profile", "full", NULL);
   g_object_get (event, "feedback-profile", &profile, NULL);
   g_assert_cmpstr (profile, ==, "full");
-  g_free (profile);
-  profile = lfb_event_get_feedback_profile (event);
-  g_assert_cmpstr (profile, ==, "full");
+  g_assert_cmpstr (lfb_event_get_feedback_profile (event), ==, "full");
 
   lfb_uninit ();
 }

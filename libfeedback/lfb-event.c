@@ -244,7 +244,7 @@ lfb_event_get_property (GObject    *object,
     g_value_set_int (value, self->timeout);
     break;
   case PROP_FEEDBACK_PROFILE:
-    g_value_set_string (value, self->profile);
+    g_value_set_string (value, lfb_event_get_feedback_profile (self));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -716,13 +716,15 @@ lfb_event_set_feedback_profile (LfbEvent *self, const gchar *profile)
  * lfb_event_get_feedback_profile:
  * @self: The event
  *
- * Returns:(transfer full): The set feedback profile to use for this
- * event or %NULL.
+ * Gets the set feedback profile. If no profile was set it returns
+ * %NULL. The event uses the system wide profile in this case.
+ *
+ * Returns: The set feedback profile to use for this event or %NULL.
  */
-char *
+const char *
 lfb_event_get_feedback_profile (LfbEvent *self)
 {
   g_return_val_if_fail (LFB_IS_EVENT (self), NULL);
 
-  return g_strdup (self->profile);
+  return self->profile;
 }
