@@ -14,6 +14,7 @@ test_lfb_event_props (void)
   g_autoptr(LfbEvent) event = NULL;
   g_autofree gchar *evname = NULL;
   g_autofree gchar *profile = NULL;
+  g_autofree gchar *app_id = NULL;
   gint timeout;
 
   g_assert_true (lfb_init (TEST_APP_ID, NULL));
@@ -21,23 +22,29 @@ test_lfb_event_props (void)
   event = lfb_event_new ("window-close");
   g_assert_true (LFB_IS_EVENT (event));
 
-  g_object_get (event, "event", &evname, NULL);
+  g_object_get (event,
+                "event", &evname,
+                "timeout", &timeout,
+                "feedback-profile", &profile,
+                "app-id", &app_id,
+                NULL);
   g_assert_cmpstr (evname, ==, "window-close");
-
-  g_object_get (event, "timeout", &timeout, NULL);
   g_assert_cmpint (timeout, ==, -1);
+  g_assert_null (profile);
+  g_assert_null (app_id);
 
   g_assert_cmpint (lfb_event_get_end_reason (event), ==, LFB_EVENT_END_REASON_NATURAL);
   g_assert_cmpint (lfb_event_get_state (event), ==, LFB_EVENT_STATE_NONE);
 
-  g_object_get (event, "feedback-profile", &profile, NULL);
-  g_assert_null (profile);
   g_object_set (event, "feedback-profile", "full", NULL);
   g_object_get (event, "feedback-profile", &profile, NULL);
   g_assert_cmpstr (profile, ==, "full");
-  g_free (profile);
-  profile = lfb_event_get_feedback_profile (event);
-  g_assert_cmpstr (profile, ==, "full");
+  g_assert_cmpstr (lfb_event_get_feedback_profile (event), ==, "full");
+
+  g_object_set (event, "app-id", "com.example.foo", NULL);
+  g_object_get (event, "app-id", &app_id, NULL);
+  g_assert_cmpstr (app_id, ==, "com.example.foo");
+  g_assert_cmpstr (lfb_event_get_app_id (event), ==, "com.example.foo");
 
   lfb_uninit ();
 }

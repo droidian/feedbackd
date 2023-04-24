@@ -79,6 +79,7 @@ enum {
   PROP_STATE,
   PROP_END_REASON,
   PROP_FEEDBACK_PROFILE,
+  PROP_APP_ID,
   PROP_LAST_PROP,
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -95,6 +96,7 @@ typedef struct _LfbEvent {
   char          *event;
   gint           timeout;
   gchar         *profile;
+  char          *app_id;
 
   guint          id;
   LfbEventState  state;
@@ -221,6 +223,9 @@ lfb_event_set_property (GObject      *object,
   case PROP_FEEDBACK_PROFILE:
     lfb_event_set_feedback_profile (self, g_value_get_string (value));
     break;
+  case PROP_APP_ID:
+    lfb_event_set_app_id (self, g_value_get_string (value));
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -244,7 +249,10 @@ lfb_event_get_property (GObject    *object,
     g_value_set_int (value, self->timeout);
     break;
   case PROP_FEEDBACK_PROFILE:
-    g_value_set_string (value, self->profile);
+    g_value_set_string (value, lfb_event_get_feedback_profile (self));
+    break;
+  case PROP_APP_ID:
+    g_value_set_string (value, lfb_event_get_app_id (self));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -262,6 +270,7 @@ lfb_event_finalize (GObject *object)
 
   g_clear_pointer (&self->event, g_free);
   g_clear_pointer (&self->profile, g_free);
+  g_clear_pointer (&self->app_id, g_free);
 
   G_OBJECT_CLASS (lfb_event_parent_class)->finalize (object);
 }
@@ -333,6 +342,20 @@ lfb_event_class_init (LfbEventClass *klass)
       "feedback-profile",
       "Feedback profile",
       "Feedback profile to use for this event",
+      NULL,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
+   * LfbEvent:app-id:
+   *
+   * The application id to use for the event.
+   * [method@LfbEvent.set_feedback_profile]() for details.
+   */
+  props[PROP_APP_ID] =
+    g_param_spec_string (
+      "app-id",
+      "Application Id",
+      "The Application id to use for this event",
       NULL,
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -411,6 +434,7 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
 {
   LfbGdbusFeedback *proxy;
   gboolean success;
+  const char *app_id;
 
   g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
@@ -429,8 +453,9 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
                                                  G_CONNECT_SWAPPED);
    }
 
+   app_id = self->app_id ?: lfb_get_app_id ();
    success =  lfb_gdbus_feedback_call_trigger_feedback_sync (proxy,
-                                                             lfb_get_app_id (),
+                                                             app_id,
                                                              self->event,
                                                              build_hints (self),
                                                              self->timeout,
@@ -462,6 +487,7 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
 {
   LfbAsyncData *data;
   LfbGdbusFeedback *proxy;
+  const char *app_id;
 
   g_return_if_fail (LFB_IS_EVENT (self));
   if (!lfb_is_initted ())
@@ -481,8 +507,10 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
   data = g_new0 (LfbAsyncData, 1);
   data->task = g_task_new (self, cancellable, callback, user_data);
   data->event = g_object_ref (self);
+
+  app_id = self->app_id ?: lfb_get_app_id ();
   lfb_gdbus_feedback_call_trigger_feedback (proxy,
-                                            lfb_get_app_id (),
+                                            app_id,
                                             self->event,
                                             build_hints (self),
                                             self->timeout,
@@ -716,13 +744,60 @@ lfb_event_set_feedback_profile (LfbEvent *self, const gchar *profile)
  * lfb_event_get_feedback_profile:
  * @self: The event
  *
- * Returns:(transfer full): The set feedback profile to use for this
- * event or %NULL.
+ * Gets the set feedback profile. If no profile was set it returns
+ * %NULL. The event uses the system wide profile in this case.
+ *
+ * Returns: The set feedback profile to use for this event or %NULL.
  */
-char *
+const char *
 lfb_event_get_feedback_profile (LfbEvent *self)
 {
   g_return_val_if_fail (LFB_IS_EVENT (self), NULL);
 
-  return g_strdup (self->profile);
+  return self->profile;
+}
+
+/**
+ * lfb_event_set_app_id:
+ * @self: The event
+ * @app_id: The application id to use
+ *
+ * Tells the feedback server to use the given application id for
+ * this event when it is submitted. The server might ignore this
+ * request. This can be used by notification daemons to honor per
+ * application settings automatically.
+ *
+ * The functions is usually not used by applications.
+ *
+ * A value of %NULL (the default) lets the server pick the profile.
+ */
+void
+lfb_event_set_app_id (LfbEvent *self, const gchar *app_id)
+{
+  g_return_if_fail (LFB_IS_EVENT (self));
+
+  if (!g_strcmp0 (self->app_id, app_id))
+    return;
+
+  g_free (self->app_id);
+  self->app_id = g_strdup (app_id);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_APP_ID]);
+}
+
+/**
+ * lfb_event_get_app_id:
+ * @self: The event
+ *
+ * Returns the app-id for this event. If no app-id has been explicitly
+ * set, %NULL is returned. The event uses the app-id returns by
+ * [func@lfb_get_app_id] in this case.
+ *
+ * Returns:(transfer none): The set app-id for this event or %NULL.
+ */
+const char *
+lfb_event_get_app_id (LfbEvent *self)
+{
+  g_return_val_if_fail (LFB_IS_EVENT (self), NULL);
+
+  return self->app_id;
 }

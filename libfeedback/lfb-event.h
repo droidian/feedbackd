@@ -74,7 +74,9 @@ gboolean    lfb_event_end_feedback_finish (LfbEvent            *self,
 void        lfb_event_set_timeout (LfbEvent *self, gint timeout);
 gint        lfb_event_get_timeout (LfbEvent *self);
 void        lfb_event_set_feedback_profile (LfbEvent *self, const char *profile);
-char       *lfb_event_get_feedback_profile (LfbEvent *self);
+const char *lfb_event_get_feedback_profile (LfbEvent *self);
+void        lfb_event_set_app_id (LfbEvent *self, const char *app_id);
+const char *lfb_event_get_app_id (LfbEvent *self);
 const char *lfb_event_get_event (LfbEvent *self);
 LfbEventState     lfb_event_get_state (LfbEvent *self);
 LfbEventEndReason lfb_event_get_end_reason (LfbEvent *self);
