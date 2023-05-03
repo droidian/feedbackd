@@ -28,7 +28,7 @@ OPTIONS
 ``-E=EVENT``; ``--event=EVENT``
   Submit the given event to ``feedbackd``. Valid events are listes in
   the event naming spec at
-  `https://source.puri.sm/Librem5/feedbackd/-/blob/main/Event-naming-spec-0.0.0.md`__
+  https://source.puri.sm/Librem5/feedbackd/-/blob/main/doc/Event-naming-spec-0.0.0.md
 
 ``-t=TIMEOUT``; ``--timeout=TIMEOUT``
   The timeout in seconds after which feedback for the given event should

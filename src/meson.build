@@ -24,6 +24,8 @@ sources = [
   'fbd-droid-leds.c',
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
+  'fbd-dev-led.c',
+  'fbd-dev-led-multicolor.c',
   'fbd-dev-leds.c',
   'fbd-event.c',
   'fbd-feedback-base.c',

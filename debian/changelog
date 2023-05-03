@@ -1,3 +1,107 @@
+feedbackd (0.2.0) experimental; urgency=medium
+
+  * build: Bump version to 0.2.0. We have a slight api change.
+  * lfb-event: Avoid allocation when getting profile.
+    We can return the const *. This makes it consistent with other getters.
+    This is an API change we didn't find any users and the API is declared
+    unstable.
+  * tests: Get properties all at once
+  * lfb-event: Add getter and setter for app-id.
+    For applications this is figured out automatically but notification
+    daemons and portal implementations might want to override it to have the
+    per-app feedback profile picked up automatically.
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 17 Apr 2023 12:14:14 +0200
+
+feedbackd (0.1.1) experimental; urgency=medium
+
+  * build: Avoid meson deprecation warning
+  * fbd-event: Make sure we iterate the list safely.
+    When all feedbacks are done the event signals "feedbacks-ended" which
+    lets the manager dispose the feedback. When all feedbacks end instantly
+    and synchronously (as is the case with the dummy feedback) this triggers
+    the disposal of the event within the loop leading to a crash.
+    Make sure the object doesn't go away be referencing it during the loop
+    iteration.
+    We didn't see this before as glib's slice allocator for lists papered
+    over this for us.
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/69
+  * tests: Don't leak json string
+  * tests: Don't leak profiles and test that.
+    We finalize the theme first so the last reference is dropped when
+    finalizing the profiles.
+  * feedback-profile: Don't leak json array when serializing profile
+    json_array_add_element doesn't transfer ownership
+  * feedback-theme: Don't leak json array when serializing profile
+    json_array_add_element doesn't transfer ownership.
+  * feedback-theme: Don't leak parent name
+  * tests/profile: Don't leak json node
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 23 Mar 2023 10:35:01 +0100
+
+feedbackd (0.1.0) experimental; urgency=medium
+
+  [ Dylan Van Assche ]
+  * udev: load the required kernel modules.
+    Loading the required kernel modules such as ledtrig-pattern via
+    /etc/modules-load.d may introduce a race condition on some systems such
+    as non-systemd based distros. Load the kernel modules using the builtin
+    'kmod load' udev command instead.
+
+  [ Guido Günther ]
+  * debian: Drop obsolete conf file.
+    As this is now handled via udev's kmod builtin we can drop this.
+  * theme: Fix some indentation
+  * fbd-dev-leds: Use gi-docgen compatible format.
+    We don't document the server classes via gi-docgen atm but
+    as we use it for the lib update classes we touch.
+  * Move LED device to separate file.
+    We separate out the led as different LED types have different
+    ways to set patterns, etc
+  * fbd-dev-leds: Move led creation into fbd-dev-led.
+    This will allow us to separate the different led types
+  * fbd-dev-leds: Move pattern trigger into fbd-dev-led
+  * fbd-dev-led: Allow to lookup color.
+    This allows us to make the led structure into an opaque in
+    the next commit
+  * fbd-dev-led: Make structure opaque.
+    This will allow us to turn it into a GObject
+  * fbd-dev-led: Turn into a GObject.
+    This is just the minimal changes to switch to a derivable GObject
+  * fbd-dev-led: Use GInitable.
+    Use default GObject patterns instead of stuffing things into the
+    fbd_dev_led_new () so derived classes can override it.
+  * fbd-dev-led: Add class methods so derived classes can override functionality
+  * fbd-dev-led: Move multicolor handling to separate class.
+    Everything related to multicolor moves into the new class and we add the
+    necessary getters and setters so derived classes can access the parent
+    classes attributes where needed.
+  * d/gbp.conf: Be less strict when matching the meson version field
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 25 Feb 2023 14:04:43 +0100
+
+feedbackd (0.0.3) experimental; urgency=medium
+
+  * build: Add dbus sources to the lib dependency.  Otherwise we might fail to
+    generate it for the executables
+  * event-naming-spec: Separate application and system events.
+    Make it obvious which events are meant to be used by "normal" GUI
+    applications in contrast to system components like desktop shells or
+    components monitoring the battery, etc.
+    This was prompted by
+    https://github.com/flatpak/xdg-desktop-portal/issues/929
+  * feedback-theme: Add screen-shot event.
+    Used to indicate that a screen shot is being taken.
+  * lfb-event: Fix docstring.
+    This allows gi-docgen to pick it up
+  * doc: Fix link to spec in manpage
+  * libfeedback: Fix link to specs.
+    Since we now have them as part of the API docs we can avoid any remote
+    URLs
+  * Update gmobile to 0.0.1
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 02 Feb 2023 12:10:51 +0100
+
 feedbackd (0.0.2) experimental; urgency=medium
 
   [ Chris Vogel ]
