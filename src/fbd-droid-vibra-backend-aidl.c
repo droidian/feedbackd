@@ -93,8 +93,6 @@ fbd_droid_vibra_backend_get_capabilities (FbdDroidVibraBackend *backend)
   int status;
   int capabilities;
 
-  gbinder_local_request_append_int32 (req, BINDER_STABILITY_VENDOR); /* stability */
-
   reply = gbinder_client_transact_sync_reply (self->client,
                                               BINDER_VIBRATOR_AIDL_GET_CAPABILITIES,
                                               req, &status);
@@ -123,7 +121,6 @@ fbd_droid_vibra_backend_aidl_on (FbdDroidVibraBackend *backend,
 
   gbinder_local_request_append_int32 (req, duration); /* duration */
   gbinder_local_request_append_local_object (req, self->callback_object); /* callback */
-  gbinder_local_request_append_int32 (req, BINDER_STABILITY_VINTF); /* stability */
 
   reply = gbinder_client_transact_sync_reply (self->client,
                                               BINDER_VIBRATOR_AIDL_ON,
@@ -145,8 +142,6 @@ fbd_droid_vibra_backend_aidl_off (FbdDroidVibraBackend *backend)
   GBinderLocalRequest *req = gbinder_client_new_request (self->client);
   GBinderRemoteReply *reply;
   int status;
-
-  gbinder_local_request_append_int32 (req, BINDER_STABILITY_VINTF); /* stability */
 
   reply = gbinder_client_transact_sync_reply (self->client,
                                               BINDER_VIBRATOR_AIDL_OFF,

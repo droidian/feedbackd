@@ -110,7 +110,6 @@ fbd_droid_leds_backend_aidl_start_periodic (FbdDroidLedsBackend *backend,
 
   gbinder_writer_append_int32 (&writer, LIGHT_TYPE_NOTIFICATIONS);
   gbinder_writer_append_parcelable (&writer, notification_state, sizeof(*notification_state));
-  gbinder_writer_append_int32 (&writer, BINDER_STABILITY_VINTF); /* stability */
 
   reply = gbinder_client_transact_sync_reply (self->client,
                                               BINDER_LIGHT_AIDL_SET_LIGHT_STATE,
@@ -146,7 +145,6 @@ fbd_droid_leds_backend_aidl_stop (FbdDroidLedsBackend *backend,
 
   gbinder_writer_append_int32 (&writer, LIGHT_TYPE_NOTIFICATIONS);
   gbinder_writer_append_parcelable (&writer, notification_state, sizeof(*notification_state));
-  gbinder_writer_append_int32 (&writer, BINDER_STABILITY_VINTF); /* stability */
 
   reply = gbinder_client_transact_sync_reply (self->client,
                                               BINDER_LIGHT_AIDL_SET_LIGHT_STATE,
