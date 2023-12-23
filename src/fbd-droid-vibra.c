@@ -16,6 +16,7 @@
 #include "fbd-droid-vibra-backend.h"
 #include "fbd-droid-vibra-backend-hidl.h"
 #include "fbd-droid-vibra-backend-aidl.h"
+#include "fbd-droid-vibra-backend-sysfs.h"
 
 #include <gio/gio.h>
 
@@ -102,7 +103,21 @@ initable_init (GInitable     *initable,
     char *device, *iface, *fqname;
     int i;
 
-    g_debug("initializing droid vibra");
+    g_debug ("initializing droid vibra");
+
+    // Some devices cannot use either hidl or aidl backends, but sysfs works fine for them
+    if (g_file_test ("/usr/lib/droidian/device/vibrator-sysfs", G_FILE_TEST_EXISTS)) {
+        self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_sysfs_new (error);
+        if (!self->backend) {
+            g_set_error (error,
+                         G_IO_ERROR, G_IO_ERROR_FAILED,
+                         "Failed to initialize vibrator backend using sysfs");
+            return FALSE;
+        }
+
+        g_debug ("Droid vibra device initialized using sysfs backend");
+        return TRUE;
+    }
 
     /* Try with AIDL first */
     self->backend = (FbdDroidVibraBackend *) fbd_droid_vibra_backend_aidl_new (error);

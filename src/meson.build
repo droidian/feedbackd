@@ -17,6 +17,7 @@ sources = [
   'fbd-droid-vibra-backend.c',
   'fbd-droid-vibra-backend-hidl.c',
   'fbd-droid-vibra-backend-aidl.c',
+  'fbd-droid-vibra-backend-sysfs.c',
   'fbd-droid-vibra.c',
   'fbd-droid-leds-backend.c',
   'fbd-droid-leds-backend-hidl.c',
