@@ -17,6 +17,7 @@
 #include "fbd-droid-leds-backend.h"
 #include "fbd-droid-leds-backend-hidl.h"
 #include "fbd-droid-leds-backend-aidl.h"
+#include "fbd-droid-leds-backend-sysfs.h"
 
 #include <gio/gio.h>
 
@@ -50,7 +51,20 @@ initable_init (GInitable     *initable,
     FbdDevLeds *self = FBD_DEV_LEDS (initable);
     gboolean success;
 
-    g_debug("initializing droid leds");
+    g_debug ("initializing droid leds");
+
+    if (g_file_test ("/usr/lib/droidian/device/leds-sysfs", G_FILE_TEST_EXISTS)) {
+        self->backend = (FbdDroidLedsBackend *) fbd_droid_leds_backend_sysfs_new (error);
+        if (!self->backend) {
+            g_set_error (error,
+                         G_IO_ERROR, G_IO_ERROR_FAILED,
+                         "Failed to initialize leds backend using sysfs");
+            return FALSE;
+        }
+
+        g_debug ("Droid leds device initialized using sysfs backend");
+        return TRUE;
+    }
 
     /* Try with AIDL first */
     self->backend = (FbdDroidLedsBackend *) fbd_droid_leds_backend_aidl_new (error);
