@@ -165,3 +165,23 @@ fbd_dev_leds_stop (FbdDevLeds *self, FbdFeedbackLedColor color)
     return fbd_droid_leds_backend_stop (self->backend, color);
 }
 
+
+/**
+ * fbd_dev_leds_has_led:
+ * @self: The FbdDevLeds
+ * @color: The color type to check
+ *
+ * Whether there's a usable LED of the given type
+ *
+ * Returns: `TRUE` if there's a at least one usable LED, otherwise `FALSE`
+ */
+gboolean
+fbd_dev_leds_has_led (FbdDevLeds *self, FbdFeedbackLedColor color)
+{
+  g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
+
+  /* We can't check for color :( So always return TRUE, if no LEDs
+   * are available, the initable would fail directly
+  */
+  return TRUE;
+}

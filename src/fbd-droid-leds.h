@@ -23,5 +23,6 @@ gboolean    fbd_dev_leds_start_periodic (FbdDevLeds *self,
 gboolean    fbd_dev_leds_stop (FbdDevLeds         *self,
                                FbdFeedbackLedColor color);
 
+gboolean    fbd_dev_leds_has_led (FbdDevLeds *self, FbdFeedbackLedColor color);
 
 G_END_DECLS
