@@ -131,7 +131,7 @@ lfb_set_app_id (const char *app_id)
 /**
  * lfb_get_app_id:
  *
- * Get the application id set via [func@Lfb.set_app_id]().
+ * Get the application id set via [func@Lfb.set_app_id].
  *
  * Returns:  the application id.
  */

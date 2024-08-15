@@ -1,5 +1,5 @@
-/usr/bin/
-/usr/libexec/
-/usr/share/dbus-1/
-/usr/share/feedbackd/
-/usr/share/man/
+usr/bin/
+usr/lib/udev/
+usr/libexec/
+usr/share/dbus-1/
+usr/share/feedbackd/

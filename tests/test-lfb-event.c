@@ -15,6 +15,7 @@ test_lfb_event_props (void)
   g_autofree gchar *evname = NULL;
   g_autofree gchar *profile = NULL;
   g_autofree gchar *app_id = NULL;
+  gboolean important;
   gint timeout;
 
   g_assert_true (lfb_init (TEST_APP_ID, NULL));
@@ -27,10 +28,12 @@ test_lfb_event_props (void)
                 "timeout", &timeout,
                 "feedback-profile", &profile,
                 "app-id", &app_id,
+                "important", &important,
                 NULL);
   g_assert_cmpstr (evname, ==, "window-close");
   g_assert_cmpint (timeout, ==, -1);
   g_assert_null (profile);
+  g_assert_false (important);
   g_assert_null (app_id);
 
   g_assert_cmpint (lfb_event_get_end_reason (event), ==, LFB_EVENT_END_REASON_NATURAL);

@@ -1,8 +1,65 @@
+feedbackd 0.4.1
+---------------
+Released August 2024
+* Simplify udev rule installation
+* Dont' fail tests with newer json-glib
+* Issues fixed:
+    * https://source.puri.sm/Librem5/feedbackd/-/issues/79
+* Contributors:
+    * Guido Günther
+
+feedbackd 0.4.0
+---------------
+Released June 2024
+* Support `hw_pattern` on devices using qcom-lpg. This allows
+  to keep LEDs on in suspend.
+* Internal cleanups and restructuring to cater for different
+  LED types.
+* Support RGB color mixing for multicolor leds
+* Allow to use (camera) flash LEDs as notificaton LED
+* Immediately end "too noisy" feedbacks when switching profile levels
+* Issues fixed:
+    * https://source.puri.sm/Librem5/feedbackd/-/issues/77
+    * https://source.puri.sm/Librem5/feedbackd/-/issues/76
+    * https://source.puri.sm/Librem5/feedbackd/-/issues/13
+    * https://source.puri.sm/Librem5/feedbackd/-/issues/55
+* Contributors:
+    * Dylan Van Assche
+    * Guido Günther
+
+feedbackd 0.3.0
+---------------
+Released April 2024
+* Allow blessed apps (e.g. alarm clocks) to override the global
+  feedback level
+* Documentation, CI and packaging updates
+* Make it simpler to add new led types
+* Contributors:
+    * Guido Günther
+
+feedbackd 0.2.1
+---------------
+Released August 2023
+* Minor documentation updates
+* Contributors:
+    * Guido Günther
+
+feedbackd 0.2.0
+---------------
+Released April 2023
+* lfbevent: Add api to set app-id
+* lfbevent: Change signature of get_feedback_profile().
+  (API change but no known users)
+* Contributors:
+    * Guido Günther
+
 feedbackd 0.1.1
 ---------------
 Released March 2023
 * Fix test failure exposed by glib 2.76
 * Leak fixes
+* Contributors:
+    * Guido Günther
 
 feedbackd 0.1.0
 ---------------

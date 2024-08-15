@@ -171,13 +171,13 @@
         {
           "event-name" : "phone-missed-call",
           "type"       : "Led",
-          "color"      : "blue",
+          "color"      : "#00FFFF",
           "frequency"  : 3000
         },
         {
           "event-name" : "message-missed-email",
           "type"       : "Led",
-          "color"      : "blue",
+          "color"      : "#800080",
           "frequency"  : 2000
         },
         {

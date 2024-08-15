@@ -1,6 +1,9 @@
 option('introspection', type: 'feature', value: 'auto')
 option('vapi', type: 'boolean', value: true)
 
+option('udev',
+       type: 'boolean', value: true,
+       description: 'Whether to install the udev rules')
 option('daemon',
        type: 'boolean', value: true,
        description: 'Whether to build the daemon')

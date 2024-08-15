@@ -22,16 +22,15 @@
 #include "fbd-feedback-theme.h"
 #include "fbd-theme-expander.h"
 
-#define GMOBILE_USE_UNSTABLE_API
 #include <gmobile.h>
 
 #include <gio/gio.h>
 #include <glib-unix.h>
 #include <gudev/gudev.h>
 
-#define FEEDBACKD_SCHEMA_ID "org.sigxcpu.feedbackd"
 #define FEEDBACKD_KEY_PROFILE "profile"
 #define FEEDBACKD_KEY_THEME "theme"
+#define FEEDBACKD_KEY_ALLOW_IMPORTANT "allow-important"
 
 #define APP_SCHEMA FEEDBACKD_SCHEMA_ID ".application"
 #define APP_PREFIX "/org/sigxcpu/feedbackd/application/"
@@ -54,6 +53,7 @@ typedef struct _FbdFeedbackManager {
   FbdFeedbackProfileLevel  level;
   FbdFeedbackTheme        *theme;
   guint                    next_id;
+  GStrv                    allow_important;
 
   /* Key: event id, value: event */
   GHashTable              *events;
@@ -218,8 +218,6 @@ on_profile_changed (FbdFeedbackManager *self, GParamSpec *psepc, gpointer unused
 
   if (!fbd_feedback_manager_set_profile (self, pname))
     g_warning ("Invalid profile '%s'", pname);
-
-  /* TODO: end running feedbacks that aren't allowed in new profile immediately */
 }
 
 static void
@@ -241,6 +239,33 @@ on_feedbackd_setting_changed (FbdFeedbackManager *self,
     g_critical ("Unknown settings key '%s'", key);
   }
 }
+
+
+static gboolean
+app_is_important (FbdFeedbackManager *self, const char *app_id)
+{
+  if (!self->allow_important)
+    return FALSE;
+
+  if (g_strv_contains ((const char *const *)self->allow_important, app_id))
+    return TRUE;
+
+  return FALSE;
+}
+
+
+static void
+on_feedbackd_allow_important_changed (FbdFeedbackManager *self,
+                                      const gchar        *key,
+                                      GSettings          *settings)
+{
+  g_return_if_fail (FBD_IS_FEEDBACK_MANAGER (self));
+  g_return_if_fail (G_IS_SETTINGS (settings));
+
+  g_strfreev (self->allow_important);
+  self->allow_important = g_settings_get_strv(self->settings, FEEDBACKD_KEY_ALLOW_IMPORTANT);
+}
+
 
 static void
 on_client_vanished (GDBusConnection *connection,
@@ -315,24 +340,31 @@ get_max_level (FbdFeedbackProfileLevel global_level,
 {
   FbdFeedbackProfileLevel level;
 
-  /* Individual events and apps can select lower levels than the global level but not higher ones */
-  level = global_level > app_level ? app_level : global_level;
-  level = level > event_level ? event_level : level;
+  /* Per app configuration can only select a *lower* feedback level */
+  level = MIN (global_level, app_level);
+  /* A hint in an event can only select a *lower* feedback level */
+  level = MIN (level, event_level);
+
   return level;
 }
 
 static gboolean
-parse_hints (GVariant *hints, FbdFeedbackProfileLevel *level)
+parse_hints (GVariant *hints, FbdFeedbackProfileLevel *level, gboolean *hint_important)
 {
   const gchar *profile;
-  gboolean found;
+  gboolean found, important;
   g_auto (GVariantDict) dict = G_VARIANT_DICT_INIT (NULL);
 
   g_variant_dict_init (&dict, hints);
-  found = g_variant_dict_lookup (&dict, "profile", "&s", &profile);
 
+  found = g_variant_dict_lookup (&dict, "profile", "&s", &profile);
   if (level && found)
     *level = fbd_feedback_profile_level (profile);
+
+  found = g_variant_dict_lookup (&dict, "important", "b", &important);
+  if (hint_important && found)
+    *hint_important = important;
+
   return TRUE;
 }
 
@@ -351,6 +383,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
   const gchar *sender;
   FbdFeedbackProfileLevel app_level, level, hint_level = FBD_FEEDBACK_PROFILE_LEVEL_FULL;
   gboolean found_fb = FALSE;
+  gboolean hint_important = FALSE, can_important;
 
   sender = g_dbus_method_invocation_get_sender (invocation);
   g_debug ("Event '%s' for '%s' from %s", arg_event, arg_app_id, sender);
@@ -374,7 +407,7 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
     return TRUE;
   }
 
-  if (!parse_hints (arg_hints, &hint_level)) {
+  if (!parse_hints (arg_hints, &hint_level, &hint_important)) {
     g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
                                            G_DBUS_ERROR_INVALID_ARGS,
                                            "Invalid hints");
@@ -390,12 +423,17 @@ fbd_feedback_manager_handle_trigger_feedback (LfbGdbusFeedback      *object,
   g_hash_table_insert (self->events, GUINT_TO_POINTER (event_id), event);
 
   app_level = app_get_feedback_level (arg_app_id);
-  level = get_max_level (self->level, app_level, hint_level);
+  can_important = app_is_important (self, arg_app_id);
+
+  if (hint_important && can_important)
+    level = hint_level;
+  else
+    level = get_max_level (self->level, app_level, hint_level);
 
   feedbacks = fbd_feedback_theme_lookup_feedback (self->theme, level, event);
   if (feedbacks) {
     for (l = feedbacks; l; l = l->next) {
-      FbdFeedbackBase *fb = l->data;
+      FbdFeedbackBase *fb = FBD_FEEDBACK_BASE (l->data);
 
       if (fbd_feedback_is_available (FBD_FEEDBACK_BASE (fb))) {
         fbd_event_add_feedback (event, fb);
@@ -470,7 +508,12 @@ fbd_feedback_manager_constructed (GObject *object)
   g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_PROFILE,
                             G_CALLBACK (on_feedbackd_setting_changed), self);
   on_feedbackd_setting_changed (self, FEEDBACKD_KEY_PROFILE, self->settings);
+
+  g_signal_connect_swapped (self->settings, "changed::" FEEDBACKD_KEY_ALLOW_IMPORTANT,
+                            G_CALLBACK (on_feedbackd_allow_important_changed), self);
+  on_feedbackd_allow_important_changed (self, FEEDBACKD_KEY_ALLOW_IMPORTANT, self->settings);
 }
+
 
 static void
 fbd_feedback_manager_dispose (GObject *object)
@@ -483,6 +526,8 @@ fbd_feedback_manager_dispose (GObject *object)
   g_clear_object (&self->vibra);
   g_clear_object (&self->leds);
   g_clear_object (&self->client);
+
+  g_clear_pointer (&self->allow_important, g_strfreev);
   g_clear_pointer (&self->events, g_hash_table_destroy);
   g_clear_pointer (&self->clients, g_hash_table_destroy);
 
@@ -596,6 +641,20 @@ fbd_feedback_manager_load_theme (FbdFeedbackManager *self)
   }
 }
 
+
+static void
+cancel_running (FbdFeedbackManager *self)
+{
+  g_autoptr (GList) running = g_hash_table_get_values (self->events);
+
+  for (GList *l = running; l ; l = l->next) {
+    FbdEvent *event = FBD_EVENT (l->data);
+
+    fbd_event_end_feedbacks_by_level (event, self->level);
+  }
+}
+
+
 gboolean
 fbd_feedback_manager_set_profile (FbdFeedbackManager *self, const gchar *profile)
 {
@@ -615,5 +674,8 @@ fbd_feedback_manager_set_profile (FbdFeedbackManager *self, const gchar *profile
   self->level = level;
   lfb_gdbus_feedback_set_profile (LFB_GDBUS_FEEDBACK (self), profile);
   g_settings_set_string (self->settings, FEEDBACKD_KEY_PROFILE, profile);
+
+  cancel_running (self);
+
   return TRUE;
 }

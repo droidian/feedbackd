@@ -1,5 +1,12 @@
 if get_option('tests')
 
+umockdev_dep = dependency('umockdev-1.0')
+
+add_test_setup ('umockdev',
+  exe_wrapper: 'umockdev-wrapper',
+  is_default: true
+)
+
 test_env = environment()
 test_env.set('G_TEST_SRCDIR', meson.current_source_dir())
 test_env.set('G_TEST_BUILDDIR', meson.current_build_dir())
@@ -66,18 +73,24 @@ test_fbd_link_args = [
 
 test_fbd_deps = [
   fbd_dep,
+  umockdev_dep,
 ]
 
+# HW independent tests
 fbd_tests = [
+  'fbd-feedback-led',
   'fbd-feedback-profile',
   'fbd-feedback-theme',
   'fbd-event',
   'fbd-theme-expander',
+  'fbd-dev-led',
 ]
 
 foreach test : fbd_tests
   t = executable('test-@0@'.format(test),
-                 ['test-@0@.c'.format(test), generated_dbus_sources[1]],
+                 ['test-@0@.c'.format(test),
+		  'testlib.c',
+		  generated_dbus_sources[1]],
                  c_args : test_fbd_cflags,
                  pie : true,
                  link_args : test_fbd_link_args,
@@ -85,7 +98,6 @@ foreach test : fbd_tests
                  dependencies : test_fbd_deps)
   test(test, t, env : test_env_fbd)
 endforeach
-
 
 endif # daemon
 

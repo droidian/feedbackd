@@ -343,8 +343,8 @@ fbd_event_get_timeout (FbdEvent *self)
 void
 fbd_event_add_feedback (FbdEvent *self, FbdFeedbackBase *feedback)
 {
-  self->feedbacks = g_slist_prepend (self->feedbacks, g_object_ref(feedback));
-  g_object_set_data (G_OBJECT (feedback), "event-id", GUINT_TO_POINTER(self->id));
+  self->feedbacks = g_slist_prepend (self->feedbacks, g_object_ref (feedback));
+  g_object_set_data (G_OBJECT (feedback), "event-id", GUINT_TO_POINTER (self->id));
   g_signal_connect_object (feedback,
                            "ended",
                            (GCallback) on_fb_ended,
@@ -361,10 +361,26 @@ fbd_event_get_feedbacks (FbdEvent *self)
 int
 fbd_event_remove_feedback (FbdEvent *self, FbdFeedbackBase *feedback)
 {
+  guint len;
+
   g_return_val_if_fail (FBD_IS_EVENT (self), 0);
 
+  if (!self->feedbacks)
+    return 0;
+
+  if (g_slist_index (self->feedbacks, feedback) >= 0) {
+    g_signal_handlers_disconnect_by_data (feedback, self);
+    /* Drop our reference, feedbacks end themselves when unref'ed */
+    g_object_unref (feedback);
+  }
+
   self->feedbacks = g_slist_remove (self->feedbacks, feedback);
-  return g_slist_length (self->feedbacks);
+
+  len = g_slist_length (self->feedbacks);
+  if (!len)
+    check_ended (self);
+
+  return len;
 }
 
 /**
@@ -412,6 +428,52 @@ fbd_event_end_feedbacks (FbdEvent *self)
   fbd_event_set_end_reason (self, FBD_EVENT_END_REASON_EXPLICIT);
   g_debug ("Ending %d feedbacks for event %d", g_slist_length (self->feedbacks), self->id);
   g_slist_foreach (self->feedbacks, (GFunc)fbd_feedback_end, NULL);
+}
+
+/**
+ * fbd_event_end_feedbacks_by_level:
+ * @self: The Event
+ * @level: The profile level
+ *
+ * End all feedback strictly above the given profile level.
+ */
+void
+fbd_event_end_feedbacks_by_level (FbdEvent *self, guint level)
+{
+  g_autoptr (GSList) feedbacks = NULL;
+  guint num = 0;
+
+  g_return_if_fail (FBD_IS_EVENT (self));
+  /* Copy the list as we will remove feedbacks from self->feedbacks */
+  feedbacks = g_slist_copy (fbd_event_get_feedbacks (self));
+
+  for (GSList *l = feedbacks; l; l = l->next) {
+    FbdFeedbackBase *fb = FBD_FEEDBACK_BASE (l->data);
+    guint event_level;
+
+    event_level = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (fb), "fbd-level"));
+    if (event_level > level)
+      num++;
+  }
+
+  if (num == 0)
+    return;
+
+  g_debug ("Will end %d feedbacks of event %s", num, fbd_event_get_event (self));
+  /* Set 'explicit' if we end all remaining feedbacks */
+  if (num == g_slist_length (self->feedbacks))
+      fbd_event_set_end_reason (self, FBD_EVENT_END_REASON_EXPLICIT);
+
+  for (GSList *l = feedbacks; l; l = l->next) {
+    FbdFeedbackBase *fb = FBD_FEEDBACK_BASE (l->data);
+    guint event_level;
+
+    event_level = GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (fb), "fbd-level"));
+    if (event_level > level) {
+      fbd_event_remove_feedback (self, fb);
+      fbd_feedback_end (fb);
+    }
+  }
 }
 
 /**

@@ -16,12 +16,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define LED_BRIGHTNESS_ATTR "brightness"
+#define LED_BRIGHTNESS_ATTR      "brightness"
 #define LED_MULTI_INTENSITY_ATTR "multi_intensity"
-#define LED_PATTERN_ATTR    "pattern"
-#define LED_REPEAT_ATTR     "repeat"
-#define LED_TRIGGER_ATTR    "trigger"
-#define LED_TRIGGER_PATTERN "pattern"
+#define LED_PATTERN_ATTR         "pattern"
+#define LED_REPEAT_ATTR          "repeat"
+#define LED_TRIGGER_ATTR         "trigger"
+#define LED_TRIGGER_PATTERN      "pattern"
+#define LED_TRIGGER_HW_PATTERN   "hw_pattern"
 
 enum {
   FBD_LEDCTRL_ERR_CMDLINE = 1,
@@ -127,7 +128,7 @@ set_perms (const char *sysfs_path, const char *trigger, const char *gname)
   if (!set_sysfs_attr_perm (sysfs_path, LED_BRIGHTNESS_ATTR, group->gr_gid))
       return FALSE;
 
-  // Attribute is optional
+  /* Attribute is optional */
   set_sysfs_attr_perm (sysfs_path, LED_MULTI_INTENSITY_ATTR, group->gr_gid);
 
   if (!g_strcmp0 (trigger, LED_TRIGGER_PATTERN)) {
@@ -135,6 +136,9 @@ set_perms (const char *sysfs_path, const char *trigger, const char *gname)
       success = FALSE;
     if (!set_sysfs_attr_perm (sysfs_path, LED_REPEAT_ATTR, group->gr_gid))
       success = FALSE;
+
+    /* Attribute is optional */
+    set_sysfs_attr_perm (sysfs_path, LED_TRIGGER_HW_PATTERN, group->gr_gid);
   }
 
   /* specific setup for other triggers goes here */

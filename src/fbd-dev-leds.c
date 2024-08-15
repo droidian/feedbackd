@@ -11,7 +11,10 @@
 #include "fbd.h"
 #include "fbd-enums.h"
 #include "fbd-dev-led.h"
+#include "fbd-dev-led-flash.h"
 #include "fbd-dev-led-multicolor.h"
+#include "fbd-dev-led-qcom.h"
+#include "fbd-dev-led-qcom-multicolor.h"
 #include "fbd-dev-leds.h"
 #include "fbd-feedback-led.h"
 #include "fbd-udev.h"
@@ -25,7 +28,7 @@
  *
  * LED device interface
  *
- * #FbdDevLeds is used to interface with LEDS via sysfs
+ * #FbdDevLeds is used to interface with all LEDs detected in sysfs
  * It currently only supports one pattern per led at a time.
  */
 typedef struct _FbdDevLeds {
@@ -46,14 +49,65 @@ find_led_by_color (FbdDevLeds *self, FbdFeedbackLedColor color)
   g_return_val_if_fail (self->leds, NULL);
 
   for (GSList *l = self->leds; l != NULL; l = l->next) {
-    FbdDevLed *led = l->data;
-    if (fbd_dev_led_has_color (led, color))
+    FbdDevLed *led = FBD_DEV_LED (l->data);
+    if (fbd_dev_led_supports_color (led, color))
       return led;
   }
 
-  /* If we did not match a color pick the first */
-  return self->leds->data;
+  /* If we did not match a color pick the first non flash LED */
+  for (GSList *l = self->leds; l != NULL; l = l->next) {
+    FbdDevLed *led = FBD_DEV_LED (l->data);
+
+    if (!fbd_dev_led_supports_color (led, FBD_FEEDBACK_LED_COLOR_FLASH))
+      return led;
+  }
+
+  return NULL;
 }
+
+
+static FbdDevLed*
+probe_led (GUdevDevice *dev, GError **error) {
+  FbdDevLed *led = NULL;
+
+  led = fbd_dev_led_qcom_multicolor_new (dev, error);
+  if (led != NULL) {
+    g_debug ("Discovered QCOM multicolor LED");
+    return led;
+  }
+  g_clear_error (error);
+
+  led = fbd_dev_led_qcom_new (dev, error);
+  if (led != NULL) {
+    g_debug ("Discovered QCOM single color LED");
+    return led;
+  }
+  g_clear_error (error);
+
+  led = fbd_dev_led_multicolor_new (dev, error);
+  if (led != NULL) {
+    g_debug ("Discovered multicolor LED");
+    return led;
+  }
+  g_clear_error (error);
+
+  led = fbd_dev_led_flash_new (dev, error);
+  if (led != NULL) {
+    g_debug ("Discovered flash LED");
+    return led;
+  }
+  g_clear_error (error);
+
+  led = fbd_dev_led_new (dev, error);
+  if (led != NULL) {
+    g_debug ("Discovered single color LED");
+    return led;
+  }
+
+  g_debug ("Unable to determine LED driver");
+  return NULL;
+}
+
 
 static gboolean
 initable_init (GInitable    *initable,
@@ -79,14 +133,7 @@ initable_init (GInitable    *initable,
       continue;
     }
 
-    /* Try multicolor first, fall back to single color */
-    led = fbd_dev_led_multicolor_new (dev, &err);
-    if (led == NULL) {
-      g_debug ("Led not usable as multicolor: '%s'", err->message);
-      led = fbd_dev_led_new (dev, &err);
-      if (led == NULL)
-        g_debug ("Led not usable as single color: '%s'", err->message);
-    }
+    led = probe_led (dev, &err);
 
     if (led) {
       self->leds = g_slist_append (self->leds, led);
@@ -148,24 +195,33 @@ fbd_dev_leds_new (GError **error)
 /**
  * fbd_dev_leds_start_periodic:
  * @self: The #FbdDevLeds
- * @color: The color to use for the LED pattern
+ * @color: The color LED to use for the LED pattern
+ * @rgb: The rgb value to set (if `color` indicates an RGB led)
  * @max_brightness_percentage: The max brightness (in percent) to use for the pattern
  * @freq: The pattern's frequency in mHz
  *
  * Start periodic feedback.
  */
 gboolean
-fbd_dev_leds_start_periodic (FbdDevLeds *self, FbdFeedbackLedColor color,
-                             guint max_brightness_percentage, guint freq)
+fbd_dev_leds_start_periodic (FbdDevLeds          *self,
+                             FbdFeedbackLedColor  color,
+                             FbdLedRgbColor      *rgb,
+                             guint                max_brightness_percentage,
+                             guint                freq)
 {
   FbdDevLed *led;
 
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
   g_return_val_if_fail (max_brightness_percentage <= 100.0, FALSE);
   led = find_led_by_color (self, color);
-  g_return_val_if_fail (led, FALSE);
+  if (!led) {
+    g_warning_once ("No usable led found");
+    return FALSE;
+  }
 
-  return fbd_dev_led_start_periodic (led, color, max_brightness_percentage, freq);
+  fbd_dev_led_set_color (led, color, rgb);
+
+  return fbd_dev_led_start_periodic (led, max_brightness_percentage, freq);
 }
 
 gboolean
@@ -176,7 +232,27 @@ fbd_dev_leds_stop (FbdDevLeds *self, FbdFeedbackLedColor color)
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
 
   led = find_led_by_color (self, color);
-  g_return_val_if_fail (led, FALSE);
+  if (!led) {
+    g_warning_once ("No usable led found");
+    return FALSE;
+  }
 
   return fbd_dev_led_set_brightness (led, 0);
+}
+
+/**
+ * fbd_dev_leds_has_led:
+ * @self: The FbdDevLeds
+ * @color: The color type to check
+ *
+ * Whether there's a usable LED of the given type
+ *
+ * Returns: `TRUE` if there's a at least one usable LED, otherwise `FALSE`
+ */
+gboolean
+fbd_dev_leds_has_led (FbdDevLeds *self, FbdFeedbackLedColor color)
+{
+  g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
+
+  return !!find_led_by_color (self, color);
 }

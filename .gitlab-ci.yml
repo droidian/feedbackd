@@ -1,33 +1,41 @@
 include:
- - remote: 'https://source.puri.sm/Librem5/librem5-ci/raw/master/librem5-pipeline-definitions.yml'
  - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/34039cd573a2df832d465bc9e4c5f543571f5241/templates/ci-fairy.yml'
-
-variables:
-  GIT_SUBMODULE_STRATEGY: normal
-  GIT_SUBMODULE_DEPTH: 1
+ - remote: 'https://gitlab.gnome.org/guidog/meta-phosh/-/raw/f3c92e90dcc0d65322888217429b75dd101bd0d3/ci/phosh-common-jobs.yml'
 
 stages:
  - build
  - test
+ - style-checks
  - package
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    # Don't trigger a branch pipeline if there is an open MR
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
 
 .before_script: &before_script
   before_script:
     - export DEBIAN_FRONTEND=noninteractive
     - apt-get -y update
+    - apt-get -y upgrade
     - apt-get -y build-dep .
-    - apt-get -y install gcovr git
+    - '[ -z "${EXTRA_PKGS}" ] || echo "Extra packages: ${EXTRA_PKGS}"'
+    - apt-get -y install gcovr git build-essential ${EXTRA_PKGS}
 
 .image: &image
   image:
-    name: debian:bookworm
+    name: debian:trixie
 
 .tags: &tags
   tags:
     - librem5:arm64
 
 # Regular, full build
-build:native-debian-bookworm:full:
+build:gcc:native-debian-trixie:full:
   <<: *tags
   <<: *image
   <<: *before_script
@@ -36,32 +44,51 @@ build:native-debian-bookworm:full:
     paths:
       - _build
   script:
-    - meson -Db_coverage=true --werror . _build
-    - ninja -C _build
+    - meson setup -Db_coverage=true --werror _build
+    - meson compile -C _build
   except:
     variables:
       - $PKG_ONLY == "1"
 
 # Minimal build for e.g. submodule usage
-build:native-debian-bookworm:lib:
+build:gcc:native-debian-trixie:lib:
   <<: *tags
   <<: *image
   <<: *before_script
   stage: build
   script:
-    - meson --werror -Ddaemon=false -Dgtk_doc=false . _build
-    - ninja -C _build
+    - meson setup --werror -Ddaemon=false -Dgtk_doc=false _build
+    - meson compile -C _build
   except:
     variables:
       - $PKG_ONLY == "1"
 
-test:native-debian-bookworm:
+# Build using clang
+build:clang:native-debian-trixie:full:
+  variables:
+    EXTRA_PKGS: clang
+  <<: *tags
+  <<: *image
+  <<: *before_script
+  stage: build
+  artifacts:
+    paths:
+      - _build
+  script:
+    - CC=clang meson setup --werror _build
+    - meson compile -C _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
+  allow_failure: true
+
+test:native-debian-trixie:
   <<: *tags
   <<: *image
   <<: *before_script
   stage: test
   needs:
-    - build:native-debian-bookworm:full
+    - build:gcc:native-debian-trixie:full
   coverage: '/^\s+lines\.+:\s+([\d.]+\%)\s+/'
   script:
     - dbus-run-session ninja -C _build test coverage
@@ -69,9 +96,46 @@ test:native-debian-bookworm:
     variables:
       - $PKG_ONLY == "1"
 
-package:deb-debian-bookwarm:arm64:
-  variables:
-    L5_DOCKER_IMAGE: debian:bookworm
-  extends: .l5-build-debian-package
+format-check:
+  <<: *tags
+  <<: *image
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get -y update
+    - apt-get -y install uncrustify git python3
+  stage: style-checks
+  needs: []
+  script:
+    - |
+      if [ -n "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
+        git remote add target $CI_MERGE_REQUEST_PROJECT_URL.git
+        echo "Fetching MR target branch $CI_MERGE_REQUEST_TARGET_BRANCH_NAME from $CI_MERGE_REQUEST_PROJECT_URL"
+        git fetch target "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+        git fetch --deepen=100 origin HEAD
+        merge_base=$(git merge-base "target/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" HEAD)
+        if [ -z "$merge_base" ]; then
+          echo "Could't determine merge base"
+          exit 1
+        fi
+        echo "Merge base: $merge_base"
+        ./.gitlab-ci/check-style.py --dry-run --sha $merge_base
+      else
+        echo "Not a merge request"
+      fi
+  allow_failure: true
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME'
+
+format-check:
+  <<: *tags
+  stage: style-checks
+  extends: .phosh-format-check
+  allow_failure: true
+
+package:deb-debian-trixie:arm64:
   tags:
     - librem5:arm64
+  stage: package
+  variables:
+    PHOSH_DOCKER_IMAGE: debian:trixie
+  extends: .phosh-build-debian-package

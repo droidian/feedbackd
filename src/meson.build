@@ -26,7 +26,10 @@ sources = [
   'fbd-dev-vibra.c',
   'fbd-dev-sound.c',
   'fbd-dev-led.c',
+  'fbd-dev-led-flash.c',
   'fbd-dev-led-multicolor.c',
+  'fbd-dev-led-qcom.c',
+  'fbd-dev-led-qcom-multicolor.c',
   'fbd-dev-leds.c',
   'fbd-event.c',
   'fbd-feedback-base.c',
@@ -66,11 +69,12 @@ fbd_lib = static_library(
   sources,
   include_directories : fbd_inc,
   dependencies : fbd_deps,
+  c_args: '-DGMOBILE_USE_UNSTABLE_API',
   install : false,
 )
 
 fbd_dep = declare_dependency(
-  sources: generated_dbus_sources,
+  sources: [generated_dbus_sources, fbd_enum_sources],
   include_directories : fbd_inc,
   link_with : fbd_lib,
   dependencies : fbd_deps,

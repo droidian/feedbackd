@@ -7,12 +7,12 @@
         {
           "type"       : "Dummy",
           "event-name" : "test-dummy-00",
-          "duration"   : 0x10
+          "duration"   : 16
         },
         {
           "type"       : "Dummy",
           "event-name" : "test-dummy-10",
-          "duration"   : 0x20
+          "duration"   : 32
         }
       ]
     },
@@ -22,7 +22,7 @@
         {
           "type"       : "Dummy",
           "event-name" : "test-dummy-10",
-          "duration"   : 0x30
+          "duration"   : 48
         }
       ]
     },
@@ -32,7 +32,7 @@
         {
           "type"       : "Dummy",
           "event-name" : "test-dummy-10",
-          "duration"   : 0x40
+          "duration"   : 64
         }
       ]
     }

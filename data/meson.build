@@ -24,6 +24,12 @@ compiled = gnome.compile_schemas(
   build_by_default: true
 )
 
+compile_schemas = find_program('glib-compile-schemas', required: false)
+if compile_schemas.found()
+  test('Validate schema file', compile_schemas,
+       args: ['--strict', '--dry-run', meson.current_source_dir()])
+endif
+
 install_data(
   schemas,
   install_dir: 'share/glib-2.0/schemas'
@@ -60,6 +66,10 @@ if json_glib_validate.found()
 		input: theme_json,
 		output: 'json_validate_stamp',
 		command: [json_glib_validate.full_path()] + jsons)
+endif
+
+if get_option('udev')
+  install_data('90-feedbackd.rules', install_dir: udevdir)
 endif
 
 endif # daemon

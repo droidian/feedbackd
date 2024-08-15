@@ -238,6 +238,7 @@ test_lfb_integration_event_async (void)
   lfb_event_set_timeout (event10, 1);
   g_assert_cmpint (lfb_event_get_timeout (event10), ==, 1);
   lfb_event_set_feedback_profile (event10, "quiet");
+  lfb_event_set_important (event10, FALSE);
   g_signal_connect (event10, "feedback-ended", (GCallback)on_feedback_ended, &cmp1);
 
   /* The async callback ends the main loop */

@@ -39,4 +39,4 @@ Options
 See also
 ========
 
-``fbcli(1)``
+``fbcli(1)`` ``fbd-theme-validate(1)`` ``feedback-themes(5)``

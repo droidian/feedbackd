@@ -22,6 +22,9 @@ case "$1" in
         if ! getent group feedbackd >/dev/null; then
             addgroup --quiet --system feedbackd
         fi
+
+        # we ship udev rules, so trigger an update
+        udevadm trigger --subsystem-match=leds --action=change || true
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

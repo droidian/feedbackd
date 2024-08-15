@@ -11,8 +11,12 @@ G_BEGIN_DECLS
 
 #define FBD_TYPE_DEV_LED_MULTICOLOR fbd_dev_led_multicolor_get_type()
 
-G_DECLARE_FINAL_TYPE (FbdDevLedMulticolor, fbd_dev_led_multicolor, FBD, DEV_LED_MULTICOLOR, FbdDevLed)
+G_DECLARE_DERIVABLE_TYPE (FbdDevLedMulticolor, fbd_dev_led_multicolor, FBD, DEV_LED_MULTICOLOR, FbdDevLed)
 
 FbdDevLed          *fbd_dev_led_multicolor_new  (GUdevDevice *dev, GError **err);
+
+struct _FbdDevLedMulticolorClass {
+  FbdDevLedClass parent_class;
+};
 
 G_END_DECLS

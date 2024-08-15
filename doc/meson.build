@@ -53,6 +53,7 @@ if get_option('man')
     ['fbcli', 1],
     ['fbd-theme-validate', 1],
     ['feedbackd', 8],
+    ['feedback-themes', 5],
   ]
 
   rst2man = find_program('rst2man', 'rst2man.py', required: false)

@@ -6,7 +6,7 @@
  * See Documentation/ABI/testing/sysfs-class-led-trigger-pattern
  */
 
-#define G_LOG_DOMAIN "fbd-dev-led"
+#define G_LOG_DOMAIN "fbd-dev-led-multicolor"
 
 #include "fbd-dev-led-priv.h"
 #include "fbd-dev-led-multicolor.h"
@@ -21,24 +21,26 @@
 #define LED_MULTI_INDEX_BLUE     "blue"
 #define LED_MULTI_INTENSITY_ATTR "multi_intensity"
 
-
-typedef struct _FbdDevLedMulticolor {
-  FbdDevLed           parent;
-
+/**
+ * fbd-dev-led-multicolor:
+ *
+ * A multicolor led using the `multi_intensitiy` sysfs attribute
+ */
+typedef struct _FbdDevLedMulticolorPrivate {
   guint               red_index;
   guint               green_index;
   guint               blue_index;
-} FbdDevLedMulticolor;
+} FbdDevLedMulticolorPrivate;
 
 
-G_DEFINE_TYPE (FbdDevLedMulticolor, fbd_dev_led_multicolor, FBD_TYPE_DEV_LED)
+G_DEFINE_TYPE_WITH_PRIVATE (FbdDevLedMulticolor, fbd_dev_led_multicolor, FBD_TYPE_DEV_LED)
 
 
 static gboolean
-fbd_dev_led_probe_multicolor (FbdDevLed *led, GError **error)
+fbd_dev_led_multicolor_probe (FbdDevLed *led, GError **error)
 {
-  g_autoptr (GError) err = NULL;
   FbdDevLedMulticolor *self = FBD_DEV_LED_MULTICOLOR (led);
+  FbdDevLedMulticolorPrivate *priv = fbd_dev_led_multicolor_get_instance_private (self);
   GUdevDevice *dev = fbd_dev_led_get_device (led);
   const gchar *name, *path;
   const gchar * const *index;
@@ -50,31 +52,31 @@ fbd_dev_led_probe_multicolor (FbdDevLed *led, GError **error)
   index = g_udev_device_get_sysfs_attr_as_strv (dev, LED_MULTI_INDEX_ATTR);
   if (index == NULL) {
     g_set_error (error,
-               G_FILE_ERROR, G_FILE_ERROR_FAILED,
-               "%s is no multicololor LED", name);
+                 G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                 "%s is no multicolor LED", name);
     return FALSE;
   }
 
   max_brightness = g_udev_device_get_sysfs_attr_as_int (dev, LED_MAX_BRIGHTNESS_ATTR);
   if (!max_brightness) {
     g_set_error (error,
-               G_FILE_ERROR, G_FILE_ERROR_FAILED,
-               "%s has no max_brightness", name);
+                 G_FILE_ERROR, G_FILE_ERROR_FAILED,
+                 "%s has no max_brightness", name);
     return FALSE;
   }
   fbd_dev_led_set_max_brightness (led, max_brightness);
-  fbd_dev_led_set_color (led, FBD_FEEDBACK_LED_COLOR_RGB);
+  fbd_dev_led_set_supported_color (led, FBD_FEEDBACK_LED_COLOR_RGB);
 
   for (int i = 0; index[i] != NULL; i++) {
     g_debug ("Index: %s", index[i]);
     if (g_strcmp0 (index[i], LED_MULTI_INDEX_RED) == 0) {
-      self->red_index = counter;
+      priv->red_index = counter;
       counter++;
     } else if (g_strcmp0 (index[i], LED_MULTI_INDEX_GREEN) == 0) {
-      self->green_index = counter;
+      priv->green_index = counter;
       counter++;
     } else if (g_strcmp0 (index[i], LED_MULTI_INDEX_BLUE) == 0) {
-      self->blue_index = counter;
+      priv->blue_index = counter;
       counter++;
     } else {
       g_warning ("Unsupport LED color index: %d %s", counter, index[i]);
@@ -88,16 +90,15 @@ fbd_dev_led_probe_multicolor (FbdDevLed *led, GError **error)
 
 
 static gboolean
-fbd_dev_led_start_periodic_multicolor (FbdDevLed           *led,
-                                       FbdFeedbackLedColor  color,
-                                       guint                max_brightness_percentage,
-                                       guint                freq)
+fbd_dev_led_multicolor_set_color (FbdDevLed           *led,
+                                  FbdFeedbackLedColor  color,
+                                  FbdLedRgbColor      *rgb)
 {
   FbdDevLedMulticolor *self = FBD_DEV_LED_MULTICOLOR (led);
+  FbdDevLedMulticolorPrivate *priv = fbd_dev_led_multicolor_get_instance_private (self);
   GUdevDevice *dev = fbd_dev_led_get_device (led);
   g_autofree char *intensity = NULL;
   g_autoptr (GError) err = NULL;
-  g_autofree gchar *str = NULL;
   gboolean success = FALSE;
   guint max_brightness;
   guint colors[] = { 0, 0, 0 };
@@ -105,31 +106,38 @@ fbd_dev_led_start_periodic_multicolor (FbdDevLed           *led,
   max_brightness = fbd_dev_led_get_max_brightness (led);
   switch (color) {
   case FBD_FEEDBACK_LED_COLOR_WHITE:
-    colors[self->red_index] = max_brightness;
-    colors[self->green_index] = max_brightness;
-    colors[self->blue_index] = max_brightness;
+    colors[priv->red_index] = max_brightness;
+    colors[priv->green_index] = max_brightness;
+    colors[priv->blue_index] = max_brightness;
     break;
   case FBD_FEEDBACK_LED_COLOR_RED:
-    colors[self->red_index] = max_brightness;
-    colors[self->green_index] = 0;
-    colors[self->blue_index] = 0;
+    colors[priv->red_index] = max_brightness;
+    colors[priv->green_index] = 0;
+    colors[priv->blue_index] = 0;
     break;
   case FBD_FEEDBACK_LED_COLOR_GREEN:
-    colors[self->red_index] = 0;
-    colors[self->green_index] = max_brightness;
-    colors[self->blue_index] = 0;
+    colors[priv->red_index] = 0;
+    colors[priv->green_index] = max_brightness;
+    colors[priv->blue_index] = 0;
     break;
   case FBD_FEEDBACK_LED_COLOR_BLUE:
-    colors[self->red_index] = 0;
-    colors[self->green_index] = 0;
-    colors[self->blue_index] = max_brightness;
+    colors[priv->red_index] = 0;
+    colors[priv->green_index] = 0;
+    colors[priv->blue_index] = max_brightness;
+    break;
+  case FBD_FEEDBACK_LED_COLOR_RGB:
+    colors[priv->red_index] = rgb->r;
+    colors[priv->green_index] = rgb->g;
+    colors[priv->blue_index] = rgb->b;
     break;
   default:
     g_warning("Unhandled color: %d\n", color);
     return FALSE;
   }
 
-  intensity = g_strdup_printf ("%d %d %d\n", colors[0], colors[1], colors[2]);
+  intensity = g_strdup_printf ("%u %u %u\n", colors[0], colors[1], colors[2]);
+  g_debug ("Multicolor intensity: %s", intensity);
+
   fbd_dev_led_set_brightness (led, max_brightness);
   success = fbd_udev_set_sysfs_path_attr_as_string (dev,
                                                     LED_MULTI_INTENSITY_ATTR,
@@ -140,16 +148,29 @@ fbd_dev_led_start_periodic_multicolor (FbdDevLed           *led,
     return FALSE;
   }
 
-  /* Chain up to parent class to set the pattern */
-  return FBD_DEV_LED_CLASS (fbd_dev_led_multicolor_parent_class)->start_periodic (
-    led, color, max_brightness_percentage, freq);
+  return TRUE;
 }
 
 
 static gboolean
-fbd_dev_led_has_color_multicolor (FbdDevLed *led, FbdFeedbackLedColor color)
+fbd_dev_led_multicolor_supports_color (FbdDevLed           *led,
+                                       FbdFeedbackLedColor  color)
 {
-  return color == FBD_FEEDBACK_LED_COLOR_RGB;
+  switch(color) {
+    case FBD_FEEDBACK_LED_COLOR_WHITE:
+      return TRUE;
+    case FBD_FEEDBACK_LED_COLOR_RED:
+      return TRUE;
+    case FBD_FEEDBACK_LED_COLOR_GREEN:
+      return TRUE;
+    case FBD_FEEDBACK_LED_COLOR_BLUE:
+      return TRUE;
+    case FBD_FEEDBACK_LED_COLOR_RGB:
+      return TRUE;
+    default:
+      g_warning ("Color unsupported: %d", color);
+      return FALSE;
+  }
 }
 
 
@@ -158,9 +179,9 @@ fbd_dev_led_multicolor_class_init (FbdDevLedMulticolorClass *klass)
 {
   FbdDevLedClass *fbd_dev_led_class = FBD_DEV_LED_CLASS (klass);
 
-  fbd_dev_led_class->probe = fbd_dev_led_probe_multicolor;
-  fbd_dev_led_class->start_periodic = fbd_dev_led_start_periodic_multicolor;
-  fbd_dev_led_class->has_color = fbd_dev_led_has_color_multicolor;
+  fbd_dev_led_class->probe = fbd_dev_led_multicolor_probe;
+  fbd_dev_led_class->set_color = fbd_dev_led_multicolor_set_color;
+  fbd_dev_led_class->supports_color = fbd_dev_led_multicolor_supports_color;
 }
 
 

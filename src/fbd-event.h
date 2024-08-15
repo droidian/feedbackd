@@ -47,6 +47,7 @@ int          fbd_event_remove_feedback (FbdEvent *self,
                                         FbdFeedbackBase *feedback);
 void         fbd_event_run_feedbacks (FbdEvent *self);
 void         fbd_event_end_feedbacks (FbdEvent *self);
+void         fbd_event_end_feedbacks_by_level (FbdEvent *self, guint level);
 gboolean     fbd_event_get_feedbacks_ended (FbdEvent *self);
 const char  *fbd_event_get_sender (FbdEvent *self);
 

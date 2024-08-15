@@ -12,6 +12,7 @@
 
 #define BLURP "- A validator for feedback themes"
 
+G_NORETURN
 static void
 print_version (void)
 {

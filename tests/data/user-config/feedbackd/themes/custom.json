@@ -8,12 +8,12 @@
         {
           "event-name" : "test-dummy-0",
           "type"       : "Dummy",
-          "duration"   : 0x10
+          "duration"   : 16
         },
         {
           "event-name" : "test-dummy-2",
           "type"       : "Dummy",
-          "duration"   : 0x30
+          "duration"   : 48
         }
       ]
     }

@@ -20,7 +20,12 @@
         TriggerFeedback:
         @app_id: The application id usually in "reverse DNS" format
         @event: The event name from the Event naming spec
-        @hints: Additional hints (e.g. to prefer haptic feedback over audio feedback on button press events)
+        @hints: Additional hints. Currently known hints
+          - profile: Override the profile used for this event with the given profile name
+          - important: Override the current global feedback level.
+            Together with the 'profile' hint this allows to trigger feedback for events
+            that would otherwise be disabled. A typical use case is an alarm clock. Note
+            that the feedback daemon (depending on it's configuration) might ignore this flag.
         @timeout: When the feedbacks for this event should end latest in seconds. The special values '-1' (just run each feedback once) and '0' (endless loop) are also supported.
 	@id: Event id for future reference
 

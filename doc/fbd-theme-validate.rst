@@ -53,4 +53,4 @@ Validate the device theme for a OnePlus 6T:
 See also
 ========
 
-``feedbackd(8)`` ``fbcli(1)``
+``feedbackd(8)`` ``fbcli(1)`` ``feedback-themes``

@@ -46,4 +46,4 @@ OPTIONS
 See also
 ========
 
-``feedbackd(8)``
+``feedbackd(8)`` ``fbd-theme-validate(1)`` ``feedback-themes(5)``

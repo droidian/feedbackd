@@ -17,10 +17,12 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (FbdDevLeds, fbd_dev_leds, FBD, DEV_LEDS, GObject);
 
 FbdDevLeds *fbd_dev_leds_new (GError **error);
-gboolean    fbd_dev_leds_start_periodic (FbdDevLeds *self,
-                                         FbdFeedbackLedColor color,
-                                         guint max_brighness, guint freq);
-gboolean    fbd_dev_leds_stop (FbdDevLeds         *self,
-                               FbdFeedbackLedColor color);
+gboolean    fbd_dev_leds_start_periodic (FbdDevLeds          *self,
+                                         FbdFeedbackLedColor  color,
+                                         FbdLedRgbColor      *rgb,
+                                         guint                max_brighness,
+                                         guint                freq);
+gboolean    fbd_dev_leds_stop (FbdDevLeds *self, FbdFeedbackLedColor color);
+gboolean    fbd_dev_leds_has_led (FbdDevLeds *self, FbdFeedbackLedColor color);
 
 G_END_DECLS

@@ -1,9 +1,26 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: feedbackd
+Upstream-Contact: Guido Günther <agx@debian.org>
 Source: https://source.puri.sm/Librem5/feedbackd
 
 Files: *
 Copyright: 2020 Purism SPC
+License: GPL-3+
+
+Files: debian/*
+Copyright:
+ 2020 Purism SPC
+ 2020 Arnaud Ferraris <arnaud.ferraris@gmail.com>
+License: GPL-3+
+
+Files: debian/feedbackd.udev
+Copyright: 2020 Purism SPC
+License: LGPL-2.1+
+
+Files: libfeedback/*
+Copyright: 2020 Purism SPC
+License: LGPL-2.1+
+
 License: GPL-3+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -21,8 +38,6 @@ License: GPL-3+
  On Debian systems, the complete text of the GNU General
  Public License version 3 can be found in "/usr/share/common-licenses/GPL-3".
 
-Files: libfeedback/*
-Copyright: 2020 Purism SPC
 License: LGPL-2.1+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by

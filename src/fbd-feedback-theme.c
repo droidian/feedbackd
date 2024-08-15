@@ -354,7 +354,8 @@ fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
     FbdFeedbackBase *feedback = fbd_feedback_profile_get_feedback (profile,
 								   fbd_event_get_event (event));
     if (feedback) {
-      feedbacks = g_slist_prepend (feedbacks, g_object_ref(feedback));
+      g_object_set_data (G_OBJECT (feedback), "fbd-level", GUINT_TO_POINTER (i));
+      feedbacks = g_slist_prepend (feedbacks, g_object_ref (feedback));
     }
   }
 

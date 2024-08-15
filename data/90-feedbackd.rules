@@ -6,8 +6,14 @@ ACTION=="remove", GOTO="feedbackd_end"
 
 SUBSYSTEM=="input", KERNEL=="event*", ENV{ID_INPUT}=="1", ENV{ID_PATH}=="platform-vibrator", TAG+="uaccess", ENV{FEEDBACKD_TYPE}="vibra"
 
+#
 # See include/dt-bindings/leds/common.h in the linux kernel
+#
+# Status LEDs
 SUBSYSTEM=="leds", DEVPATH=="*/*:status", ENV{FEEDBACKD_TYPE}="led", RUN{builtin}+="kmod load ledtrig-pattern", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
 SUBSYSTEM=="leds", DEVPATH=="*/*:indicator", ENV{FEEDBACKD_TYPE}="led", RUN{builtin}+="kmod load ledtrig-pattern", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
+# Camera Flash
+SUBSYSTEM=="leds", DEVPATH=="*/*:flash", ENV{FEEDBACKD_TYPE}="led", RUN{builtin}+="kmod load ledtrig-pattern", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
+SUBSYSTEM=="leds", DEVPATH=="*/*:torch", ENV{FEEDBACKD_TYPE}="led", RUN{builtin}+="kmod load ledtrig-pattern", RUN+="/usr/libexec/fbd-ledctrl -p %S%p -t pattern -G feedbackd"
 
 LABEL="feedbackd_end"

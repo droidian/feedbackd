@@ -23,6 +23,23 @@
         feedbackd receives an event.
       </description>
     </key>
+
+    <key name="prefer-flash" type="b">
+      <default>false</default>
+      <summary>Prefer camera flash LED over notification LED</summary>
+      <description>
+        Prefer the (camera) flash LED over other notifiction LEDs.
+      </description>
+    </key>
+
+    <key name="allow-important" type="as">
+      <default>[]</default>
+      <summary>List of apps that can override the feedback level</summary>
+      <description>
+        Apps listed here can override the configured feedack level by
+        setting the 'important' hint on the submitted event.
+      </description>
+    </key>
   </schema>
 
   <schema id="org.sigxcpu.feedbackd.application">

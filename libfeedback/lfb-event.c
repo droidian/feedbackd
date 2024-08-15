@@ -23,9 +23,9 @@
  * One event can trigger multiple feedbacks at once (e.g. audio and
  * haptic feedback). This is determined by the feedback theme in
  * use (which is not under the appliction's control) and the active
- * feedback profile (see [func@Lfb.set_feedback_profile]().
+ * feedback profile (see [func@Lfb.set_feedback_profile].
  *
- * After initializing the library via [func@Lfb.init]() feedback can be
+ * After initializing the library via [func@Lfb.init] feedback can be
  * triggered like:
  *
  * ```c
@@ -38,7 +38,7 @@
  *
  * When all feedback for this event has ended the [signal@LfbEvent::feedback-ended]
  * signal is emitted. If you want to end the feedback ahead of time use
- * [method@LfbEvent.end_feedback]():
+ * [method@LfbEvent.end_feedback]:
  *
  * ```c
  *   if (!lfb_event_end_feedback (event, &err))
@@ -46,7 +46,7 @@
  * ```
  *
  * Since these methods involve DBus calls there are asynchronous variants
- * available, e.g. [method@LfbEvent.trigger_feedback_async]():
+ * available, e.g. [method@LfbEvent.trigger_feedback_async]:
  *
  * ```c
  *   static void
@@ -79,6 +79,7 @@ enum {
   PROP_STATE,
   PROP_END_REASON,
   PROP_FEEDBACK_PROFILE,
+  PROP_IMPORTANT,
   PROP_APP_ID,
   PROP_LAST_PROP,
 };
@@ -96,6 +97,7 @@ typedef struct _LfbEvent {
   char          *event;
   gint           timeout;
   gchar         *profile;
+  gboolean       important;
   char          *app_id;
 
   guint          id;
@@ -139,6 +141,8 @@ build_hints (LfbEvent *self)
   g_variant_builder_init (&hints_builder, G_VARIANT_TYPE ("a{sv}"));
   if (self->profile)
     g_variant_builder_add (&hints_builder, "{sv}", "profile", g_variant_new_string (self->profile));
+  if (self->important)
+    g_variant_builder_add (&hints_builder, "{sv}", "important", g_variant_new_boolean (self->important));
   return g_variant_builder_end (&hints_builder);
 }
 
@@ -223,6 +227,9 @@ lfb_event_set_property (GObject      *object,
   case PROP_FEEDBACK_PROFILE:
     lfb_event_set_feedback_profile (self, g_value_get_string (value));
     break;
+  case PROP_IMPORTANT:
+    lfb_event_set_important (self, g_value_get_boolean (value));
+    break;
   case PROP_APP_ID:
     lfb_event_set_app_id (self, g_value_get_string (value));
     break;
@@ -250,6 +257,9 @@ lfb_event_get_property (GObject    *object,
     break;
   case PROP_FEEDBACK_PROFILE:
     g_value_set_string (value, lfb_event_get_feedback_profile (self));
+    break;
+  case PROP_IMPORTANT:
+    g_value_set_boolean (value, lfb_event_get_important (self));
     break;
   case PROP_APP_ID:
     g_value_set_string (value, lfb_event_get_app_id (self));
@@ -303,7 +313,7 @@ lfb_event_class_init (LfbEventClass *klass)
    *
    * How long feedback should be provided in seconds. The special value
    * %-1 uses the natural length of each feedback while %0 plays each feedback
-   * in a loop until ended explicitly via e.g. [method@LfbEvent.end_feedback]().
+   * in a loop until ended explicitly via e.g. [method@LfbEvent.end_feedback].
    */
   props[PROP_TIMEOUT] =
     g_param_spec_int (
@@ -335,7 +345,7 @@ lfb_event_class_init (LfbEventClass *klass)
    * LfbEvent:feedback-profile:
    *
    * The name of the feedback profile to use for this event. See
-   * [method@LfbEvent.set_feedback_profile]() for details.
+   * [method@LfbEvent.set_feedback_profile] for details.
    */
   props[PROP_FEEDBACK_PROFILE] =
     g_param_spec_string (
@@ -346,10 +356,24 @@ lfb_event_class_init (LfbEventClass *klass)
       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   /**
+   * LfbEvent:important:
+   *
+   * Whether to flag this event as important.
+   * [method@LfbEvent.set_important] for details.
+   */
+  props[PROP_IMPORTANT] =
+    g_param_spec_boolean (
+      "important",
+      "Important",
+      "Whether to flags this event as important",
+      FALSE,
+      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
    * LfbEvent:app-id:
    *
    * The application id to use for the event.
-   * [method@LfbEvent.set_feedback_profile]() for details.
+   * [method@LfbEvent.set_feedback_profile] for details.
    */
   props[PROP_APP_ID] =
     g_param_spec_string (
@@ -477,7 +501,7 @@ lfb_event_trigger_feedback (LfbEvent *self, GError **error)
  *
  * Tells the feedback server to provide proper feedback for the give
  * event to the user. This is the sync version of
- * [method@LfbEvent.trigger_feedback]().
+ * [method@LfbEvent.trigger_feedback].
  */
 void
 lfb_event_trigger_feedback_async (LfbEvent            *self,
@@ -525,7 +549,7 @@ lfb_event_trigger_feedback_async (LfbEvent            *self,
  * @res: Result object passed to the callback of [method@LfbEvent.trigger_feedback_async]
  * @error: Return location for error
  *
- * Finish an async operation started by [method@LfbEvent.trigger_feedback_async](). You
+ * Finish an async operation started by [method@LfbEvent.trigger_feedback_async]. You
  * must call this function in the callback to free memory and receive any
  * errors which occurred.
  *
@@ -571,7 +595,7 @@ lfb_event_end_feedback (LfbEvent *self, GError **error)
 /**
  * lfb_event_end_feedback_finish:
  * @self: the event
- * @res: Result object passed to the callback of [method@LfbEvent.end_feedback_async]()
+ * @res: Result object passed to the callback of [method@LfbEvent.end_feedback_async]
  * @error: Return location for error
  *
  * Finish an async operation started by lfb_event_end_feedback_async. You
@@ -637,10 +661,10 @@ lfb_event_end_feedback_async (LfbEvent            *self,
  * Tells the feedback server to end feedack after #timeout seconds.
  * The value -1 indicates to not set a timeout and let feedbacks stop
  * on their own while 0 indicates to loop all feedbacks endlessly.
- * They must be stopped via [method@LfbEvent.end_feedback]() in this case.
+ * They must be stopped via [method@LfbEvent.end_feedback] in this case.
  *
  * It is an error to change the timeout after the feedback has been triggered
- * via [method@LfbEvent.trigger_feedback]().
+ * via [method@LfbEvent.trigger_feedback].
  */
 void
 lfb_event_set_timeout (LfbEvent *self, gint timeout)
@@ -758,6 +782,44 @@ lfb_event_get_feedback_profile (LfbEvent *self)
 }
 
 /**
+ * lfb_event_set_important:
+ * @self: The event
+ * @important: Whether to flag this event as important
+ *
+ * Tells the feedback server that the sender deems this to be an
+ * important event. A feedback server might allow the sender to
+ * override the current feedback level when this is set.
+ */
+void
+lfb_event_set_important (LfbEvent *self, gboolean important)
+{
+  g_return_if_fail (LFB_IS_EVENT (self));
+
+  if (self->important == important)
+    return;
+
+  self->important = important;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_IMPORTANT]);
+}
+
+/**
+ * lfb_event_get_important:
+ * @self: The event
+ *
+ * Gets the set feedback profile. If no profile was set it returns
+ * %NULL. The event uses the system wide profile in this case.
+ *
+ * Returns: The set feedback profile to use for this event or %NULL.
+ */
+gboolean
+lfb_event_get_important (LfbEvent *self)
+{
+  g_return_val_if_fail (LFB_IS_EVENT (self), FALSE);
+
+  return self->important;
+}
+
+/**
  * lfb_event_set_app_id:
  * @self: The event
  * @app_id: The application id to use
@@ -789,8 +851,8 @@ lfb_event_set_app_id (LfbEvent *self, const gchar *app_id)
  * @self: The event
  *
  * Returns the app-id for this event. If no app-id has been explicitly
- * set, %NULL is returned. The event uses the app-id returns by
- * [func@lfb_get_app_id] in this case.
+ * set, %NULL is returned. The event uses the app-id returned by
+ * [func@Lfb.get_app_id] in this case.
  *
  * Returns:(transfer none): The set app-id for this event or %NULL.
  */

@@ -1,3 +1,217 @@
+feedbackd (0.4.1) experimental; urgency=medium
+
+  * not-intalled: Avoid gmobile on all arches.
+    This only matters for the case where we use the embedded
+    gmobile but better to be correct.
+  * tests: Use decimal values.
+    We don't rely on that anywhere anyway.
+    Co-authored-by: Tomi Lähteenmäki <lihis@lihis.net>
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/79
+  * build: Install udev rule.
+    Don't hide it in the packaging as that makes it easier to miss.
+    This makes debian/ really only carry packaging information.
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 12 Aug 2024 22:54:48 +0200
+
+feedbackd (0.4.0) experimental; urgency=medium
+
+  [ Guido Günther ]
+  * docs: Expand the examples section a bit
+  * led: Add doc strings
+  * led: Drop unused variable
+  * led: Don't forget to init variable
+  * fbd-dev-led-multicolor: Drop unused variable
+  * fbd-theme-validate: Use G_NORETURN
+  * Build: Use meson instead of ninja
+  * ci: Add clang build
+  * tests: Add umockdev based tests for leds.
+    This ensures we can probe the different led types correctly
+    The umockdev data was recoreded on an Librem 5 and Librem 14
+  * led-qcom: Use char instead of gchar.
+    We prefer the C types in new code.
+  * led-qcom-multicolor: Drop unused defines
+  * led-qcom-multicolor: Don't leak qcom_led
+  * led-qcom: Check for LED driver.
+    The hw_pattern attribute is driver specific. Ensure we don't apply the
+    LED pattern to unknown drivers.
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/77
+  * ci: Update common files from meta-phosh.
+    This updates to commit f3c92e90dcc0d65322888217429b75dd101bd0d3
+  * ci: Use common jobs from meta-phosh
+  * build: Let daemon dependency depend on generated enum headers.
+    Otherwise it might not be available in the tests
+  * dev-led-multicolor: Use correct format specifier.
+    The values are unsigned int
+  * doc: Document feedback types.
+    This allows us to remove the list from the README
+  * doc: Fix URLs.
+    Don't use Markdown markup as it looks odd in the generated page.
+  * fbd-feedback-led: Modernize property definitions.
+    Adapt current phosh coding style before making other changes
+  * feedback-led: Support colors as strings.
+    The FbdDevLedColor enum defines the hardware color of the LED. We used
+    it for the feedbacks color value as long as the kernel mostly had
+    single color LEDs. As multicolor LEDs are common nowadays switch the
+    color to a string which will allow us to use RGB values later on.
+  * feedbackd: Pass GMOBILE_USE_UNSTABLE_API to all files.
+    No need to ack that individually
+  * feedback-led: Document hw LED types
+  * led: Parse color values and pass them down the chain.
+    We parse RGB color values as HEX ('#RRGGBB') and use those when a RGB
+    LED is available. Single color LEDs won't see a change.
+  * theme: Use different colors for emails and calls.
+    This makes them a bit simpler to distinguish
+  * manager: Move schema name to header.
+    This makes it available to other compilation units
+  * led: Drop FBD_FEEDBACK_LED_COLOR_LAST.
+    With new led types we might not loop over all of them. This makes
+    it a bit more obvious.
+  * feedback-led: Check if at least one LED is available.
+    So far we didn't create any FbdDevLeds if there wasn't at least one
+    usable LED. Once we introduce flash LEDs we might probe the LED but the
+    LED might not be usable as the user hasn't enabled using it. Prepare for
+    that scenario.
+  * led: Add flash LED type.
+    Camera flashes are also exported via the LED subsystem. We use a
+    separate LED type so they're not picked by default.
+    We don't use them as fallbacks either.
+  * leds: Probe flash LED
+  * feedback-led: Allow to prefer flash LEDs over notification LEDs
+  * udev: Allow to use flash devices
+  * packaging: Don't require root for building.
+    This helps the nightly builds
+  * packaging: Build-depend on shared gmobile.
+    This ensures we don't use the subproject in packaging builds
+  * cli: Inform user when no feedback was found.
+    This might either be because the event doesn't exist or when the profile
+    doesn't have any feedback on the current level.
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/76
+  * tests/fbd-event: Check if objects are finalized.
+    This gives us more info than just using automatic cleanup
+  * event: Make removing feedbacks more self contained.
+    If the feedback is in our list of feedbacks disconnect signals
+    and drop the reference we hold.
+    As we have removed the signal handler that would invoke `check_ended()`
+    we invoke this manually when the list becomes empty.
+  * event: Allow to end events by level.
+    The level here is an abstract value but in fact matches the profile
+    level. Well make this a property when fixing #35.
+  * feedback-manager: End too noisy feedbacks on profile level change.
+    When the profile gets lowered from e.g. quiet to silent we want to end
+    all ongoing feedbacks that belong to the quiet level.
+    This allows to e.g. silence an incoming phone call by switching the
+    feedback level via phosh's quick setting.
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/13
+    Closes: https://source.puri.sm/Librem5/feedbackd/-/issues/55
+
+  [ Dylan Van Assche ]
+  * fbd-dev-led-multicolor: Use separate log domain.
+    Debugging driver probing is much easier when each driver has its own log domain.
+  * fbd-dev-led-multicolor: Fix typo in error message
+    multicololo -> multicolor LED
+  * fbd-dev-led: Scan for RGB color as well.
+    Multicolor LEDs have the color 'rgb', we should also scan it
+    as they are also a FbdDevLed.
+  * fbd-dev-led-*: Adjust to method convention
+    fbd_dev_led_ is the convention for methods, adjust them all.
+  * fbd-dev-led: Rework color API.
+    Drop has_color API since supported colors are set during probing
+    and can be handled completely separately from the classes for
+    each type of hardware.
+  * fbd-ledctrl: Set permissions for hw_pattern.
+    Allow access to hw_pattern sysfs node for feedbackd, similar to other nodes.
+  * fbd-dev-led: Check max_brightness_percentage range.
+    Percentages are always between 0.0 and 100.0.
+    Also fix a typo along the way.
+  * fbd-dev-led-multicolor: Support red, green, blue and white LED colors.
+    Provide our own supports_color method to specify which colors are
+    actually implemented by the driver. RGB LEDs could provide different
+    colors as well such as orange, purple, etc. but those are not supported
+    yet.
+  * fbd-dev-led-qcom: Support QCOM LPG LED single color.
+    QCOM LPG LEDs expose a hw_pattern sysfs entry which accepts a limited
+    set of patterns but allows to use dedicated hardware for blinking the
+    LED. This way, battery life can be improved and the LED still blinks,
+    even if the device is suspended.
+  * fbd-dev-led-qcom-multicolor: Support QCOM LPG LED multicolor.
+    QCOM LPG LEDs can also operate in a multicolor fashion.
+    Re-use the probing sequence of multicolor LEDs and the hw_pattern
+    configuration of single color QCOM LPG LEDs.
+  * fbd-dev-leds: Probe QCOM HW LED types.
+    Try first the QCOM hardware LED types which require the most features of
+    LED drivers. Try until we have a single color GPIO LED which is the
+    minimal LED driver support we require. If the LED does not meet that
+    expectation either, we ignore the LED.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 11 Jun 2024 09:49:20 +0200
+
+feedbackd (0.3.0) experimental; urgency=medium
+
+  * feedback-themes: Improve wording
+  * manpages: Improve references
+  * manpages: Fix whatis entry
+  * debian: Update from the current packaging in Debian
+    - Validate fbd-theme-validate
+    - Add Build-dep to symbols file
+    - Add doc-base registration
+    - Use dh_installman to fix nodoc build
+    - Update debian/copyright
+    - Improve Recommends: and multi arch annotations
+    - Add lintian overrides
+  * debian: Fix nodoc build.
+    Don't try to install the dev docs in that case.
+  * debian: Install NEWS
+  * packaging: Use meson's default wrap mode
+    ci should be allowed to download gmobile
+  * build: Switch gmobile to 0.0.4.
+    We switch to a wrap which helps us to avoid the submodule
+  * ci: Switch to trixie
+  * ci: Add uncrustify config and checker.
+    Based on what we added to phoc recently
+  * ci: Run style checks on merge requests
+  * fbd-dev-led-multicolor: Fix indentation
+  * fbd-dev-led-multicolor: Drop unused variable
+  * fbd-dev-led-multicolor: Make it a derivable type.
+    This will allow hw-pattern classes to derive from it.
+  * Draft: ci: Add rules for format-check
+  * build: Switch to gmobile 0.1.0
+  * build: Allow to use shared gmobile
+  * packaging: Add libgirepository1.0-dev
+  * README: Note what's the preferred way to specify a theme
+  * build: Validate schema file
+  * data/dbus: Document current flags
+  * data/dbus: Document important hint.
+    The important hint can be used by apps to override the current per app
+    or system wide feedback level (if the feedback server allows it).
+  * data/schema: Add 'allow-override' gsetting.
+    This allows to list apps that can override the currently
+    effective feedback level by setting the 'impotant' hint in
+    the event.
+  * fbcli: Allow to override app-id.
+    Useful for testing
+  * feedback-manager: Use MIN()
+    A bit easier to read
+  * libfeedback: Allow to set important hint
+  * feedback-manager: Parse important hint
+  * cli: Allow to set important hint
+  * feedback-manager: Handle important hint.
+    This allows blessed apps to override the per-app as well as the global
+    feedback level. This can e.g. be useful for alarm clocks.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 21 Apr 2024 12:15:01 +0200
+
+feedbackd (0.2.1) experimental; urgency=medium
+
+  * Update NEWS
+  * event: Fix doc link
+  * treewide: Drop superfluous '()' after functions in doc strings.
+    Otherwise we have that doubled in the docs
+  * doc: Better cross reference manpages
+  * doc: Add manpage for feedback themes.
+    This should direct users to the documentation.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 29 Aug 2023 18:32:09 +0200
+
 feedbackd (0.2.0) experimental; urgency=medium
 
   * build: Bump version to 0.2.0. We have a slight api change.

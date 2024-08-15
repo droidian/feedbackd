@@ -25,15 +25,15 @@ void                fbd_feedback_theme_update (FbdFeedbackTheme *self, FbdFeedba
 
 const char         *fbd_feedback_theme_get_name (FbdFeedbackTheme *self);
 void                fbd_feedback_theme_set_name (FbdFeedbackTheme *self, const char *name);
-void               fbd_feedback_theme_set_parent_name (FbdFeedbackTheme *self,
-                                                       const char *parent_name);
+void                fbd_feedback_theme_set_parent_name (FbdFeedbackTheme *self,
+                                                        const char *parent_name);
 const char         *fbd_feedback_theme_get_parent_name (FbdFeedbackTheme *self);
 void                fbd_feedback_theme_add_profile (FbdFeedbackTheme *self,
 						    FbdFeedbackProfile *profile);
 FbdFeedbackProfile *fbd_feedback_theme_get_profile (FbdFeedbackTheme *self, const char *name);
 
-GSList           *fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
-                                                      FbdFeedbackProfileLevel profile,
-                                                      FbdEvent *event);
+GSList             *fbd_feedback_theme_lookup_feedback (FbdFeedbackTheme *self,
+                                                        FbdFeedbackProfileLevel profile,
+                                                        FbdEvent *event);
 
 G_END_DECLS
