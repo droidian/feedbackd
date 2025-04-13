@@ -17,6 +17,7 @@ Build-Depends:
  libgsound-dev,
  libjson-glib-dev,
  libumockdev-dev,
+ libdroid-dev (>= 0.2.0),
  meson,
  pkgconf,
  python3-docutils <!nodoc>,
