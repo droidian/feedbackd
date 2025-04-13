@@ -20,6 +20,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef WITH_LIBDROID
+#include <libdroid/vibra.h>
+#endif /* WITH_LIBDROID */
+
 /**
  * SECTION:fbd-dev-vibra
  * @short_description: Haptic motor device interface
@@ -50,6 +54,10 @@ typedef struct _FbdDevVibra {
   gint id; /* currently used id */
 
   FbdDevVibraFeatureFlags features;
+#ifdef WITH_LIBDROID
+  DroidVibra *droid_vibra;
+  gboolean    prefer_libdroid;
+#endif /* WITH_LIBDROID */
 } FbdDevVibra;
 
 static void initable_iface_init (GInitableIface *iface);
@@ -101,9 +109,27 @@ initable_init (GInitable     *initable,
                GError       **error)
 {
   FbdDevVibra *self = FBD_DEV_VIBRA (initable);
-  const char *filename = g_udev_device_get_device_file (self->device);
+  const char *filename;
   gulong features[1 + FF_MAX/BITS_PER_LONG];
   struct input_event gain = { 0 };
+
+#ifdef WITH_LIBDROID
+  if (!self->device) {
+    g_autoptr (GError) libdroid_err = NULL;
+    self->droid_vibra = droid_vibra_new (&libdroid_err);
+
+    if (!libdroid_err) {
+      self->prefer_libdroid = TRUE;
+      self->features |= FBD_DEV_VIBRA_FEATURE_RUMBLE;
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+#endif /* WITH_LIBDROID */
+
+  g_return_val_if_fail (G_UDEV_IS_DEVICE (self->device), FALSE);
+  filename = g_udev_device_get_device_file (self->device);
 
   self->fd = open (filename, O_RDWR | O_NONBLOCK, O_RDWR);
   if (self->fd < 0) {
@@ -176,6 +202,10 @@ fbd_dev_vibra_dispose (GObject *object)
 {
   FbdDevVibra *self = FBD_DEV_VIBRA (object);
 
+#ifdef WITH_LIBDROID
+  g_clear_object (&self->droid_vibra);
+#endif /* WITH_LIBDROID */
+
   g_clear_object (&self->device);
 
   G_OBJECT_CLASS (fbd_dev_vibra_parent_class)->dispose (object);
@@ -240,6 +270,13 @@ fbd_dev_vibra_rumble (FbdDevVibra *self, double magnitude, guint duration, gbool
 
   g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    self->id = 0;
+    return droid_vibra_on (self->droid_vibra, duration);
+  }
+#endif /* WITH_LIBDROID */
+
   memset(&effect, 0, sizeof(effect));
   effect.type = FF_RUMBLE;
   effect.id = -1;
@@ -283,6 +320,13 @@ fbd_dev_vibra_periodic (FbdDevVibra *self,
 
   g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    self->id = 0;
+    return droid_vibra_on (self->droid_vibra, duration);
+  }
+#endif /* WITH_LIBDROID */
+
   effect.type = FF_PERIODIC;
   effect.id = -1;
   effect.u.periodic.waveform = FF_SINE;
@@ -325,6 +369,13 @@ fbd_dev_vibra_remove_effect (FbdDevVibra *self)
 {
   g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    self->id = -1;
+    return droid_vibra_off (self->droid_vibra);
+  }
+#endif /* WITH_LIBDROID */
+
   if (self->id == -1)
     return TRUE;
 
@@ -346,6 +397,13 @@ fbd_dev_vibra_stop (FbdDevVibra *self)
 
   g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
 
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    self->id = -1;
+    return droid_vibra_off (self->droid_vibra);
+  }
+#endif /* WITH_LIBDROID */
+
   if (self->id == -1)
     return TRUE;
 
@@ -365,6 +423,12 @@ GUdevDevice *
 fbd_dev_vibra_get_device (FbdDevVibra *self)
 {
   g_return_val_if_fail (FBD_IS_DEV_VIBRA (self), FALSE);
+
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    return FALSE;
+  }
+#endif /* WITH_LIBDROID */
 
   return self->device;
 }

@@ -148,6 +148,10 @@ init_devices (FbdFeedbackManager *self)
 
   devices = g_udev_client_query_by_subsystem (self->client, "input");
 
+#ifdef WITH_LIBDROID
+  self->vibra = fbd_dev_vibra_new (NULL, &err);
+  if (!self->vibra) {
+#endif /* WITH_LIBDROID */
   for (l = devices; l != NULL; l = l->next) {
     GUdevDevice *dev = l->data;
 
@@ -160,6 +164,9 @@ init_devices (FbdFeedbackManager *self)
       }
     }
   }
+#ifdef WITH_LIBDROID
+  } /* if (!self->vibra) */
+#endif /* WITH_LIBDROID */
   if (!self->vibra)
     g_debug ("No vibra capable device found");
 

@@ -35,6 +35,10 @@ if get_option('daemon')
 
   fbd_deps = [gio, gio_unix, glib, gmobile, gobject, gsound, gudev, json_glib]
 
+  if libdroid.found()
+    fbd_deps += libdroid
+  endif
+
   fbd_inc = [include_directories('.'), libfeedback_inc, dbus_inc]
 
   fbd_lib = static_library(

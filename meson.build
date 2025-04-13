@@ -43,6 +43,8 @@ else
   udevdir = prefix / 'lib' / 'udev' / 'rules.d'
 endif
 
+libdroid = dependency('libdroid-0', version: '>=0.1', required: false)
+
 run_data = configuration_data()
 run_data.set('ABS_BUILDDIR', meson.current_build_dir())
 run_data.set('ABS_SRCDIR', meson.current_source_dir())
@@ -94,6 +96,10 @@ global_c_args = [
   '-DLIBFEEDBACK_COMPILATION',
   '-DFBD_VERSION="@0@"'.format(meson.project_version()),
 ]
+
+if libdroid.found()
+  global_c_args += '-DWITH_LIBDROID'
+endif
 
 add_project_arguments(global_c_args + cc.get_supported_arguments(test_c_args), language: 'c')
 

@@ -19,6 +19,10 @@
 #include "fbd-feedback-led.h"
 #include "fbd-udev.h"
 
+#ifdef WITH_LIBDROID
+#include <libdroid/leds.h>
+#endif /* WITH_LIBDROID */
+
 #include <gio/gio.h>
 
 #define LED_SUBSYSTEM            "leds"
@@ -36,12 +40,46 @@ typedef struct _FbdDevLeds {
 
   GUdevClient *client;
   GSList      *leds;
+#ifdef WITH_LIBDROID
+  DroidLeds   *droid_leds;
+  gboolean     prefer_libdroid;
+#endif /* WITH_LIBDROID */
 } FbdDevLeds;
 
 static void initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (FbdDevLeds, fbd_dev_leds, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init));
+
+#ifdef WITH_LIBDROID
+static int32_t
+droid_get_argb_color (FbdFeedbackLedColor color,
+                      guint               max_brightness)
+{
+  int32_t alpha, max, argb_color;
+
+  max = (max_brightness / 100.0) * 0xff;
+  alpha = 0xff; // Full Alpha
+
+  argb_color = (alpha & 0xff) << 24;
+  switch (color) {
+      case FBD_FEEDBACK_LED_COLOR_WHITE:
+          argb_color += ((max & 0xff) << 16) + ((max & 0xff) << 8) + (max & 0xff);
+          break;
+      case FBD_FEEDBACK_LED_COLOR_RED:
+          argb_color += (max & 0xff) << 16;
+          break;
+      case FBD_FEEDBACK_LED_COLOR_GREEN:
+          argb_color += (max & 0xff) << 8;
+          break;
+      case FBD_FEEDBACK_LED_COLOR_BLUE:
+          argb_color += max & 0xff;
+          break;
+  }
+
+  return argb_color;
+}
+#endif /* WITH_LIBDROID */
 
 static FbdDevLed *
 find_led_by_color (FbdDevLeds *self, FbdFeedbackLedColor color)
@@ -119,6 +157,16 @@ initable_init (GInitable    *initable,
   g_autolist (GUdevDevice) leds = NULL;
   gboolean found = FALSE;
 
+#ifdef WITH_LIBDROID
+  g_autoptr (GError) libdroid_err = NULL;
+  self->droid_leds = droid_leds_new (&libdroid_err);
+  if (!libdroid_err && droid_leds_is_kind_supported (self->droid_leds,
+                                              DROID_LEDS_KIND_NOTIFICATION)) {
+    self->prefer_libdroid = TRUE;
+    return TRUE;
+  }
+#endif /* WITH_LIBDROID */
+
   self->client = g_udev_client_new (subsystems);
 
   leds = g_udev_client_query_by_subsystem (self->client, LED_SUBSYSTEM);
@@ -162,6 +210,10 @@ static void
 fbd_dev_leds_dispose (GObject *object)
 {
   FbdDevLeds *self = FBD_DEV_LEDS (object);
+
+#ifdef WITH_LIBDROID
+  g_clear_object (&self->droid_leds);
+#endif /* WITH_LIBDROID */
 
   g_clear_object (&self->client);
   g_slist_free_full (self->leds, (GDestroyNotify)g_object_unref);
@@ -213,6 +265,15 @@ fbd_dev_leds_start_periodic (FbdDevLeds          *self,
 
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
   g_return_val_if_fail (max_brightness_percentage <= 100.0, FALSE);
+
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    return droid_leds_set_notification (self->droid_leds,
+      droid_get_argb_color (color, max_brightness_percentage),
+      1000 * 1000 / freq / 2, 1000 * 1000 / freq / 2);
+  }
+#endif /* WITH_LIBDROID */
+
   led = find_led_by_color (self, color);
   if (!led) {
     g_warning_once ("No usable led found");
@@ -230,6 +291,12 @@ fbd_dev_leds_stop (FbdDevLeds *self, FbdFeedbackLedColor color)
   FbdDevLed *led;
 
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
+
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    return droid_leds_clear_notification (self->droid_leds);
+  }
+#endif /* WITH_LIBDROID */
 
   led = find_led_by_color (self, color);
   if (!led) {
@@ -253,6 +320,12 @@ gboolean
 fbd_dev_leds_has_led (FbdDevLeds *self, FbdFeedbackLedColor color)
 {
   g_return_val_if_fail (FBD_IS_DEV_LEDS (self), FALSE);
+
+#ifdef WITH_LIBDROID
+  if (self->prefer_libdroid) {
+    return TRUE;
+  }
+#endif /* WITH_LIBDROID */
 
   return !!find_led_by_color (self, color);
 }
