@@ -15,6 +15,11 @@
           "effect"     : "button-pressed"
         },
         {
+          "event-name" : "notification-new-generic",
+          "type"       : "Sound",
+          "effect"     : "message-new-instant"
+        },
+        {
           "event-name" : "button-released",
           "type"       : "Sound",
           "effect"     : "button-released"
